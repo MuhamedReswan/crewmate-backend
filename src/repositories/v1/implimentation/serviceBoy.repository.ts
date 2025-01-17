@@ -1,5 +1,5 @@
 import { IServiceBoyRepository } from "../interfaces/IServiceBoyRepository";
-import serviceBoyModel from "../../models/serviceBoy.model";
+import serviceBoyModel from "../../../models/v1/serviceBoy.model";
 
 
 export default class ServiceBoysRepository implements IServiceBoyRepository{

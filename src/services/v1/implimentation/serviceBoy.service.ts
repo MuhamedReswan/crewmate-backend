@@ -1,4 +1,4 @@
-import { IServiceBoyRepository } from "../../repositories/interfaces/IServiceBoyRepository";
+import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
 import { IServiceBoyService } from "../interfaces/IServiceBoyService";
 import { injectable,inject } from "tsyringe";
 

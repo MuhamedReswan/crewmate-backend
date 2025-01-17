@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IServiceBoyService } from "../../services/interfaces/IServiceBoyService";
+import { IServiceBoyService } from "../../../services/v1/interfaces/IServiceBoyService";
 import { IServiceBoyController } from "../interfaces/IServiceBoyController";
 import { inject, injectable } from "tsyringe";
 
