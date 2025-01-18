@@ -5,20 +5,26 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "tsc && node dist/server.js",
-    "dev": "nodemon src/server.ts" 
+    "dev": "nodemon src/server.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.10.7",
     "nodemon": "^3.1.9",
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "redis": "^4.7.0",
+    "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.8.0"
   }
 }
