@@ -6,3 +6,5 @@ import  ServiceBoyController  from "../controllers/v1/implimentation/serviceBoy.
 
 
 container.register<IServiceBoyController>('IServiceBoyController', {useClass: ServiceBoyController});
+
+export default container;
