@@ -1,6 +1,9 @@
-import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
-import { IServiceBoyService } from "../interfaces/IServiceBoyService";
 import { injectable,inject } from "tsyringe";
+import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
+import redisClient from "../../../utils/redisClient";
+import { IServiceBoyService } from "../interfaces/IServiceBoyService";
+import { sendOtpEmail } from "../../../utils/sendOtp";
+import { createOtp } from "../../../utils/createOtp";
 
 
 @injectable()
@@ -11,12 +14,27 @@ export default class ServiceBoyService implements IServiceBoyService{
         this.serviceBoyRepository = serviceBoyRepository;
     }
 
-    async async register(name: string, email: string, password: string, mobile: string): Promise<void> {
+
+     async register(name: string, email: string, password: string, mobile: string): Promise<void> {
         console.log("ServiceBoyServie register got");
-        console.log("name",name);
-        console.log("email",email);
-        console.log("password",password);
-        console.log("mobile",mobile);
+const existingServiceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+if(existingServiceBoy) throw new Error('Email is already in use');
+
+await redisClient.setEx(`email:${email}`,3600, JSON.stringify({name,email,password,mobile}));
+let registerFromRedis = await redisClient.get(`email:${email}`);
+console.log("registerFromRedis",registerFromRedis);
+    }
+
+
+    async generateOTP(email:string){
+        const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+        if(serviceBoy) throw new Error('Email already verified');
+
+        const otp = createOtp();
+        await redisClient.setEx(`otp:${email}`, 120, JSON.stringify({otp}));
+        let savedOtp = await redisClient.get(`otp:${email}`);
+        console.log("savedOtp",savedOtp);
+        await sendOtpEmail(email, otp);
     }
 
 
