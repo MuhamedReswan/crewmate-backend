@@ -1,6 +1,6 @@
 import { injectable,inject } from "tsyringe";
 import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
-import redisClient from "../../../utils/redisClient.util";
+import { deleteRedisData, getRedisData, setRedisData } from "../../../utils/redis.util";
 import { IServiceBoyService } from "../interfaces/IServiceBoyService";
 import { sendOtpEmail } from "../../../utils/otp.util";
 import { createOtp } from "../../../utils/otp.util";
@@ -24,8 +24,8 @@ export default class ServiceBoyService implements IServiceBoyService{
 const existingServiceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
 if(existingServiceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
 
-await redisClient.setEx(`serviceBoy:${email}`,3600, JSON.stringify({name,email,password,mobile}));
-let registerFromRedis = await redisClient.get(`serviceBoy:${email}`);
+await setRedisData(`serviceBoy:${email}`,JSON.stringify({name,email,password,mobile}),3600)
+let registerFromRedis = await getRedisData(`serviceBoy:${email}`);
 console.log("registerFromRedis",registerFromRedis);
     }
 
@@ -36,8 +36,8 @@ console.log("registerFromRedis",registerFromRedis);
         if(serviceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
         const otp = createOtp();
-        await redisClient.setEx(`otpB:${email}`, 320, JSON.stringify({otp}));
-        let savedOtp = await redisClient.get(`otpB:${email}`);
+        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),320);
+        let savedOtp = await getRedisData(`otpB:${email}`);
         console.log("savedOtp",savedOtp);
         await sendOtpEmail(email, otp);
 
@@ -54,7 +54,7 @@ console.log("registerFromRedis",registerFromRedis);
             console.log("within verify otp in service");
             console.log(`email:${email},otp:${otp} serivce`);
     
-            const savedOtp = await redisClient.get(`otpB:${email}`);
+            const savedOtp = await getRedisData(`otpB:${email}`);
             console.log("savedOtp",savedOtp)
             if(!savedOtp) throw new ExpiredError('OTP expired')
         
@@ -63,10 +63,10 @@ console.log("registerFromRedis",registerFromRedis);
             console.log("otp",otp);
             if(otp !== savedOtpValue) throw new BadrequestError('Invalid OTP');
 
-            let deleteotp = await redisClient.del(`otpB:${email}`);
+            let deleteotp = await deleteRedisData(`otpB:${email}`);
             console.log("deleteotp",deleteotp);
             
-           let serviceBoyData  = await redisClient.get(`serviceBoy:${email}`);
+           let serviceBoyData  = await getRedisData(`serviceBoy:${email}`)
            console.log("serviceBoyData  from serivice",serviceBoyData);
            if(serviceBoyData){
              let serviceBoyDataObject = JSON.parse(serviceBoyData);
@@ -75,7 +75,7 @@ console.log("registerFromRedis",registerFromRedis);
              serviceBoyDataObject.password = await hashPassword(serviceBoyDataObject.password);
             let createdBoy = await this.serviceBoyRepository.createServiceBoy(serviceBoyDataObject);
             console.log("createdBoy from service",createdBoy);
-             await redisClient.del(`serviceBoy:${email}`); 
+             await deleteRedisData(`serviceBoy:${email}`); 
           }
          
 

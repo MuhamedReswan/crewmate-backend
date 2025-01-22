@@ -5,7 +5,7 @@ import { inject, injectable } from "tsyringe";
 import { HttpStatusCode } from "../../../enums/httpStatusCode";
 import { handleSuccess } from "../../../utils/successHandler.util";
 import { ResponseMessage } from "../../../enums/resposnseMessage";
-import redisClient from "../../../utils/redisClient.util";
+import redisClient from "../../../utils/redis.util";
 
 
 
@@ -43,7 +43,7 @@ export default class ServiceBoyController implements IServiceBoyController {
            console.log("verifyotp",verify)
             res.status(HttpStatusCode.CREATED).json(handleSuccess(ResponseMessage.SERVICE_BOY_VERIFICATION_SUCCESS))
         } catch (error) {
-            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message: 'Internal Server Error form controller'});
+            next(error);
         }
 
     }
