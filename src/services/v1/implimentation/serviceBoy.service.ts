@@ -1,9 +1,9 @@
 import { injectable,inject } from "tsyringe";
 import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
-import redisClient from "../../../utils/redisClient";
+import redisClient from "../../../utils/redisClient.util";
 import { IServiceBoyService } from "../interfaces/IServiceBoyService";
-import { sendOtpEmail } from "../../../utils/sendOtp";
-import { createOtp } from "../../../utils/createOtp";
+import { sendOtpEmail } from "../../../utils/otp.util";
+import { createOtp } from "../../../utils/otp.util";
 
 
 @injectable()
@@ -36,6 +36,19 @@ console.log("registerFromRedis",registerFromRedis);
         console.log("savedOtp",savedOtp);
         await sendOtpEmail(email, otp);
     }
+
+
+    async verifyOTP(email: string, otp: string): Promise<void> {
+        const savedOtp = await redisClient.get(`otp:${email}`);
+        if(!savedOtp) throw new Error('OTP expired');
+
+        const {otp: savedOtpValue} = JSON.parse(savedOtp);
+        console.log("savedOtpValue",savedOtpValue);
+        if(otp !== savedOtpValue) throw new Error('Invalid OTP');
+        await redisClient.del(`otp:${email}`);
+        await this.serviceBoyRepository.createServiceBoy({email});
+    }
+    
 
 
 

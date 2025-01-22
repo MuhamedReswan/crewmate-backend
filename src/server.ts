@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { PORT,CLIENTURL } from "./config/env";
 import { connectDB } from "./config/connectDB";
 import cors from "cors"
+import { errorHandler } from "./middleware/errorHandler";
 
 
 const app : Application = express();
@@ -25,6 +26,8 @@ app.use("/", router);
 // app.get("/", (req,res)=>{
 //     res.send("server started");
 // })
+
+app.use(errorHandler);
 
 connectDB().then(() => {
     app.listen(PORT, () => {
