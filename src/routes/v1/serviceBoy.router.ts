@@ -7,7 +7,8 @@ const router = Router();
 const serviceBoyController = container.resolve<IServiceBoyController>('IServiceBoyController');
 
 
-router.post('/register',(req, res) => serviceBoyController.register(req,res));
+router.post('/register', serviceBoyController.register);
+router.post('/otp',serviceBoyController.verifyOTP);
 
 
 export default router;

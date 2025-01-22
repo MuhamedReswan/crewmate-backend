@@ -71,3 +71,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
         throw new Error('Error sending OTP email');
     }
 };
+
+export function createOtp(): string{
+    return Math.floor(1000 + Math.random() * 9000).toString();
+}
