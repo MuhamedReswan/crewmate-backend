@@ -14,9 +14,9 @@ redisClient.on("connect", () => {
   console.log("Connected to Redis");
 });
 
-redisClient.on("reconnecting", () => {
-  console.log("Reconnecting to Redis...");
-});
+// redisClient.on("reconnecting", () => {
+//   console.log("Reconnecting to Redis...");
+// });
 
 const connectRedis = async () => {
   try {
