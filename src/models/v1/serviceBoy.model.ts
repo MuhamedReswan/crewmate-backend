@@ -1,7 +1,8 @@
-import mongoose, { Schema, model } from 'mongoose';
-import IServiceBoy from "../../entities/v1/serviceBoyEntity";
+import mongoose, { Mongoose, Schema, model } from 'mongoose';
+import IServiceBoy from '../../entities/v1/serviceBoyEntity';
+import { string } from 'zod';
 
-const ServieBoysSchema: Schema = new Schema({
+ const ServieBoysSchema: Schema = new Schema<IServiceBoy>({
   name: { type: String },
   email: { type: String, required: true, unique: true },
   mobile: { type: String },
@@ -9,11 +10,11 @@ const ServieBoysSchema: Schema = new Schema({
   profileImage: { type: String },
   aadharNumber: { type: String },
   isBlocked: {type: Boolean, default: false},
-  location: {
-  },
+  location: {type: Object,default:{}},
   age: { type: Number },
   qualification: { type: String },
   points: { type: Number, default:0 },
+  role:{type:String, default:"Service Boy"},
   offDates: [{
   }],
   date: {  type: Schema.Types.Date },
@@ -21,10 +22,8 @@ const ServieBoysSchema: Schema = new Schema({
   servicerId: { type: String, unique: true },
   walletId: { type: Schema.Types.ObjectId, unique: true },
   workHistoryId: { type: Schema.Types.ObjectId, unique: true },
-  refreshToken: {type: String}
 });
 
-export default  model<IServiceBoy>('ServiceBoys', ServieBoysSchema);
-
+export const serviceBoyModel = mongoose.model<IServiceBoy>('ServiceBoys', ServieBoysSchema);
 
 

@@ -9,6 +9,7 @@ const serviceBoyController = container.resolve<IServiceBoyController>('IServiceB
 
 router.post('/register', serviceBoyController.register);
 router.post('/otp',serviceBoyController.verifyOTP);
+router.post('/resent-otp', serviceBoyController.resendOtp );
 // router.post
 
 
