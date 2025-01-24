@@ -1,13 +1,20 @@
 import { injectable,inject } from "tsyringe";
 import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../utils/redis.util";
-import { IServiceBoyService } from "../interfaces/IServiceBoyService";
+import { IServiceBoyLoginResponse, IServiceBoyService } from "../interfaces/IServiceBoyService";
 import { sendOtpEmail } from "../../../utils/otp.util";
 import { createOtp } from "../../../utils/otp.util";
 import { hashPassword } from "../../../utils/password.util";
 import { ExpiredError } from "../../../utils/errors/expired.error";
 import { BadrequestError } from "../../../utils/errors/badRequest.error";
 import { ResponseMessage } from "../../../enums/resposnseMessage";
+import { NotFoundError } from "../../../utils/errors/notFound.error";
+import bcrypt from 'bcrypt';
+import { ValidationError } from "../../../utils/errors/validation.error";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../../utils/jwt.util";
+import IServiceBoy from "../../../entities/v1/serviceBoyEntity";
+import { UnAuthorizedError } from "../../../utils/errors/unAuthorized.error";
+
 
 
 @injectable()
@@ -36,7 +43,7 @@ console.log("registerFromRedis",registerFromRedis);
         if(serviceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
         const otp = createOtp();
-        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),320);
+        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),120);
         let savedOtp = await getRedisData(`otpB:${email}`);
         console.log("savedOtp",savedOtp);
         await sendOtpEmail(email, otp);
@@ -77,13 +84,72 @@ console.log("registerFromRedis",registerFromRedis);
             console.log("createdBoy from service",createdBoy);
              await deleteRedisData(`serviceBoy:${email}`); 
           }
-         
-
         } catch (error) {
             console.log(error);
             throw error;
         }
     }
+
+
+    async serviceBoyLogin(email: string, password: string): Promise<IServiceBoyLoginResponse> {
+        try {
+            const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+            console.log("serviceBoy login service",serviceBoy);
+        if(!serviceBoy){
+            throw new NotFoundError("Invalid credentials");
+        }
+        const validPassword = await bcrypt.compare(password,serviceBoy.password);
+        if(!validPassword)throw new ValidationError("Invalid credentials");
+            console.log("validPassword login service",validPassword);
+            const role = 'Service Boy';
+            const accessToken = generateAccessToken(serviceBoy,role);
+            const refreshToken = generateRefreshToken(serviceBoy,role);
+            console.log("refresh token",refreshToken);
+            console.log("accessToken token",accessToken);
+return {serviceBoy,accessToken,refreshToken};
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
+
+   async resendOtp (email:string): Promise <void> {
+try {
+    await deleteRedisData(`otpB${email}`);
+    const otp = createOtp();
+    await setRedisData(`otpB:${email}`, JSON.stringify({otp}),120);
+    let savedOtp = await getRedisData(`otpB:${email}`);
+    console.log("savedOtp",savedOtp);
+    await sendOtpEmail(email, otp);    
+} catch (error) {
+    throw error
+}
+   }
+
+
+   async setNewAccessToken (refreshToken:string): Promise <any>{
+    try {
+       const decoded =  await verifyRefreshToken(refreshToken);
+       const serviceBoy = decoded?.serviceBoy;
+       const role = decoded?.role ?? "Service Boy";
+       console.log("sevice boy from setNewAccessToken from service",serviceBoy);
+       console.log("role from setNewAccessToken from service",role);
+
+       if(!decoded || !serviceBoy ){
+        throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
+       }
+        const accessToken = await generateAccessToken(serviceBoy,role);
+        return {
+            accessToken,
+            message:"Access token set successfully from service",
+            success:true,
+        }
+
+    } catch (error) {
+        throw error;
+    }
+   }
     
 
 

@@ -1,6 +1,6 @@
 import { Document, ObjectId } from "mongoose";
 
-interface UnAvailable {
+export interface UnAvailable {
     date:Date,
     reason:string
 }
@@ -14,7 +14,9 @@ export default interface IServiceBoy extends Document {
     isVerified:boolean,
     profileImage:string,
     isBlocked:boolean,
-    aadharNumber:string, 
+    aadharNumber:string,
+    servicerId:string,
+    role:string; 
     location:object,
     age:number,
     qualification:string,
