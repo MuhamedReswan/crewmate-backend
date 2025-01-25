@@ -26,8 +26,10 @@ export const setRedisData = async (key:string, value:string, ttl?:number) => {
       await redisClient.set(key, value);
     }
 console.log(`Data for ${key} saved successfully`);
+return true
   } catch (error) {
     console.error(`Error saving data for ${key}:`, error);
+    return false
   }
 };
 

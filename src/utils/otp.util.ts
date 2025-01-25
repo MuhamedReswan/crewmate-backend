@@ -74,4 +74,10 @@ export const sendOtpEmail = async (email: string, otp: string) => {
 
 export function createOtp(): string{
     return Math.floor(1000 + Math.random() * 9000).toString();
+};
+
+
+const sendForgotPasswordLink = async (email:string, token:string) =>{
+  
 }
+

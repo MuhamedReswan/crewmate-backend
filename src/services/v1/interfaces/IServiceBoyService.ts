@@ -12,4 +12,7 @@ export interface IServiceBoyService {
     serviceBoyLogin(email:string, password:string): Promise<IServiceBoyLoginResponse>
     resendOtp(email:string): Promise<void>
     setNewAccessToken(refreshToken:string):Promise<any>
+    forgotPassword(email:string): Promise<string>
+    forgotResetPassword(email:string, password:string): Promise<void>
+    resetPasswordTokenVerify(email:string, token:string): Promise<void>
 }

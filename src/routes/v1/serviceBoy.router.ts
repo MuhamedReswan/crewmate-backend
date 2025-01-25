@@ -10,7 +10,9 @@ const serviceBoyController = container.resolve<IServiceBoyController>('IServiceB
 router.post('/register', serviceBoyController.register);
 router.post('/otp',serviceBoyController.verifyOTP);
 router.post('/resent-otp', serviceBoyController.resendOtp );
-// router.post
+router.post('/login', serviceBoyController.serviceBoyLogin);
+router.post('/forgot-password', serviceBoyController.forgotPassword);
+router.post('/reset-forgot-password', serviceBoyController.forgotResetPassword);
 
 
 export default router;
