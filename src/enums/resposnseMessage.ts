@@ -7,7 +7,13 @@ export enum ResponseMessage {
     RESEND_OTP_SEND = "Resend otp sended",
     NO_REFRESH_TOKEN="No refresh token",
     ACCESS_TOKEN_SET ="Access token set successfully",
-    INVALID_REFRESH_TOKEN = "Invalid or expired refresh token"
+    INVALID_REFRESH_TOKEN = "Invalid or expired refresh token",
+    NO_SERVICE_BOY_WITH_EMAIL = "Service boy not found with the provided email",
+    FORGOT_PASSWORD_LINK_SEND = "Forgot Password Link sended to your email PleaseVerify",
+    SERVICE_BOY_NOTFOUND = "Service boy not found",
+    PASSWORD_RESET_SUCCESS = "Password reset successfully",
+    RESET_PASSWORD_TOKEN_EXPIRED = "Reset password token expired",
+    INVALID_RESET_PASSWORD_TOKEN = "invalid reset password token"
 
 
 }

@@ -81,7 +81,6 @@ res.status(HttpStatusCode.OK)
 
            res.status(HttpStatusCode.OK)
            .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK))
-
         } catch (error) {
             next(error);
         }
@@ -101,6 +100,33 @@ res.status(HttpStatusCode.OK)
                  { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000, sameSite: 'strict' });
                   res.status(HttpStatusCode.OK)
                  .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET,HttpStatusCode.OK));
+        } catch (error) {
+            next(error)
+        }
+    }
+
+
+    forgotPassword =  async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+        try {
+            const {email} = req.body;
+          const isSendeMail = await this.serviceBoyService.forgotPassword(email);
+          if (isSendeMail){ 
+            res.status(HttpStatusCode.OK)
+.json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
+          }
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+    forgotResetPassword = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+        try {
+            const {email, password,token} = req.body;
+            await this.serviceBoyService.resetPasswordTokenVerify(email,token);
+         await this.serviceBoyService.forgotResetPassword(email,password);
+         res.status(HttpStatusCode.OK)
+         .json(responseHandler(ResponseMessage.PASSWORD_RESET_SUCCESS,HttpStatusCode.OK));
         } catch (error) {
             next(error)
         }

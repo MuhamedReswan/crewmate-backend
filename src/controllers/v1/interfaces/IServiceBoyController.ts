@@ -8,5 +8,7 @@ verifyOTP: RequestHandler
 serviceBoyLogin:RequestHandler
 resendOtp:RequestHandler,
 setNewAccessToken:RequestHandler<void>
+forgotPassword:RequestHandler
+forgotResetPassword:RequestHandler
 
 }

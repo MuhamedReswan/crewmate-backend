@@ -14,6 +14,7 @@ import { ValidationError } from "../../../utils/errors/validation.error";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../../utils/jwt.util";
 import IServiceBoy from "../../../entities/v1/serviceBoyEntity";
 import { UnAuthorizedError } from "../../../utils/errors/unAuthorized.error";
+import * as crypto from 'crypto';
 
 
 
@@ -151,6 +152,48 @@ try {
     }
    }
     
+
+
+   forgotPassword = async (email:string): Promise<string> =>{
+    try {
+        const serviceBoy = this.serviceBoyRepository.findServiceBoyByEmail(email);
+        if(!serviceBoy) throw new NotFoundError(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL)
+        const token = crypto.randomBytes(8).toString('hex');
+        const forgotTokenkey = `forgotToken:${email}`
+       await setRedisData(forgotTokenkey, token , 1800 );
+        return token;
+    } catch (error) {
+        throw error;
+    }
+   };
+
+
+   forgotResetPassword = async (email:string, password:string): Promise<void> =>{
+    try {
+      const updatedServiceBoy  = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+        if(!updatedServiceBoy ) throw new NotFoundError(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL);
+        const hashedPassword = await hashPassword(password);
+        await this.serviceBoyRepository.updateServiceBoyPassword(email,hashedPassword);
+    } catch (error) {
+        throw error;
+    }
+   }
+
+
+   resetPasswordTokenVerify = async (email:string, token:string): Promise<void> =>{
+    try {
+      const  resetTokenData = await getRedisData(`forgotToken:${email}`);
+      console.log("resetTokenData from boy service",resetTokenData);
+      if(!resetTokenData){
+        throw new ExpiredError(ResponseMessage.RESET_PASSWORD_TOKEN_EXPIRED);
+      }
+      if( resetTokenData != token){
+        throw new ValidationError(ResponseMessage.INVALID_RESET_PASSWORD_TOKEN);
+      }
+    } catch (error) {
+        throw error;
+    }
+   }
 
 
 
