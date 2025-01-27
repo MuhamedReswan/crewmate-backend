@@ -7,8 +7,11 @@ register:RequestHandler
 verifyOTP: RequestHandler
 serviceBoyLogin:RequestHandler
 resendOtp:RequestHandler,
-setNewAccessToken:RequestHandler<void>
+setNewAccessToken:RequestHandler
 forgotPassword:RequestHandler
 forgotResetPassword:RequestHandler
+googleRegister:RequestHandler
+googleLogin:RequestHandler
+resetPassword:RequestHandler
 
 }

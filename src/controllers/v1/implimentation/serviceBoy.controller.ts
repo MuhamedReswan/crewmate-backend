@@ -5,6 +5,7 @@ import { inject, injectable } from "tsyringe";
 import { HttpStatusCode } from "../../../enums/httpStatusCode";
 import { responseHandler } from "../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../enums/resposnseMessage";
+import { BadrequestError } from "../../../utils/errors/badRequest.error";
 
 
 
@@ -130,5 +131,46 @@ res.status(HttpStatusCode.OK)
         } catch (error) {
             next(error)
         }
-    }
+    };
+
+
+    googleRegister = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+        try {
+            console.log('recieved body : ',req.body)
+            const { serviceBoyCredential } = req.body
+            const name = serviceBoyCredential.name
+            const email = serviceBoyCredential.email 
+            const password = serviceBoyCredential.sub
+            const profileImage = serviceBoyCredential.picture
+            const serviceBoy = await this.serviceBoyService.googleRegister({name,email,password,profileImage});
+            console.log("serviceBoy in controllr google aut: ",serviceBoy)
+            res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.GOOGLE_REGISTER_SUCCESS, HttpStatusCode.OK));
+        } catch (error) {
+            next(error)   
+        }
+    };
+
+
+    googleLogin = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+        try {
+            const { serviceBoyCredential } = req.body
+            const name = serviceBoyCredential.name
+            const email = serviceBoyCredential.email 
+            await this.serviceBoyService.googleLogin({email});
+        } catch (error) {
+            next(error);
+        }
+    };
+
+
+    resetPassword = async (req:Request, res:Response, next: NextFunction): Promise<void> => {
+        try {
+           const {email, password} = req.body;
+           await this.serviceBoyService.resetPassword(email, password);
+           res.status(HttpStatusCode.OK)
+           .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS,HttpStatusCode.OK));
+        } catch (error) {
+            next(error);
+        }
+    };
 }

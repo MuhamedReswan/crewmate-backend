@@ -13,7 +13,10 @@ export enum ResponseMessage {
     SERVICE_BOY_NOTFOUND = "Service boy not found",
     PASSWORD_RESET_SUCCESS = "Password reset successfully",
     RESET_PASSWORD_TOKEN_EXPIRED = "Reset password token expired",
-    INVALID_RESET_PASSWORD_TOKEN = "invalid reset password token"
+    INVALID_RESET_PASSWORD_TOKEN = "invalid reset password token",
+    GOOGLE_REGISTER_SUCCESS = "Google register success",
+    GOOGLE_REGISTER_FAILED = "Google register failed",
+    RESET_PASSWORD_SUCCESS = "Password changed successfully"
 
 
 }

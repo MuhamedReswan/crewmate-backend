@@ -15,6 +15,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import IServiceBoy from "../../../entities/v1/serviceBoyEntity";
 import { UnAuthorizedError } from "../../../utils/errors/unAuthorized.error";
 import * as crypto from 'crypto';
+import { Register } from "../../../entities/v1/authenticationEntity";
 
 
 
@@ -193,8 +194,41 @@ try {
     } catch (error) {
         throw error;
     }
+   };
+
+
+   googleRegister = async(data: Register): Promise<void> => {
+    try {
+        const existingServiceBoy =await this.serviceBoyRepository.findServiceBoyByEmail(data.email);
+        if(existingServiceBoy){
+            throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
+        }
+        await this.serviceBoyRepository.createServiceBoy(data);
+    } catch (error) {
+        throw error;
+    } 
+   };
+
+
+   googleLogin = async  (data: Register): Promise<void> => {
+    try {
+      const serviceBoy =  await this.serviceBoyRepository.findServiceBoyByEmail(data.email);
+        console.log("service boy from repository google login",serviceBoy);
+        if(!serviceBoy){
+            throw new Error(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL);
+        }
+    } catch (error) {
+        throw error;
+    }
+   };
+
+
+   resetPassword = async (email:string, password:string): Promise<void> => {
+    try {
+        const hashedPassword = await hashPassword(password);
+        await this.serviceBoyRepository.updateServiceBoyPassword(email, hashedPassword);
+    } catch (error) {
+        throw error;
+    }
    }
-
-
-
 }

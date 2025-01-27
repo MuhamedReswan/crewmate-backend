@@ -43,6 +43,10 @@ throw new NotFoundError(ResponseMessage.SERVICE_BOY_NOTFOUND);
     } catch (error) {
         throw error
     }
-}
+};
+
+
+
+
 
 }

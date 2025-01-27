@@ -13,6 +13,10 @@ router.post('/resent-otp', serviceBoyController.resendOtp );
 router.post('/login', serviceBoyController.serviceBoyLogin);
 router.post('/forgot-password', serviceBoyController.forgotPassword);
 router.post('/reset-forgot-password', serviceBoyController.forgotResetPassword);
+router.post('/google-register', serviceBoyController.googleRegister);
+router.post('/google-login', serviceBoyController.googleLogin);
+router.post('/reset-password', serviceBoyController.resetPassword);
+
 
 
 export default router;
