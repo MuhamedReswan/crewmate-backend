@@ -26,7 +26,7 @@ private serviceBoyService: IServiceBoyService;
              await this.serviceBoyService.generateOTP(email);
             res
             .status(HttpStatusCode.OK)
-            .json(responseHandler(ResponseMessage.SERVICE_BOY_REGISTER_SUCCESS,HttpStatusCode.OK));
+            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.OK));
         } catch (error) {
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message: 'Internal Server Error'});
         }
