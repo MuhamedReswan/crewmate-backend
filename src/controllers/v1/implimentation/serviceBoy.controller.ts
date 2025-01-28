@@ -40,7 +40,7 @@ private serviceBoyService: IServiceBoyService;
            let verify =  await this.serviceBoyService.verifyOTP(email, otp); 
            console.log("verifyotp",verify)
             res.status(HttpStatusCode.CREATED)
-            .json(responseHandler(ResponseMessage.SERVICE_BOY_VERIFICATION_SUCCESS,HttpStatusCode.CREATED))
+            .json(responseHandler(ResponseMessage.OTP_VERIFICATION_SUCCESS,HttpStatusCode.CREATED))
         } catch (error) {
             next(error);
         }

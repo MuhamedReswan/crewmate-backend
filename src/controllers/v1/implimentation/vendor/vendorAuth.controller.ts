@@ -25,6 +25,33 @@ export default class VendorAuthController implements IVendorAuthController{
         } catch (error) {
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message: 'Internal Server Error'});
         }
+    };
+
+
+    verifyOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { email, otp } = req.body;
+            console.log("req.body on controller",req.body);
+           let verify =  await this.vendorAuthService.verifyOTP(email, otp); 
+           console.log("verifyotp",verify)
+            res.status(HttpStatusCode.CREATED)
+            .json(responseHandler(ResponseMessage.OTP_VERIFICATION_SUCCESS,HttpStatusCode.CREATED))
+        } catch (error) {
+            next(error);
+        }
+    };
+
+
+    resendOtp = async (req: Request, res:Response, next: NextFunction):Promise<void> => {
+        try {
+            const {email} = req.body;
+await this.vendorAuthService.resendOtp(email);
+res.status(HttpStatusCode.OK)
+.json(responseHandler(ResponseMessage.RESEND_OTP_SEND,HttpStatusCode.OK));
+        } catch (error) {
+            next(error)
+        }
     }
+
 
 }
