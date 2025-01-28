@@ -19,7 +19,7 @@ container.register<IServiceBoyRepository>('IServiceBoyRepository', {useClass: Se
 container.register<IServiceBoyService>('IServiceBoyService', {useClass: ServiceBoyService});
 container.register<IServiceBoyController>('IServiceBoyController', {useClass: ServiceBoyController});
 
-container.register<IVendorAuthRepository>('IVendorAuthController',{useClass: VendorAuthRepository});
+container.register<IVendorAuthRepository>('IVendorAuthRepository',{useClass: VendorAuthRepository});
 container.register<IVendorAuthService>('IVendorAuthService',{useClass: VendorAuthService});
 container.register<IVendorAuthController>('IVendorAuthController',{useClass: VendorAuthController});
 

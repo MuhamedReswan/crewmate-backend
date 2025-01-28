@@ -6,6 +6,8 @@ const vendorAuthController = container.resolve<IVendorAuthController>('IVendorAu
 
 const router = Router();
 router.post('/register', vendorAuthController.register);
+router.post('/otp',vendorAuthController.verifyOTP);
+router.post('/resent-otp', vendorAuthController.resendOtp );
 
 
 

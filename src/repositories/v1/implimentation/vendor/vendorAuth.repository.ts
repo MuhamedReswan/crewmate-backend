@@ -1,4 +1,7 @@
+import IVendor from "../../../../entities/v1/vendorEntity";
 import { vendorModel } from "../../../../models/v1/vendor.model";
+import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
+import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { IVendorAuthRepository } from "../../interfaces/vendor/vendorAuth.repository";
 
 export default class VendorAuthRepository implements IVendorAuthRepository { 
@@ -12,7 +15,7 @@ export default class VendorAuthRepository implements IVendorAuthRepository {
     };
 
 
-    async createVendor(vendorData: any): Promise<any>{
+    async createVendor(vendorData: IVendor): Promise<void>{
         try {
             console.log("vendor got");
             console.log("vendorData",vendorData);
@@ -23,5 +26,19 @@ export default class VendorAuthRepository implements IVendorAuthRepository {
             console.log("error from createServiceBoy repository",error)
             throw error
         }
-    }
+    };
+
+
+    async resendOtp (email:string): Promise <void> {
+        try {
+            await deleteRedisData(`otpV${email}`);
+            const otp = createOtp();
+            await setRedisData(`otpV:${email}`, JSON.stringify({otp}),120);
+            let savedOtp = await getRedisData(`otpV:${email}`);
+            console.log("savedOtp",savedOtp);
+            await sendOtpEmail(email, otp);    
+        } catch (error) {
+            throw error
+        }
+           };
 }
