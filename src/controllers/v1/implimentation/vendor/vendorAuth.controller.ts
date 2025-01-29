@@ -140,5 +140,34 @@ setNewAccessToken = async (req:Request, res:Response, next:NextFunction): Promis
             } catch (error) {
                 next(error)
     }
-}
+};
+
+
+googleRegister = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+    try {
+        console.log('recieved body : ',req.body)
+        const { vendorCredential } = req.body
+        const name = vendorCredential.name
+        const email = vendorCredential.email 
+        const password = vendorCredential.sub
+        const profileImage = vendorCredential.picture
+        const vendor = await this.vendorAuthService.googleRegister({name,email,password,profileImage});
+        console.log("vendor in controllr google aut: ",vendor)
+        res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.GOOGLE_REGISTER_SUCCESS, HttpStatusCode.OK));
+    } catch (error) {
+        next(error)   
+    }
+};
+
+
+googleLogin = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+    try {
+        const { vendorCredential } = req.body
+        const name = vendorCredential.name
+        const email = vendorCredential.email 
+        await this.vendorAuthService.googleLogin({email});
+    } catch (error) {
+        next(error);
+    }
+};
 }
