@@ -22,10 +22,11 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
 app.get("/", (req,res)=>{
     res.send("server started");
 })
+
+app.use("/", router);
 
 app.use(errorHandler);
 

@@ -35,7 +35,7 @@ export default class VendorAuthRepository implements IVendorAuthRepository {
             const otp = createOtp();
             await setRedisData(`otpV:${email}`, JSON.stringify({otp}),120);
             let savedOtp = await getRedisData(`otpV:${email}`);
-            console.log("savedOtp",savedOtp);
+            console.log("savedOtpV",savedOtp);
             await sendOtpEmail(email, otp);    
         } catch (error) {
             throw error

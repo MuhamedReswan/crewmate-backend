@@ -28,7 +28,7 @@ private serviceBoyService: IServiceBoyService;
             .status(HttpStatusCode.OK)
             .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.OK));
         } catch (error) {
-            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message: 'Internal Server Error'});
+            next(error)
         }
     }
 
@@ -66,6 +66,7 @@ res.status(HttpStatusCode.OK)
         try {
             const {email, password} = req.body;
            const serviceBoy =  await this.serviceBoyService.serviceBoyLogin(email, password);
+           console.log("serviceBoy from login controller",serviceBoy)
            // set access token and refresh token in coockies
            res.cookie('refreshToken', serviceBoy.accessToken,{
             httpOnly: true,
@@ -79,7 +80,6 @@ res.status(HttpStatusCode.OK)
             maxAge: 15 * 60 * 1000,
             sameSite: 'lax'
            })
-
            res.status(HttpStatusCode.OK)
            .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK))
         } catch (error) {
