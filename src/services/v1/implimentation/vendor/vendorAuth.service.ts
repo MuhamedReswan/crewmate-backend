@@ -3,14 +3,15 @@ import { IVendorAuthService, IVendorLoginResponse } from "../../interfaces/vendo
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { ResponseMessage } from "../../../../enums/resposnseMessage";
-import { IVendorAuthRepository } from "../../../../repositories/v1/interfaces/vendor/vendorAuth.repository";
-import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
+import { IVendorAuthRepository } from "../../../../repositories/v1/interfaces/vendor/IVendorAuth.repository";
+import { createOtp, sendForgotPasswordLink, sendOtpEmail } from "../../../../utils/otp.util";
 import { ExpiredError } from "../../../../utils/errors/expired.error";
 import { hashPassword } from "../../../../utils/password.util";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import bcrypt from 'bcrypt';
 import { ValidationError } from "../../../../utils/errors/validation.error";
 import { generateAccessToken, generateRefreshToken } from "../../../../utils/jwt.util";
+import * as crypto from 'crypto';
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -116,6 +117,56 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
                     throw error;
                 }
             };
+
+
+               forgotPassword = async (email:string): Promise<string> =>{
+                try {
+                    const serviceBoy = this.vendorAuthRepository.findVendorByEmail(email);
+                    if(!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+                    const token = crypto.randomBytes(8).toString('hex');
+                   await setRedisData(`forgotToken:${email}`, token , 1800 );
+                    return token;
+                } catch (error) {
+                    throw error;
+                }
+               };
+
+
+               resetPasswordTokenVerify = async (email:string, token:string): Promise<void> =>{
+                try {
+                  const  forgotTokenData = await getRedisData(`forgotToken:${email}`);
+                  console.log("forgotTokenData from boy service",forgotTokenData);
+                  if(!forgotTokenData){
+                    throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
+                  }
+                  if( forgotTokenData != token){
+                    throw new ValidationError(ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN);
+                  }
+                } catch (error) {
+                    throw error;
+                }
+               };
+
+
+
+               resetPassword = async (email:string, password:string): Promise<void> => {
+                try {
+                    const hashedPassword = await hashPassword(password);
+                    await this.vendorAuthRepository.updateVendorPassword(email, hashedPassword);
+                } catch (error) {
+                    throw error;
+                }
+               };
+
+
+
+               resetPasswordLink = async (token:string,email:string): Promise<void>=>{
+                   try {
+                       await sendForgotPasswordLink(email,token);
+                   } catch (error) {
+                       throw error;
+                   }
+               }
         
 
 

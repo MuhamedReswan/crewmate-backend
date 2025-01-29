@@ -1,10 +1,12 @@
 import { NextFunction, Request, response, Response } from "express";
-import { IVendorAuthController } from "../../interfaces/vendor/IVendorAuthController";
+import { IVendorAuthController } from "../../interfaces/vendor/IVendorAuth.controller";
 import { inject, injectable } from "tsyringe";
 import { HttpStatusCode } from "../../../../enums/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../enums/resposnseMessage";
 import { IVendorAuthService } from "../../../../services/v1/interfaces/vendor/IVendorAuthService";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import { sendForgotPasswordLink } from "../../../../utils/otp.util";
 
 @injectable()
 export default class VendorAuthController implements IVendorAuthController{
@@ -77,5 +79,47 @@ res.status(HttpStatusCode.OK)
             next(error);
         }
     };
+
+
+
+    forgotPassword =  async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+            try {
+                const {email} = req.body;
+              const forgotToken = await this.vendorAuthService.forgotPassword(email);
+              if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND)
+                 await this.vendorAuthService.resetPasswordLink(email,forgotToken);
+                res.status(HttpStatusCode.OK)
+    .json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
+          
+            } catch (error) {
+                next(error);
+            }
+        };
+
+
+        resetPassword = async (req:Request, res:Response, next: NextFunction): Promise<void> => {
+            try {
+               const {email, password,forgotToken} = req.body;
+               if(forgotToken){
+                await this.vendorAuthService.resetPasswordTokenVerify(email,forgotToken);
+                await this.vendorAuthService.resetPassword(email, password);
+               }else{
+                await this.vendorAuthService.resetPassword(email, password);
+               }
+               res.status(HttpStatusCode.OK)
+               .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS,HttpStatusCode.OK));
+            } catch (error) {
+                next(error);
+            }
+        };
+    
+    
+resetPasswordLink = async (token:string,email:string): Promise<void>=>{
+    try {
+        await sendForgotPasswordLink(email,token);
+    } catch (error) {
+        throw error;
+    }
+};
 
 }

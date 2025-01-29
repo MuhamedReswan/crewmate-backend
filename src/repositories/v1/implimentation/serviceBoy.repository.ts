@@ -1,7 +1,7 @@
 import { ResponseMessage } from "../../../enums/resposnseMessage";
 import { serviceBoyModel } from "../../../models/v1/serviceBoy.model";
 import { NotFoundError } from "../../../utils/errors/notFound.error";
-import { IServiceBoyRepository } from "../interfaces/IServiceBoyRepository";
+import { IServiceBoyRepository } from "../interfaces/IServiceBoy.repository";
 
 export default class ServiceBoysRepository implements IServiceBoyRepository{
 

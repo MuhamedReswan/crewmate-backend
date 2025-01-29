@@ -14,5 +14,12 @@ export interface IVendorLoginResponse {
     verifyOTP(email: string, otp: string): Promise<void>
     resendOtp(email: string): Promise<void>
     vendorLogin(email:string, password:string): Promise<IVendorLoginResponse>
+    forgotPassword(email:string): Promise<string>
+    resetPasswordTokenVerify(email:string, token:string): Promise<void>
+    resetPassword(password:string,email:string): Promise<void>
+    resetPasswordLink(token:string,email:string): Promise<void>
+
+
+
 
 }

@@ -1,5 +1,5 @@
 import { injectable,inject } from "tsyringe";
-import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
+import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoy.repository";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../utils/redis.util";
 import { IServiceBoyLoginResponse, IServiceBoyService } from "../interfaces/IServiceBoyService";
 import { sendForgotPasswordLink, sendOtpEmail } from "../../../utils/otp.util";

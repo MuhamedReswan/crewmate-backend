@@ -102,8 +102,8 @@ res.status(HttpStatusCode.OK)
                  { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000, sameSite: 'strict' });
                   res.status(HttpStatusCode.OK)
                  .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET,HttpStatusCode.OK));
-        } catch (error) {
-            next(error)
+                } catch (error) {
+                    next(error)
         }
     }
 
@@ -111,19 +111,35 @@ res.status(HttpStatusCode.OK)
     forgotPassword =  async (req:Request, res:Response, next:NextFunction): Promise<void> => {
         try {
             const {email} = req.body;
-          const forgotToken = await this.serviceBoyService.forgotPassword(email);
-          if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND)
-             await this.serviceBoyService.resetPasswordLink(email,forgotToken);
+            const forgotToken = await this.serviceBoyService.forgotPassword(email);
+            if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND)
+                await this.serviceBoyService.resetPasswordLink(email,forgotToken);
             res.status(HttpStatusCode.OK)
-.json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
-      
+            .json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
+            
         } catch (error) {
             next(error);
         }
     }
-
-
-
+    
+    
+    resetPassword = async (req:Request, res:Response, next: NextFunction): Promise<void> => {
+        try {
+           const {email, password,forgotToken} = req.body;
+           if(forgotToken){
+            await this.serviceBoyService.resetPasswordTokenVerify(email,forgotToken);
+            await this.serviceBoyService.resetPassword(email, password);
+           }else{
+            await this.serviceBoyService.resetPassword(email, password);
+           }
+           res.status(HttpStatusCode.OK)
+           .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS,HttpStatusCode.OK));
+        } catch (error) {
+            next(error);
+        }
+    };
+    
+    
     googleRegister = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
         try {
             console.log('recieved body : ',req.body)
@@ -153,19 +169,4 @@ res.status(HttpStatusCode.OK)
     };
 
 
-    resetPassword = async (req:Request, res:Response, next: NextFunction): Promise<void> => {
-        try {
-           const {email, password,forgotToken} = req.body;
-           if(forgotToken){
-            await this.serviceBoyService.resetPasswordTokenVerify(email,forgotToken);
-            await this.serviceBoyService.resetPassword(email, password);
-           }else{
-            await this.serviceBoyService.resetPassword(email, password);
-           }
-           res.status(HttpStatusCode.OK)
-           .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS,HttpStatusCode.OK));
-        } catch (error) {
-            next(error);
-        }
-    };
 }

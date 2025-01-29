@@ -1,8 +1,10 @@
 import IVendor from "../../../../entities/v1/vendorEntity";
+import { ResponseMessage } from "../../../../enums/resposnseMessage";
 import { vendorModel } from "../../../../models/v1/vendor.model";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
-import { IVendorAuthRepository } from "../../interfaces/vendor/vendorAuth.repository";
+import { IVendorAuthRepository } from "../../interfaces/vendor/IVendorAuth.repository";
 
 export default class VendorAuthRepository implements IVendorAuthRepository { 
     async findVendorByEmail(email: string): Promise<any>{
@@ -40,5 +42,22 @@ export default class VendorAuthRepository implements IVendorAuthRepository {
         } catch (error) {
             throw error
         }
+           };
+
+
+           async updateVendorPassword(email:string, password:string): Promise<void>  {
+               try {
+               const updatedServiceBoy =  await vendorModel.findOneAndUpdate(
+                   {email},
+                   {password},
+                    {new:true}
+                   );
+           
+            if(!updatedServiceBoy){
+           throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+            }
+               } catch (error) {
+                   throw error
+               }
            };
 }
