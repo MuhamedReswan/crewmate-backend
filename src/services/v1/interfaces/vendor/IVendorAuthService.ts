@@ -1,5 +1,6 @@
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
+import { Register } from "../../../../entities/v1/authenticationEntity";
 
 export interface VendorLoginResponse {
   vendor: IVendor; 
@@ -18,6 +19,8 @@ export interface VendorLoginResponse {
     resetPassword(password:string,email:string): Promise<void>
     resetPasswordLink(token:string,email:string): Promise<void>
     setNewAccessToken(refreshToken:string):Promise<CustomTokenResponse>
+    googleRegister(data:Register): Promise <void>
+    googleLogin(data:Register): Promise <void>
 
 
 

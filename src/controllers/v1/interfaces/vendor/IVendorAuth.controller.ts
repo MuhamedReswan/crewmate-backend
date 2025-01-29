@@ -8,7 +8,6 @@ export interface IVendorAuthController {
     forgotPassword:RequestHandler
     resetPassword:RequestHandler
     setNewAccessToken:RequestHandler
-
-
-
+    googleRegister:RequestHandler 
+    googleLogin:RequestHandler
 }

@@ -15,6 +15,7 @@ import * as crypto from 'crypto';
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import { TokenResponse } from "google-auth-library/build/src/auth/impersonated";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
+import { Register } from "../../../../entities/v1/authenticationEntity";
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -124,8 +125,8 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
 
                forgotPassword = async (email:string): Promise<string> =>{
                 try {
-                    const serviceBoy = this.vendorAuthRepository.findVendorByEmail(email);
-                    if(!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+                    const vendor = this.vendorAuthRepository.findVendorByEmail(email);
+                    if(!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
                     const token = crypto.randomBytes(8).toString('hex');
                    await setRedisData(`forgotToken:${email}`, token , 1800 );
                     return token;
@@ -193,6 +194,32 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
     } catch (error) {
         throw error;
     }
-   }
+   };
+
+
+   googleRegister = async(data: Register): Promise<void> => {
+       try {
+           const existingVendor =await this.vendorAuthRepository.findVendorByEmail(data.email);
+           if(existingVendor){
+               throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
+           }
+           await this.vendorAuthRepository.createVendor(data);
+       } catch (error) {
+           throw error;
+       } 
+      };
+   
+   
+      googleLogin = async  (data: Register): Promise<void> => {
+       try {
+         const vendor =  await this.vendorAuthRepository.findVendorByEmail(data.email);
+           console.log("service boy from repository google login",vendor);
+           if(!vendor){
+               throw new Error(ResponseMessage.USER_NOT_FOUND);
+           }
+       } catch (error) {
+           throw error;
+       }
+      };
         
 }
