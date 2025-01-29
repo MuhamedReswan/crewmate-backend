@@ -5,4 +5,8 @@ export interface IVendorAuthController {
     verifyOTP: RequestHandler
     resendOtp: RequestHandler
     vendorLogin: RequestHandler
+    forgotPassword:RequestHandler
+    resetPassword:RequestHandler
+
+
 }

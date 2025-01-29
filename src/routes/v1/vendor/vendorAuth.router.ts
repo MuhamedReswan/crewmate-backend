@@ -1,6 +1,6 @@
 import { container } from "tsyringe";
 import { Router } from "express";
-import { IVendorAuthController } from "../../../controllers/v1/interfaces/vendor/IVendorAuthController";
+import { IVendorAuthController } from "../../../controllers/v1/interfaces/vendor/IVendorAuth.controller";
 
 const vendorAuthController = container.resolve<IVendorAuthController>('IVendorAuthController');
 
@@ -12,6 +12,10 @@ router.post('/register', vendorAuthController.register);
 router.post('/otp',vendorAuthController.verifyOTP);
 router.post('/resent-otp', vendorAuthController.resendOtp );
 router.post('/login', vendorAuthController.vendorLogin);
+router.post('/forgot-password', vendorAuthController.forgotPassword);
+router.post('/reset-password', vendorAuthController.resetPassword);
+
+
 
 
 
