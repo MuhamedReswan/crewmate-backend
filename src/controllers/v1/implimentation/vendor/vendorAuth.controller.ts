@@ -122,4 +122,23 @@ resetPasswordLink = async (token:string,email:string): Promise<void>=>{
     }
 };
 
+
+
+setNewAccessToken = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+        if(!refreshToken){
+         res.status(HttpStatusCode.UNAUTHORIZED)
+        .json(responseHandler(ResponseMessage.NO_REFRESH_TOKEN,HttpStatusCode.UNAUTHORIZED))
+        }
+        const result = await this.vendorAuthService.setNewAccessToken(refreshToken);
+        console.log("result of new access token form controller",result);
+        res.cookie('accessToken',result.accessToken,
+             { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000, sameSite: 'strict' });
+              res.status(HttpStatusCode.OK)
+             .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET,HttpStatusCode.OK));
+            } catch (error) {
+                next(error)
+    }
+}
 }
