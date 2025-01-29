@@ -1,7 +1,7 @@
 import { injectable,inject } from "tsyringe";
 import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoy.repository";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../utils/redis.util";
-import { IServiceBoyLoginResponse, IServiceBoyService } from "../interfaces/IServiceBoyService";
+import { IServiceBoyService, ServiceBoyLoginResponse } from "../interfaces/IServiceBoyService";
 import { sendForgotPasswordLink, sendOtpEmail } from "../../../utils/otp.util";
 import { createOtp } from "../../../utils/otp.util";
 import { hashPassword } from "../../../utils/password.util";
@@ -103,7 +103,7 @@ export default class ServiceBoyService implements IServiceBoyService{
     }
 
 
-    async serviceBoyLogin(email: string, password: string): Promise<IServiceBoyLoginResponse> {
+    async serviceBoyLogin(email: string, password: string): Promise<ServiceBoyLoginResponse> {
         try {
             const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
             console.log("serviceBoy login service",serviceBoy);
@@ -115,7 +115,6 @@ export default class ServiceBoyService implements IServiceBoyService{
             console.log("validPassword login service",validPassword);
             const role = 'Service Boy';
             const accessToken = generateAccessToken({data:serviceBoy,role:role});
-            // const accessToken = generateAccessToken(serviceBoy,role);
             const refreshToken = generateRefreshToken({data:serviceBoy,role:role});
             console.log("refresh token",refreshToken);
             console.log("accessToken token",accessToken);
@@ -144,14 +143,14 @@ try {
    async setNewAccessToken (refreshToken:string): Promise <any>{
     try {
        const decoded =  await verifyRefreshToken(refreshToken);
-       const serviceBoy = decoded?.serviceBoy;
        const role = decoded?.role ?? "Service Boy";
-       console.log("sevice boy from setNewAccessToken from service",serviceBoy);
+       console.log("sevice boy from setNewAccessToken from service",decoded);
        console.log("role from setNewAccessToken from service",role);
 
-       if(!decoded || !serviceBoy ){
+       if(!decoded || !decoded.email ){
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
        }
+       const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(decoded.email);
         const accessToken = await generateAccessToken({data:serviceBoy, role});
         return {
             accessToken,

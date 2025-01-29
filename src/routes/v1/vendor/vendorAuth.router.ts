@@ -14,6 +14,8 @@ router.post('/resent-otp', vendorAuthController.resendOtp );
 router.post('/login', vendorAuthController.vendorLogin);
 router.post('/forgot-password', vendorAuthController.forgotPassword);
 router.post('/reset-password', vendorAuthController.resetPassword);
+router.post('/refresh-token',vendorAuthController.setNewAccessToken);
+
 
 
 

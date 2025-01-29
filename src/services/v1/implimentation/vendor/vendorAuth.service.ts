@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IVendorAuthService, IVendorLoginResponse } from "../../interfaces/vendor/IVendorAuthService";
+import { IVendorAuthService,  VendorLoginResponse } from "../../interfaces/vendor/IVendorAuthService";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { ResponseMessage } from "../../../../enums/resposnseMessage";
@@ -10,8 +10,11 @@ import { hashPassword } from "../../../../utils/password.util";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import bcrypt from 'bcrypt';
 import { ValidationError } from "../../../../utils/errors/validation.error";
-import { generateAccessToken, generateRefreshToken } from "../../../../utils/jwt.util";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../../../utils/jwt.util";
 import * as crypto from 'crypto';
+import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
+import { TokenResponse } from "google-auth-library/build/src/auth/impersonated";
+import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -97,7 +100,7 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
 
 
 
-               async vendorLogin(email: string, password: string): Promise<IVendorLoginResponse> {
+               async vendorLogin(email: string, password: string): Promise<VendorLoginResponse> {
                 try {
                     const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
                     console.log("vendor login service",vendor);
@@ -169,6 +172,27 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
                }
         
 
+ async setNewAccessToken (refreshToken:string): Promise <CustomTokenResponse>{
+    try {
+       const decoded =  await verifyRefreshToken(refreshToken);
+       const role = decoded?.role ?? "Vendor";
+       console.log("vendor from setNewAccessToken from service",decoded);
+       console.log("role from setNewAccessToken from service",role);
 
+       if(!decoded || !decoded.email ){
+        throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
+       }
+       const vendor = await this.vendorAuthRepository.findVendorByEmail(decoded.email);
+        const accessToken = await generateAccessToken({data:vendor, role});
+        return {
+            accessToken,
+            message:ResponseMessage.ACCESS_TOKEN_SET,
+            success:true,
+        }
+
+    } catch (error) {
+        throw error;
+    }
+   }
         
 }

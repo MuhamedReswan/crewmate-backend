@@ -1,8 +1,7 @@
-import exp from "constants";
-import { RequestHandler } from "../../../../utils/type";
 import IVendor from "../../../../entities/v1/vendorEntity";
+import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 
-export interface IVendorLoginResponse {
+export interface VendorLoginResponse {
   vendor: IVendor; 
     accessToken: string;
     refreshToken: string;
@@ -13,11 +12,13 @@ export interface IVendorLoginResponse {
     generateOTP(email:string): Promise<void>
     verifyOTP(email: string, otp: string): Promise<void>
     resendOtp(email: string): Promise<void>
-    vendorLogin(email:string, password:string): Promise<IVendorLoginResponse>
+    vendorLogin(email:string, password:string): Promise<VendorLoginResponse>
     forgotPassword(email:string): Promise<string>
     resetPasswordTokenVerify(email:string, token:string): Promise<void>
     resetPassword(password:string,email:string): Promise<void>
     resetPasswordLink(token:string,email:string): Promise<void>
+    setNewAccessToken(refreshToken:string):Promise<CustomTokenResponse>
+
 
 
 

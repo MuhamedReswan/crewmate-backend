@@ -7,6 +7,8 @@ export interface IVendorAuthController {
     vendorLogin: RequestHandler
     forgotPassword:RequestHandler
     resetPassword:RequestHandler
+    setNewAccessToken:RequestHandler
+
 
 
 }

@@ -12,9 +12,10 @@ router.post('/otp',serviceBoyController.verifyOTP);
 router.post('/resent-otp', serviceBoyController.resendOtp );
 router.post('/login', serviceBoyController.serviceBoyLogin);
 router.post('/forgot-password', serviceBoyController.forgotPassword);
+router.post('/reset-password', serviceBoyController.resetPassword);
 router.post('/google-register', serviceBoyController.googleRegister);
 router.post('/google-login', serviceBoyController.googleLogin);
-router.post('/reset-password', serviceBoyController.resetPassword);
+router.post('/refresh-token',serviceBoyController.setNewAccessToken);
 
 
 
