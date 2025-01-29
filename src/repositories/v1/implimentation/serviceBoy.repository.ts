@@ -38,7 +38,7 @@ async updateServiceBoyPassword(email:string, password:string): Promise<void>  {
         );
 
  if(!updatedServiceBoy){
-throw new NotFoundError(ResponseMessage.SERVICE_BOY_NOTFOUND);
+throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
  }
     } catch (error) {
         throw error

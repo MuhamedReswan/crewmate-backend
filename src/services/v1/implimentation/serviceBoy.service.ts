@@ -2,7 +2,7 @@ import { injectable,inject } from "tsyringe";
 import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoyRepository";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../utils/redis.util";
 import { IServiceBoyLoginResponse, IServiceBoyService } from "../interfaces/IServiceBoyService";
-import { sendOtpEmail } from "../../../utils/otp.util";
+import { sendForgotPasswordLink, sendOtpEmail } from "../../../utils/otp.util";
 import { createOtp } from "../../../utils/otp.util";
 import { hashPassword } from "../../../utils/password.util";
 import { ExpiredError } from "../../../utils/errors/expired.error";
@@ -169,7 +169,7 @@ try {
    forgotPassword = async (email:string): Promise<string> =>{
     try {
         const serviceBoy = this.serviceBoyRepository.findServiceBoyByEmail(email);
-        if(!serviceBoy) throw new NotFoundError(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL)
+        if(!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
         const token = crypto.randomBytes(8).toString('hex');
        await setRedisData(`forgotToken:${email}`, token , 1800 );
         return token;
@@ -179,27 +179,15 @@ try {
    };
 
 
-   forgotResetPassword = async (email:string, password:string): Promise<void> =>{
-    try {
-      const updatedServiceBoy  = await this.serviceBoyRepository.findServiceBoyByEmail(email);
-        if(!updatedServiceBoy ) throw new NotFoundError(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL);
-        const hashedPassword = await hashPassword(password);
-        await this.serviceBoyRepository.updateServiceBoyPassword(email,hashedPassword);
-    } catch (error) {
-        throw error;
-    }
-   }
-
-
    resetPasswordTokenVerify = async (email:string, token:string): Promise<void> =>{
     try {
-      const  resetTokenData = await getRedisData(`forgotToken:${email}`);
-      console.log("resetTokenData from boy service",resetTokenData);
-      if(!resetTokenData){
-        throw new ExpiredError(ResponseMessage.RESET_PASSWORD_TOKEN_EXPIRED);
+      const  forgotTokenData = await getRedisData(`forgotToken:${email}`);
+      console.log("forgotTokenData from boy service",forgotTokenData);
+      if(!forgotTokenData){
+        throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
       }
-      if( resetTokenData != token){
-        throw new ValidationError(ResponseMessage.INVALID_RESET_PASSWORD_TOKEN);
+      if( forgotTokenData != token){
+        throw new ValidationError(ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN);
       }
     } catch (error) {
         throw error;
@@ -225,7 +213,7 @@ try {
       const serviceBoy =  await this.serviceBoyRepository.findServiceBoyByEmail(data.email);
         console.log("service boy from repository google login",serviceBoy);
         if(!serviceBoy){
-            throw new Error(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL);
+            throw new Error(ResponseMessage.USER_NOT_FOUND);
         }
     } catch (error) {
         throw error;
@@ -241,4 +229,14 @@ try {
         throw error;
     }
    }
+
+
+
+resetPasswordLink = async (token:string,email:string): Promise<void>=>{
+    try {
+        await sendForgotPasswordLink(email,token);
+    } catch (error) {
+        throw error;
+    }
+}
 }
