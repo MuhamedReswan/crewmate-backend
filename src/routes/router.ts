@@ -4,7 +4,6 @@ import v1VendorAuthRouter from "./v1/vendor/vendorAuth.router";
 
 const router = Router();
 
-
 router.use('/api/auth/v1/service-boy',v1ServiceBoyRouter);
 router.use('/api/auth/v1/vendor',v1VendorAuthRouter);
 

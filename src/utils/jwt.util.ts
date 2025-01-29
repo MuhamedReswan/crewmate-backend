@@ -1,30 +1,29 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from '../config/env';
 import { UnAuthorizedError } from './errors/unAuthorized.error';
-import { IServiceBoyLoginResponse } from '../services/v1/interfaces/IServiceBoyService';
+import { CreateToken } from './type';
 
 
 const accessTokenSecret = ACCESSTOKENSECRET 
 const refreshTokenSecret = REFRESHTOKENSECRET 
 
 
-export const generateAccessToken = (data: IServiceBoyLoginResponse, role:string ) => {
+export const generateAccessToken = (details:CreateToken ) => {
     if(!accessTokenSecret){
         throw new Error('Access token secret is not defined');
     } 
-    return jwt.sign({id:data.serviceBoy._id, email: data.serviceBoy.email,
- name: data.serviceBoy.name, role: role}, accessTokenSecret, {expiresIn: '50m'} );
+    return jwt.sign({id:details.data?._id, email:details.data?.email,
+ name: details.data?.name, role:details.role}, accessTokenSecret, {expiresIn: '50m'} );
 };
 
 
-export const generateRefreshToken = (data: IServiceBoyLoginResponse, role:string ) => {
+export const generateRefreshToken = (details:CreateToken ) => {
     if(!refreshTokenSecret){
         throw new Error('Refrsesh token secret in not defined')
     }
-    return jwt.sign({id:data.serviceBoy._id, email: data.serviceBoy.email,
-         name: data.serviceBoy.name, role: role}, refreshTokenSecret, {expiresIn: '7d'} );
+    return jwt.sign({id:details.data?._id, email:details.data?.email,
+        name: details.data?.name, role:details.role}, refreshTokenSecret, {expiresIn: '7d'} );
 };
-
 
 
 export const verifyAccessToken = (token: string): JwtPayload |undefined => {

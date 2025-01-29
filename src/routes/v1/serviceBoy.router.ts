@@ -6,7 +6,10 @@ import { IServiceBoyController } from "../../controllers/v1/interfaces/IServiceB
 const router = Router();
 const serviceBoyController = container.resolve<IServiceBoyController>('IServiceBoyController');
 
-
+// router.use((req,res,next)=>{
+//     console.log("within boy router")
+//     next()
+// })
 router.post('/register', serviceBoyController.register);
 router.post('/otp',serviceBoyController.verifyOTP);
 router.post('/resent-otp', serviceBoyController.resendOtp );

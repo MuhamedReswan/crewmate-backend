@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IVendorAuthService } from "../../interfaces/vendor/IVendorAuthService";
+import { IVendorAuthService, IVendorLoginResponse } from "../../interfaces/vendor/IVendorAuthService";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { ResponseMessage } from "../../../../enums/resposnseMessage";
@@ -7,6 +7,10 @@ import { IVendorAuthRepository } from "../../../../repositories/v1/interfaces/ve
 import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
 import { ExpiredError } from "../../../../utils/errors/expired.error";
 import { hashPassword } from "../../../../utils/password.util";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import bcrypt from 'bcrypt';
+import { ValidationError } from "../../../../utils/errors/validation.error";
+import { generateAccessToken, generateRefreshToken } from "../../../../utils/jwt.util";
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -48,17 +52,17 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
         
                 const savedOtp = await getRedisData(`otpV:${email}`);
                 console.log("savedOtp",savedOtp)
-                if(!savedOtp) throw new ExpiredError('OTP expired')
+                if(!savedOtp) throw new ExpiredError(ResponseMessage.OTP_EXPIRED)
             
                 const {otp: savedOtpValue} = JSON.parse(savedOtp);
                 console.log("savedOtpValue",savedOtpValue);
                 console.log("otp",otp);
-                if(otp !== savedOtpValue) throw new BadrequestError('Invalid OTP');
+                if(otp !== savedOtpValue) throw new BadrequestError(ResponseMessage.INVALID_OTP);
     
-                const deleteotp = await deleteRedisData(`otpB:${email}`);
-                console.log("deleteotp",deleteotp);
+                const deleteOtp = await deleteRedisData(`otpV:${email}`);
+                console.log("deleteotp",deleteOtp);
                 
-               const vendorData  = await getRedisData(`serviceBoy:${email}`)
+               const vendorData  = await getRedisData(`vendor:${email}`)
                console.log("vendorData  from serivice",vendorData);
                if(vendorData){
                  const vendorDataObject = JSON.parse(vendorData);
@@ -88,7 +92,30 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
             } catch (error) {
                 throw error
             }
-               }
+               };
+
+
+
+               async vendorLogin(email: string, password: string): Promise<IVendorLoginResponse> {
+                try {
+                    const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
+                    console.log("vendor login service",vendor);
+                if(!vendor){
+                    throw new NotFoundError("Invalid credentials");
+                }
+                const validPassword = await bcrypt.compare(password,vendor.password);
+                if(!validPassword)throw new ValidationError("Invalid credentials");
+                    console.log("validPassword login service",validPassword);
+                    const role = 'Vendor';
+                    const accessToken = generateAccessToken({ role, data: vendor });
+                    const refreshToken = generateRefreshToken({ role, data: vendor });
+                    console.log("refresh token",refreshToken);
+                    console.log("accessToken token",accessToken);
+        return {vendor,accessToken,refreshToken};
+                } catch (error) {
+                    throw error;
+                }
+            };
         
 
 

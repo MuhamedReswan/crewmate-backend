@@ -29,13 +29,23 @@ export default class ServiceBoyService implements IServiceBoyService{
 
 
      async register(name: string, email: string, password: string, mobile: string): Promise<void> {
-        console.log("ServiceBoyServie register got");
-const existingServiceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
-if(existingServiceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
-
-await setRedisData(`serviceBoy:${email}`,JSON.stringify({name,email,password,mobile}),3600)
-let registerFromRedis = await getRedisData(`serviceBoy:${email}`);
-console.log("registerFromRedis",registerFromRedis);
+        try {
+            console.log("ServiceBoyServie register got");
+            const existingServiceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+            console.log("existingServiceBoy",existingServiceBoy);
+            if(existingServiceBoy){
+                console.log("bad request thrown");
+             throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
+           }
+           let setServiceBoyData = await setRedisData(`serviceBoy:${email}`,JSON.stringify({name,email,password,mobile}),3600);
+           console.log("setServiceBoyData",setServiceBoyData);
+            let registerFromRedis = await getRedisData(`serviceBoy:${email}`);
+            console.log("registerFromRedis",registerFromRedis);
+        } catch (error) {
+            console.log("bad ");
+            throw error;
+        }
+     
     }
 
 
@@ -104,8 +114,9 @@ console.log("registerFromRedis",registerFromRedis);
         if(!validPassword)throw new ValidationError("Invalid credentials");
             console.log("validPassword login service",validPassword);
             const role = 'Service Boy';
-            const accessToken = generateAccessToken(serviceBoy,role);
-            const refreshToken = generateRefreshToken(serviceBoy,role);
+            const accessToken = generateAccessToken({data:serviceBoy,role:role});
+            // const accessToken = generateAccessToken(serviceBoy,role);
+            const refreshToken = generateRefreshToken({data:serviceBoy,role:role});
             console.log("refresh token",refreshToken);
             console.log("accessToken token",accessToken);
 return {serviceBoy,accessToken,refreshToken};
@@ -141,10 +152,10 @@ try {
        if(!decoded || !serviceBoy ){
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
        }
-        const accessToken = await generateAccessToken(serviceBoy,role);
+        const accessToken = await generateAccessToken({data:serviceBoy, role});
         return {
             accessToken,
-            message:"Access token set successfully from service",
+            message:ResponseMessage.ACCESS_TOKEN_SET,
             success:true,
         }
 
@@ -160,8 +171,7 @@ try {
         const serviceBoy = this.serviceBoyRepository.findServiceBoyByEmail(email);
         if(!serviceBoy) throw new NotFoundError(ResponseMessage.NO_SERVICE_BOY_WITH_EMAIL)
         const token = crypto.randomBytes(8).toString('hex');
-        const forgotTokenkey = `forgotToken:${email}`
-       await setRedisData(forgotTokenkey, token , 1800 );
+       await setRedisData(`forgotToken:${email}`, token , 1800 );
         return token;
     } catch (error) {
         throw error;

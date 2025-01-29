@@ -51,7 +51,31 @@ res.status(HttpStatusCode.OK)
         } catch (error) {
             next(error)
         }
-    }
+    };
 
+
+    vendorLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const {email, password} = req.body;
+           const vendor =  await this.vendorAuthService.vendorLogin(email, password);
+           // set access token and refresh token in coockies
+           res.cookie('refreshToken', vendor.accessToken,{
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            sameSite: 'lax'
+           } );
+           res.cookie('accessToken', vendor.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 15 * 60 * 1000,
+            sameSite: 'lax'
+           })
+           res.status(HttpStatusCode.OK)
+           .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK))
+        } catch (error) {
+            next(error);
+        }
+    };
 
 }
