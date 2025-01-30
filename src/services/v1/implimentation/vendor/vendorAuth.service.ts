@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IVendorAuthService,  VendorLoginResponse } from "../../interfaces/vendor/IVendorAuthService";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
-import { ResponseMessage } from "../../../../enums/resposnseMessage";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { IVendorAuthRepository } from "../../../../repositories/v1/interfaces/vendor/IVendorAuth.repository";
 import { createOtp, sendForgotPasswordLink, sendOtpEmail } from "../../../../utils/otp.util";
 import { ExpiredError } from "../../../../utils/errors/expired.error";

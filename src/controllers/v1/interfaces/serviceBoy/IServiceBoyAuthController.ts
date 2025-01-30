@@ -1,10 +1,10 @@
-import { RequestHandler } from "../../../utils/type"
+import { RequestHandler } from "../../../../utils/type"
 export interface ITokenResult {
     accessToken: string;
   }
 
 
-export interface IServiceBoyController {
+export interface IServiceBoyAuthController {
 register:RequestHandler
 verifyOTP: RequestHandler
 serviceBoyLogin:RequestHandler

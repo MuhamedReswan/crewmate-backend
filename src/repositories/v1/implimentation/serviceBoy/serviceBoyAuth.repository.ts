@@ -1,9 +1,9 @@
-import { ResponseMessage } from "../../../enums/resposnseMessage";
-import { serviceBoyModel } from "../../../models/v1/serviceBoy.model";
-import { NotFoundError } from "../../../utils/errors/notFound.error";
-import { IServiceBoyRepository } from "../interfaces/IServiceBoy.repository";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { serviceBoyModel } from "../../../../models/v1/serviceBoy.model";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import { IServiceBoyAuthRepository } from "../../interfaces/serviceBoy/IServiceBoyAuth.repository"; 
 
-export default class ServiceBoysRepository implements IServiceBoyRepository{
+export default class ServiceBoyAuthRepository implements IServiceBoyAuthRepository{
 
     async findServiceBoyByEmail(email: string): Promise<any>{
         try {

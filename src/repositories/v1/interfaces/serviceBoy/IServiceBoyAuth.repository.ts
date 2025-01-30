@@ -1,6 +1,6 @@
-import { Register } from "../../../entities/v1/authenticationEntity";
+import { Register } from "../../../../entities/v1/authenticationEntity";
 
-export interface IServiceBoyRepository{
+export interface IServiceBoyAuthRepository{
     findServiceBoyByEmail(email:string):Promise<any>;
     createServiceBoy(serviceBoyData:Register):Promise<any>;
     updateServiceBoyPassword(email:string, password:string): Promise<void>

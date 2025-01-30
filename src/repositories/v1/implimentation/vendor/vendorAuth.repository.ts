@@ -1,5 +1,5 @@
 import IVendor from "../../../../entities/v1/vendorEntity";
-import { ResponseMessage } from "../../../../enums/resposnseMessage";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { vendorModel } from "../../../../models/v1/vendor.model";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
