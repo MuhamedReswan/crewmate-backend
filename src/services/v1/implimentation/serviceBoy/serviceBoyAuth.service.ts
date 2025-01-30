@@ -1,37 +1,37 @@
 import { injectable,inject } from "tsyringe";
-import { IServiceBoyRepository } from "../../../repositories/v1/interfaces/IServiceBoy.repository";
-import { deleteRedisData, getRedisData, setRedisData } from "../../../utils/redis.util";
-import { IServiceBoyService, ServiceBoyLoginResponse } from "../interfaces/IServiceBoyService";
-import { sendForgotPasswordLink, sendOtpEmail } from "../../../utils/otp.util";
-import { createOtp } from "../../../utils/otp.util";
-import { hashPassword } from "../../../utils/password.util";
-import { ExpiredError } from "../../../utils/errors/expired.error";
-import { BadrequestError } from "../../../utils/errors/badRequest.error";
-import { ResponseMessage } from "../../../enums/resposnseMessage";
-import { NotFoundError } from "../../../utils/errors/notFound.error";
+import { IServiceBoyAuthRepository } from "../../../../repositories/v1/interfaces/serviceBoy/IServiceBoyAuth.repository";
+import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
+import { IServiceBoyAuthService,ServiceBoyLoginResponse } from "../../interfaces/serviceBoy/IServiceBoyAuthService"; 
+import { sendForgotPasswordLink, sendOtpEmail } from "../../../../utils/otp.util";
+import { createOtp } from "../../../../utils/otp.util";
+import { hashPassword } from "../../../../utils/password.util";
+import { ExpiredError } from "../../../../utils/errors/expired.error";
+import { BadrequestError } from "../../../../utils/errors/badRequest.error";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import bcrypt from 'bcrypt';
-import { ValidationError } from "../../../utils/errors/validation.error";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../../utils/jwt.util";
-import IServiceBoy from "../../../entities/v1/serviceBoyEntity";
-import { UnAuthorizedError } from "../../../utils/errors/unAuthorized.error";
+import { ValidationError } from "../../../../utils/errors/validation.error";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../../../utils/jwt.util";
+import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
+import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import * as crypto from 'crypto';
-import { Register } from "../../../entities/v1/authenticationEntity";
+import { Register } from "../../../../entities/v1/authenticationEntity";
 
 
 
 @injectable()
-export default class ServiceBoyService implements IServiceBoyService{
-    private serviceBoyRepository: IServiceBoyRepository;
+export default class ServiceBoyAuthService implements IServiceBoyAuthService{
+    private serviceBoyAuthRepository: IServiceBoyAuthRepository;
 
-    constructor(@inject("IServiceBoyRepository") serviceBoyRepository: IServiceBoyRepository){
-        this.serviceBoyRepository = serviceBoyRepository;
+    constructor(@inject("IServiceBoyAuthRepository") serviceBoyAuthRepository: IServiceBoyAuthRepository){
+        this.serviceBoyAuthRepository = serviceBoyAuthRepository;
     }
 
 
      async register(name: string, email: string, password: string, mobile: string): Promise<void> {
         try {
             console.log("ServiceBoyServie register got");
-            const existingServiceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+            const existingServiceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
             console.log("existingServiceBoy",existingServiceBoy);
             if(existingServiceBoy){
                 console.log("bad request thrown");
@@ -51,7 +51,7 @@ export default class ServiceBoyService implements IServiceBoyService{
 
     async generateOTP(email:string){
         try {
-            const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+            const serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
         if(serviceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
         const otp = createOtp();
@@ -92,7 +92,7 @@ export default class ServiceBoyService implements IServiceBoyService{
              console.log("parsed serviceBoyData  from serivice",serviceBoyDataObject);
 
              serviceBoyDataObject.password = await hashPassword(serviceBoyDataObject.password);
-            let createdBoy = await this.serviceBoyRepository.createServiceBoy(serviceBoyDataObject);
+            let createdBoy = await this.serviceBoyAuthRepository.createServiceBoy(serviceBoyDataObject);
             console.log("createdBoy from service",createdBoy);
              await deleteRedisData(`serviceBoy:${email}`); 
           }
@@ -105,7 +105,7 @@ export default class ServiceBoyService implements IServiceBoyService{
 
     async serviceBoyLogin(email: string, password: string): Promise<ServiceBoyLoginResponse> {
         try {
-            const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(email);
+            const serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
             console.log("serviceBoy login service",serviceBoy);
         if(!serviceBoy){
             throw new NotFoundError("Invalid credentials");
@@ -150,7 +150,7 @@ try {
        if(!decoded || !decoded.email ){
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
        }
-       const serviceBoy = await this.serviceBoyRepository.findServiceBoyByEmail(decoded.email);
+       const serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(decoded.email);
         const accessToken = await generateAccessToken({data:serviceBoy, role});
         return {
             accessToken,
@@ -167,7 +167,7 @@ try {
 
    forgotPassword = async (email:string): Promise<string> =>{
     try {
-        const serviceBoy = this.serviceBoyRepository.findServiceBoyByEmail(email);
+        const serviceBoy = this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
         if(!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
         const token = crypto.randomBytes(8).toString('hex');
        await setRedisData(`forgotToken:${email}`, token , 1800 );
@@ -196,11 +196,11 @@ try {
 
    googleRegister = async(data: Register): Promise<void> => {
     try {
-        const existingServiceBoy =await this.serviceBoyRepository.findServiceBoyByEmail(data.email);
+        const existingServiceBoy =await this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
         if(existingServiceBoy){
             throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
         }
-        await this.serviceBoyRepository.createServiceBoy(data);
+        await this.serviceBoyAuthRepository.createServiceBoy(data);
     } catch (error) {
         throw error;
     } 
@@ -209,7 +209,7 @@ try {
 
    googleLogin = async  (data: Register): Promise<void> => {
     try {
-      const serviceBoy =  await this.serviceBoyRepository.findServiceBoyByEmail(data.email);
+      const serviceBoy =  await this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
         console.log("service boy from repository google login",serviceBoy);
         if(!serviceBoy){
             throw new Error(ResponseMessage.USER_NOT_FOUND);
@@ -223,7 +223,7 @@ try {
    resetPassword = async (email:string, password:string): Promise<void> => {
     try {
         const hashedPassword = await hashPassword(password);
-        await this.serviceBoyRepository.updateServiceBoyPassword(email, hashedPassword);
+        await this.serviceBoyAuthRepository.updateServiceBoyPassword(email, hashedPassword);
     } catch (error) {
         throw error;
     }

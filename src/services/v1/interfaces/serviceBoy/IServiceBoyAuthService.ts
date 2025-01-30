@@ -1,5 +1,5 @@
-import IServiceBoy from "../../../entities/v1/serviceBoyEntity"
-import { Register } from "../../../entities/v1/authenticationEntity";
+import IServiceBoy from "../../../../entities/v1/serviceBoyEntity"
+import { Register } from "../../../../entities/v1/authenticationEntity";
 export  interface ServiceBoyLoginResponse {
     serviceBoy: IServiceBoy; 
     accessToken: string;
@@ -12,7 +12,7 @@ export  interface ServiceBoyLoginResponse {
       password: string
     }
   
-export interface IServiceBoyService {
+export interface IServiceBoyAuthService {
     register(name:string, email:string, password:string,mobile:string): Promise<void>
     generateOTP(email:string): Promise<void>
     verifyOTP(email:string, otp:string): Promise<void>

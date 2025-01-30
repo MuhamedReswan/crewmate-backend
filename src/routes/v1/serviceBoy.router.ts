@@ -1,21 +1,21 @@
 import { container } from "tsyringe";
 import { Router } from "express";
-import { IServiceBoyController } from "../../controllers/v1/interfaces/IServiceBoyController";
+import { IServiceBoyAuthController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoyAuthController"; 
 
 
 const router = Router();
-const serviceBoyController = container.resolve<IServiceBoyController>('IServiceBoyController');
+const serviceBoyAuthController = container.resolve<IServiceBoyAuthController>('IServiceBoyAuthController');
 
 
-router.post('/register', serviceBoyController.register);
-router.post('/otp',serviceBoyController.verifyOTP);
-router.post('/resent-otp', serviceBoyController.resendOtp );
-router.post('/login', serviceBoyController.serviceBoyLogin);
-router.post('/forgot-password', serviceBoyController.forgotPassword);
-router.post('/reset-password', serviceBoyController.resetPassword);
-router.post('/google-register', serviceBoyController.googleRegister);
-router.post('/google-login', serviceBoyController.googleLogin);
-router.post('/refresh-token',serviceBoyController.setNewAccessToken);
+router.post('/register', serviceBoyAuthController.register);
+router.post('/otp',serviceBoyAuthController.verifyOTP);
+router.post('/resent-otp', serviceBoyAuthController.resendOtp );
+router.post('/login', serviceBoyAuthController.serviceBoyLogin);
+router.post('/forgot-password', serviceBoyAuthController.forgotPassword);
+router.post('/reset-password', serviceBoyAuthController.resetPassword);
+router.post('/google-register', serviceBoyAuthController.googleRegister);
+router.post('/google-login', serviceBoyAuthController.googleLogin);
+router.post('/refresh-token',serviceBoyAuthController.setNewAccessToken);
 
 
 

@@ -1,9 +1,9 @@
 import { NextFunction, Request, response, Response } from "express";
 import { IVendorAuthController } from "../../interfaces/vendor/IVendorAuth.controller";
 import { inject, injectable } from "tsyringe";
-import { HttpStatusCode } from "../../../../enums/httpStatusCode";
+import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
-import { ResponseMessage } from "../../../../enums/resposnseMessage";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { IVendorAuthService } from "../../../../services/v1/interfaces/vendor/IVendorAuthService";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { sendForgotPasswordLink } from "../../../../utils/otp.util";
