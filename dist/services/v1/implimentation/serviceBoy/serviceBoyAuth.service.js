@@ -103,6 +103,8 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
         });
         this.googleRegister = (data) => __awaiter(this, void 0, void 0, function* () {
             try {
+                if (!data.email)
+                    throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.INVALID_INPUT);
                 const existingServiceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
                 if (existingServiceBoy) {
                     throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.EMAIL_ALREADY_USED);
@@ -172,7 +174,7 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 if (serviceBoy)
                     throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.EMAIL_ALREADY_VERIFIED);
                 const otp = (0, otp_util_2.createOtp)();
-                yield (0, redis_util_1.setRedisData)(`otpB:${email}`, JSON.stringify({ otp }), 60);
+                yield (0, redis_util_1.setRedisData)(`otpB:${email}`, JSON.stringify({ otp }), 120);
                 let savedOtp = yield (0, redis_util_1.getRedisData)(`otpB:${email}`);
                 console.log("savedOtp", savedOtp);
                 yield (0, otp_util_1.sendOtpEmail)(email, otp);
@@ -209,6 +211,9 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                     serviceBoyDataObject.password = yield (0, password_util_1.hashPassword)(serviceBoyDataObject.password);
                     serviceBoyDataObject.servicerId = servicerId;
                     let createdBoy = yield this.serviceBoyAuthRepository.createServiceBoy(serviceBoyDataObject);
+                    if (!createdBoy) {
+                        throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.USER_NOT_CREATED);
+                    }
                     number++;
                     console.log("createdBoy from service", createdBoy);
                     yield (0, redis_util_1.deleteRedisData)(`serviceBoy:${email}`);

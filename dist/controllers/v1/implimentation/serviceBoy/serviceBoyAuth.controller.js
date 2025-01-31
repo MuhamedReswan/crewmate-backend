@@ -35,8 +35,8 @@ let ServiceBoyAuthController = class ServiceBoyAuthController {
                 yield this.serviceBoyAuthService.register(name, email, password, mobile);
                 yield this.serviceBoyAuthService.generateOTP(email);
                 res
-                    .status(httpStatusCode_1.HttpStatusCode.OK)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.REGISTER_SUCCESS, httpStatusCode_1.HttpStatusCode.OK));
+                    .status(httpStatusCode_1.HttpStatusCode.CREATED)
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.REGISTER_SUCCESS, httpStatusCode_1.HttpStatusCode.CREATED));
             }
             catch (error) {
                 next(error);
@@ -48,8 +48,8 @@ let ServiceBoyAuthController = class ServiceBoyAuthController {
                 console.log("req.body on controller", req.body);
                 let verify = yield this.serviceBoyAuthService.verifyOTP(email, otp);
                 console.log("verifyotp", verify);
-                res.status(httpStatusCode_1.HttpStatusCode.CREATED)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.OTP_VERIFICATION_SUCCESS, httpStatusCode_1.HttpStatusCode.CREATED));
+                res.status(httpStatusCode_1.HttpStatusCode.OK)
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.OTP_VERIFICATION_SUCCESS, httpStatusCode_1.HttpStatusCode.OK));
             }
             catch (error) {
                 next(error);

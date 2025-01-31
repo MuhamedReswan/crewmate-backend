@@ -56,7 +56,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService{
         if(serviceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
         const otp = createOtp();
-        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),60);
+        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),120);
         let savedOtp = await getRedisData(`otpB:${email}`);
         console.log("savedOtp",savedOtp);
         await sendOtpEmail(email, otp);
@@ -98,6 +98,9 @@ const servicerId = `A-${number}`
              serviceBoyDataObject.password = await hashPassword(serviceBoyDataObject.password);
              serviceBoyDataObject.servicerId=servicerId;
             let createdBoy = await this.serviceBoyAuthRepository.createServiceBoy(serviceBoyDataObject);
+            if(!createdBoy){
+throw new BadrequestError(ResponseMessage.USER_NOT_CREATED);
+            }
             number++;
             console.log("createdBoy from service",createdBoy);
              await deleteRedisData(`serviceBoy:${email}`); 
@@ -202,8 +205,9 @@ try {
    };
 
 
-   googleRegister = async(data: Register): Promise<void> => {
+   googleRegister = async(data: Partial<IServiceBoy>): Promise<void> => {
     try {
+        if(!data.email) throw new BadrequestError(ResponseMessage.INVALID_INPUT);
         const existingServiceBoy =await this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
         if(existingServiceBoy){
             throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);

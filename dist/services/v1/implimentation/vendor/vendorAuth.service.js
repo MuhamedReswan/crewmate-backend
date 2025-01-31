@@ -232,9 +232,11 @@ let VendorAuthService = class VendorAuthService {
                 if (!vendor) {
                     throw new notFound_error_1.NotFoundError("Invalid credentials");
                 }
+                if (!vendor.password)
+                    throw new validation_error_1.ValidationError("No password in vendor");
                 const validPassword = yield bcrypt_1.default.compare(password, vendor.password);
                 if (!validPassword)
-                    throw new validation_error_1.ValidationError("Invalid credentials");
+                    throw new validation_error_1.ValidationError(resposnseMessage_1.ResponseMessage.INVALID_CREDINTIALS);
                 console.log("validPassword login service", validPassword);
                 const role = 'Vendor';
                 const accessToken = (0, jwt_util_1.generateAccessToken)({ role, data: vendor });
@@ -261,6 +263,8 @@ let VendorAuthService = class VendorAuthService {
                     throw new unAuthorized_error_1.UnAuthorizedError(resposnseMessage_1.ResponseMessage.INVALID_REFRESH_TOKEN);
                 }
                 const vendor = yield this.vendorAuthRepository.findVendorByEmail(decoded.email);
+                if (!vendor)
+                    throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
                 const accessToken = yield (0, jwt_util_1.generateAccessToken)({ data: vendor, role });
                 return {
                     accessToken,

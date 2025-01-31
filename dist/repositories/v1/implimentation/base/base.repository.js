@@ -29,7 +29,7 @@ let BaseRepository = class BaseRepository {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const createdDocument = yield this.model.create(data);
-                return true;
+                return createdDocument;
             }
             catch (error) {
                 console.error("Error creating document:", error);
