@@ -6,6 +6,7 @@ import { IServiceBoyAuthRepository } from "../../interfaces/serviceBoy/IServiceB
 import { Model } from "mongoose";
 import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
+import { Register } from "../../../../entities/v1/authenticationEntity";
 
 @injectable()
 export default class serviceBoyAuthRepository
@@ -27,15 +28,14 @@ export default class serviceBoyAuthRepository
     };
 
 
-async createServiceBoy(serviceBoyData: any): Promise<boolean | null>{
+async createServiceBoy(serviceBoyData: Partial<IServiceBoy>): Promise<IServiceBoy | null>{
     try {
         console.log("createServiceBoy got");
         console.log("serviceBoyData",serviceBoyData);
     
-        // let serviceBoyDetails =  await serviceBoyModel.create(serviceBoyData);
         let serviceBoyDetails =  await this.create(serviceBoyData);
         console.log("serviceBoyDetails",serviceBoyDetails);
-        return true;
+        return serviceBoyDetails;
     } catch (error) {
         console.log("error from createServiceBoy repository",error)
         throw error
@@ -48,14 +48,13 @@ async updateServiceBoyPassword(email:string, password:string): Promise<void>  {
     const updatedServiceBoy =  await serviceBoyModel.findOneAndUpdate(
         {email},
         {password},
-         {new:true}
         );
 
  if(!updatedServiceBoy){
 throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
  }
     } catch (error) {
-        throw error
+        throw error;
     }
 };
 

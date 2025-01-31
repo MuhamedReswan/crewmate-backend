@@ -6,10 +6,10 @@ import { IBaseRepository } from '../../interfaces/base/IBaseRepository';
 export  class BaseRepository <T> implements IBaseRepository<T> {
   constructor(private model: Model<T>) {} 
 
-  async create(data: Partial<T>): Promise<boolean> {
+  async create(data: Partial<T>): Promise<T> {
     try {
        const createdDocument= await this.model.create(data);
-      return  true;
+      return  createdDocument;
     } catch (error) {
         console.error("Error creating document:", error);
         throw error;

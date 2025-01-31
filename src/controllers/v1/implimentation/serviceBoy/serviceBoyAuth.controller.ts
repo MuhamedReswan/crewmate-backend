@@ -26,8 +26,8 @@ private serviceBoyAuthService: IServiceBoyAuthService;
              await this.serviceBoyAuthService.register( name, email, password, mobile );
              await this.serviceBoyAuthService.generateOTP(email);
             res
-            .status(HttpStatusCode.OK)
-            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.OK));
+            .status(HttpStatusCode.CREATED)
+            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.CREATED));
         } catch (error) {
             next(error)
         }
@@ -40,8 +40,8 @@ private serviceBoyAuthService: IServiceBoyAuthService;
             console.log("req.body on controller",req.body);
            let verify =  await this.serviceBoyAuthService.verifyOTP(email, otp); 
            console.log("verifyotp",verify)
-            res.status(HttpStatusCode.CREATED)
-            .json(responseHandler(ResponseMessage.OTP_VERIFICATION_SUCCESS,HttpStatusCode.CREATED))
+            res.status(HttpStatusCode.OK)
+            .json(responseHandler(ResponseMessage.OTP_VERIFICATION_SUCCESS,HttpStatusCode.OK))
         } catch (error) {
             next(error);
         }

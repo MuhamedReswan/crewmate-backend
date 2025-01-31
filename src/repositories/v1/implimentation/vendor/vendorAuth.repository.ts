@@ -5,9 +5,18 @@ import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { IVendorAuthRepository } from "../../interfaces/vendor/IVendorAuth.repository";
+import { BaseRepository } from "../base/base.repository";
+import { Register } from "../../../../entities/v1/authenticationEntity";
+import { inject, injectable } from "tsyringe";
+import { Model } from "mongoose";
+import { partialUtil } from "zod/lib/helpers/partialUtil";
 
-export default class VendorAuthRepository implements IVendorAuthRepository { 
-    async findVendorByEmail(email: string): Promise<any>{
+@injectable()
+export default class VendorAuthRepository extends BaseRepository<IVendor> implements IVendorAuthRepository { 
+    constructor(@inject("VendorModel") model: Model<IVendor> ){
+        super(model);
+    }
+    async findVendorByEmail(email: string): Promise<IVendor | null>{
         try {
             return await vendorModel.findOne({email});
         } catch (error) {
@@ -17,12 +26,12 @@ export default class VendorAuthRepository implements IVendorAuthRepository {
     };
 
 
-    async createVendor(vendorData: IVendor): Promise<void>{
+    async createVendor(vendorData: Partial<IVendor>): Promise<void>{
         try {
             console.log("vendor got");
             console.log("vendorData",vendorData);
         
-            let vendorDetails =  await vendorModel.create(vendorData);
+            let vendorDetails =  await this.create(vendorData);
             console.log("vendorDetails from repo create",vendorDetails)
         } catch (error) {
             console.log("error from createServiceBoy repository",error)
@@ -47,10 +56,9 @@ export default class VendorAuthRepository implements IVendorAuthRepository {
 
            async updateVendorPassword(email:string, password:string): Promise<void>  {
                try {
-               const updatedServiceBoy =  await vendorModel.findOneAndUpdate(
+               const updatedServiceBoy =  this.updateOne(
                    {email},
-                   {password},
-                    {new:true}
+                   {password}
                    );
            
             if(!updatedServiceBoy){

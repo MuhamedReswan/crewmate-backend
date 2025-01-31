@@ -4,6 +4,9 @@ export enum ResponseMessage {
     EMAIL_ALREADY_USED = "Email is already in use",
     EMAIL_ALREADY_VERIFIED = "Email already verified",
     USER_NOT_FOUND = "User not found with this email",
+    USER_NOT_CREATED = "User not created",
+    INVALID_CREDINTIALS = "Invalid credintials",
+    INVALID_INPUT = "Invalid input",
 
     OTP_EXPIRED = "OTP expired",
     OTP_VERIFICATION_SUCCESS = "OTP verification Success",

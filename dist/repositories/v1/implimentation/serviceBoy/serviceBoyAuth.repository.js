@@ -48,10 +48,9 @@ let serviceBoyAuthRepository = class serviceBoyAuthRepository extends base_repos
             try {
                 console.log("createServiceBoy got");
                 console.log("serviceBoyData", serviceBoyData);
-                // let serviceBoyDetails =  await serviceBoyModel.create(serviceBoyData);
                 let serviceBoyDetails = yield this.create(serviceBoyData);
                 console.log("serviceBoyDetails", serviceBoyDetails);
-                return true;
+                return serviceBoyDetails;
             }
             catch (error) {
                 console.log("error from createServiceBoy repository", error);
@@ -62,7 +61,7 @@ let serviceBoyAuthRepository = class serviceBoyAuthRepository extends base_repos
     updateServiceBoyPassword(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const updatedServiceBoy = yield serviceBoy_model_1.serviceBoyModel.findOneAndUpdate({ email }, { password }, { new: true });
+                const updatedServiceBoy = yield serviceBoy_model_1.serviceBoyModel.findOneAndUpdate({ email }, { password });
                 if (!updatedServiceBoy) {
                     throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
                 }

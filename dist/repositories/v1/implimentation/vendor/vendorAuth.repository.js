@@ -1,4 +1,16 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14,7 +26,13 @@ const vendor_model_1 = require("../../../../models/v1/vendor.model");
 const notFound_error_1 = require("../../../../utils/errors/notFound.error");
 const otp_util_1 = require("../../../../utils/otp.util");
 const redis_util_1 = require("../../../../utils/redis.util");
-class VendorAuthRepository {
+const base_repository_1 = require("../base/base.repository");
+const tsyringe_1 = require("tsyringe");
+const mongoose_1 = require("mongoose");
+let VendorAuthRepository = class VendorAuthRepository extends base_repository_1.BaseRepository {
+    constructor(model) {
+        super(model);
+    }
     findVendorByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -32,7 +50,7 @@ class VendorAuthRepository {
             try {
                 console.log("vendor got");
                 console.log("vendorData", vendorData);
-                let vendorDetails = yield vendor_model_1.vendorModel.create(vendorData);
+                let vendorDetails = yield this.create(vendorData);
                 console.log("vendorDetails from repo create", vendorDetails);
             }
             catch (error) {
@@ -61,7 +79,7 @@ class VendorAuthRepository {
     updateVendorPassword(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const updatedServiceBoy = yield vendor_model_1.vendorModel.findOneAndUpdate({ email }, { password }, { new: true });
+                const updatedServiceBoy = this.updateOne({ email }, { password });
                 if (!updatedServiceBoy) {
                     throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
                 }
@@ -72,5 +90,10 @@ class VendorAuthRepository {
         });
     }
     ;
-}
+};
+VendorAuthRepository = __decorate([
+    (0, tsyringe_1.injectable)(),
+    __param(0, (0, tsyringe_1.inject)("VendorModel")),
+    __metadata("design:paramtypes", [mongoose_1.Model])
+], VendorAuthRepository);
 exports.default = VendorAuthRepository;

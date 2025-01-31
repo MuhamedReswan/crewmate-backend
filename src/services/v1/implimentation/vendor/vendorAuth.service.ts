@@ -13,7 +13,6 @@ import { ValidationError } from "../../../../utils/errors/validation.error";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../../../utils/jwt.util";
 import * as crypto from 'crypto';
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
-import { TokenResponse } from "google-auth-library/build/src/auth/impersonated";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import { Register } from "../../../../entities/v1/authenticationEntity";
 
@@ -108,8 +107,10 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
                 if(!vendor){
                     throw new NotFoundError("Invalid credentials");
                 }
+                if(!vendor.password) throw new ValidationError("No password in vendor");
+                
                 const validPassword = await bcrypt.compare(password,vendor.password);
-                if(!validPassword)throw new ValidationError("Invalid credentials");
+                if(!validPassword)throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
                     console.log("validPassword login service",validPassword);
                     const role = 'Vendor';
                     const accessToken = generateAccessToken({ role, data: vendor });
@@ -184,6 +185,7 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
        }
        const vendor = await this.vendorAuthRepository.findVendorByEmail(decoded.email);
+       if(!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
         const accessToken = await generateAccessToken({data:vendor, role});
         return {
             accessToken,
