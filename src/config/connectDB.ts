@@ -3,7 +3,9 @@ import { MONGODBURL } from "./env";
 
 export const connectDB = async () =>{
     try {
-        await mongoose.connect(MONGODBURL ?? "")
+        await mongoose.connect(MONGODBURL ?? "",{
+            autoIndex: false
+        });
         console.log("Database connected");
         
     } catch (error) {

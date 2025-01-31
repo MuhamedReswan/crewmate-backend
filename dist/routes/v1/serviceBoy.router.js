@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tsyringe_1 = require("tsyringe");
+const express_1 = require("express");
+const router = (0, express_1.Router)();
+const serviceBoyAuthController = tsyringe_1.container.resolve('IServiceBoyAuthController');
+router.post('/register', serviceBoyAuthController.register);
+router.post('/otp', serviceBoyAuthController.verifyOTP);
+router.post('/resent-otp', serviceBoyAuthController.resendOtp);
+router.post('/login', serviceBoyAuthController.serviceBoyLogin);
+router.post('/forgot-password', serviceBoyAuthController.forgotPassword);
+router.post('/reset-password', serviceBoyAuthController.resetPassword);
+router.post('/google-register', serviceBoyAuthController.googleRegister);
+router.post('/google-login', serviceBoyAuthController.googleLogin);
+router.post('/refresh-token', serviceBoyAuthController.setNewAccessToken);
+exports.default = router;
