@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ResponseMessage = void 0;
+var ResponseMessage;
+(function (ResponseMessage) {
+    ResponseMessage["REGISTER_SUCCESS"] = "Registered successfully";
+    ResponseMessage["LOGIN_SUCCESS"] = "Login succesful";
+    ResponseMessage["EMAIL_ALREADY_USED"] = "Email is already in use";
+    ResponseMessage["EMAIL_ALREADY_VERIFIED"] = "Email already verified";
+    ResponseMessage["USER_NOT_FOUND"] = "User not found with this email";
+    ResponseMessage["OTP_EXPIRED"] = "OTP expired";
+    ResponseMessage["OTP_VERIFICATION_SUCCESS"] = "OTP verification Success";
+    ResponseMessage["RESEND_OTP_SEND"] = "Resend otp sended";
+    ResponseMessage["INVALID_OTP"] = "Invalid OTP";
+    ResponseMessage["NO_REFRESH_TOKEN"] = "No refresh token";
+    ResponseMessage["ACCESS_TOKEN_SET"] = "Access token set successfully";
+    ResponseMessage["INVALID_REFRESH_TOKEN"] = "Invalid or expired refresh token";
+    ResponseMessage["GOOGLE_REGISTER_SUCCESS"] = "Google register success";
+    ResponseMessage["GOOGLE_REGISTER_FAILED"] = "Google register failed";
+    ResponseMessage["FORGOT_PASSWORD_TOKEN_NOTFOUND"] = "Forgot token not found";
+    ResponseMessage["FORGOT_PASSWORD_LINK_SEND"] = "Forgot Password Link sended to your email Please Verify";
+    ResponseMessage["FORGOT_PASSWORD_TOKEN_EXPIRED"] = "Reset password token expired";
+    ResponseMessage["INVALID_FORGOT_PASSWORD_TOKEN"] = "invalid forgot password token";
+    ResponseMessage["RESET_PASSWORD_SUCCESS"] = "Password changed successfully";
+})(ResponseMessage || (exports.ResponseMessage = ResponseMessage = {}));

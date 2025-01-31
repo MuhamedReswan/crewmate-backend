@@ -1,27 +1,41 @@
+import { inject, injectable } from "tsyringe";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { serviceBoyModel } from "../../../../models/v1/serviceBoy.model";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { IServiceBoyAuthRepository } from "../../interfaces/serviceBoy/IServiceBoyAuth.repository"; 
+import { Model } from "mongoose";
+import { BaseRepository } from "../base/base.repository";
+import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 
-export default class ServiceBoyAuthRepository implements IServiceBoyAuthRepository{
+@injectable()
+export default class serviceBoyAuthRepository
+  extends BaseRepository<IServiceBoy>
+  implements IServiceBoyAuthRepository
+{
+     constructor(@inject('ServiceBoyModel')  model: Model<IServiceBoy>) {
+    super(model);
+  }
 
-    async findServiceBoyByEmail(email: string): Promise<any>{
+
+    async findServiceBoyByEmail(email: string): Promise<IServiceBoy | null>{
         try {
-            return await serviceBoyModel.findOne({email});
+            return await this.findOne({email});
         } catch (error) {
             console.log(error);
             throw error
         }
-    }
+    };
 
 
-async createServiceBoy(serviceBoyData: any): Promise<any>{
+async createServiceBoy(serviceBoyData: any): Promise<boolean | null>{
     try {
         console.log("createServiceBoy got");
         console.log("serviceBoyData",serviceBoyData);
     
-        let serviceBoyDetails =  await serviceBoyModel.create(serviceBoyData);
-        console.log("serviceBoyDetails",serviceBoyDetails)
+        // let serviceBoyDetails =  await serviceBoyModel.create(serviceBoyData);
+        let serviceBoyDetails =  await this.create(serviceBoyData);
+        console.log("serviceBoyDetails",serviceBoyDetails);
+        return true;
     } catch (error) {
         console.log("error from createServiceBoy repository",error)
         throw error

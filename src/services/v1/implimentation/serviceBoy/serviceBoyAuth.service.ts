@@ -16,6 +16,7 @@ import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import * as crypto from 'crypto';
 import { Register } from "../../../../entities/v1/authenticationEntity";
+import { number } from "zod";
 
 
 
@@ -55,7 +56,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService{
         if(serviceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
         const otp = createOtp();
-        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),120);
+        await setRedisData(`otpB:${email}`, JSON.stringify({otp}),60);
         let savedOtp = await getRedisData(`otpB:${email}`);
         console.log("savedOtp",savedOtp);
         await sendOtpEmail(email, otp);
@@ -80,7 +81,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService{
             const {otp: savedOtpValue} = JSON.parse(savedOtp);
             console.log("savedOtpValue",savedOtpValue);
             console.log("otp",otp);
-            if(otp !== savedOtpValue) throw new BadrequestError('Invalid OTP');
+            if(otp !== savedOtpValue) throw new ValidationError('Invalid OTP');
 
             let deleteotp = await deleteRedisData(`otpB:${email}`);
             console.log("deleteotp",deleteotp);
@@ -90,9 +91,14 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService{
            if(serviceBoyData){
              let serviceBoyDataObject = JSON.parse(serviceBoyData);
              console.log("parsed serviceBoyData  from serivice",serviceBoyDataObject);
+            
+let number = 1
+const servicerId = `A-${number}`
 
              serviceBoyDataObject.password = await hashPassword(serviceBoyDataObject.password);
+             serviceBoyDataObject.servicerId=servicerId;
             let createdBoy = await this.serviceBoyAuthRepository.createServiceBoy(serviceBoyDataObject);
+            number++;
             console.log("createdBoy from service",createdBoy);
              await deleteRedisData(`serviceBoy:${email}`); 
           }
@@ -151,6 +157,8 @@ try {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
        }
        const serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(decoded.email);
+       if(!serviceBoy)  throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+
         const accessToken = await generateAccessToken({data:serviceBoy, role});
         return {
             accessToken,
@@ -167,7 +175,7 @@ try {
 
    forgotPassword = async (email:string): Promise<string> =>{
     try {
-        const serviceBoy = this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
+        const serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
         if(!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
         const token = crypto.randomBytes(8).toString('hex');
        await setRedisData(`forgotToken:${email}`, token , 1800 );

@@ -8,7 +8,7 @@ import { string } from 'zod';
   mobile: { type: String },
   isVerified: { type: Boolean, default: false },
   profileImage: { type: String },
-  aadharNumber: { type: String },
+  aadharNumber: { type: String, unique:true, sparse: true},
   isBlocked: {type: Boolean, default: false},
   location: {type: Object,default:{}},
   age: { type: Number },
@@ -19,9 +19,9 @@ import { string } from 'zod';
   }],
   date: {  type: Schema.Types.Date },
   password: { type: String },
-  servicerId: { type: String, unique: true },
-  walletId: { type: Schema.Types.ObjectId, unique: true },
-  workHistoryId: { type: Schema.Types.ObjectId, unique: true },
+  servicerId: { type: String, unique: true, sparse: true },
+  walletId: { type: Schema.Types.ObjectId, unique: true, sparse: true },
+  workHistoryId: { type: Schema.Types.ObjectId, unique: true,sparse: true },
 });
 
 export const serviceBoyModel = mongoose.model<IServiceBoy>('ServiceBoys', ServieBoysSchema);
