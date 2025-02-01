@@ -5,7 +5,6 @@ import { inject, injectable } from "tsyringe";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 
 

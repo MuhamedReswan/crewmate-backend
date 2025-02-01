@@ -1,6 +1,5 @@
-import mongoose, { Mongoose, Schema, model } from 'mongoose';
+import mongoose, {  Schema } from 'mongoose';
 import IServiceBoy from '../../entities/v1/serviceBoyEntity';
-import { string } from 'zod';
 
  const ServieBoysSchema: Schema = new Schema<IServiceBoy>({
   name: { type: String },
