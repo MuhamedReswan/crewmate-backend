@@ -15,8 +15,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import * as crypto from 'crypto';
-import { Register } from "../../../../entities/v1/authenticationEntity";
-import { number } from "zod";
+import { LoginResponse, Register } from "../../../../entities/v1/authenticationEntity";
 
 
 
@@ -112,7 +111,7 @@ throw new BadrequestError(ResponseMessage.USER_NOT_CREATED);
     }
 
 
-    async serviceBoyLogin(email: string, password: string): Promise<ServiceBoyLoginResponse> {
+    async serviceBoyLogin(email: string, password: string): Promise<LoginResponse<IServiceBoy,'serviceBoy'>> {
         try {
             const serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
             console.log("serviceBoy login service",serviceBoy);

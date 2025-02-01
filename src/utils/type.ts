@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import IServiceBoy from "../entities/v1/serviceBoyEntity";
 import IVendor from "../entities/v1/vendorEntity";
+import IAdmin from "../entities/v1/adminEntity";
 
 export type RequestHandler<
   TReturn = void
@@ -12,4 +13,5 @@ export type RequestHandler<
 
 export type CreateToken = 
 | { role: "Service Boy"; data: IServiceBoy }
+| { role: "Admin"; data: IAdmin }
 | { role: "Vendor"; data: IVendor };

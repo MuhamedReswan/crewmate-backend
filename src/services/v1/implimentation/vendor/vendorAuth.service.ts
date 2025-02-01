@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IVendorAuthService,  VendorLoginResponse } from "../../interfaces/vendor/IVendorAuthService";
+import { IVendorAuthService } from "../../interfaces/vendor/IVendorAuthService";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
@@ -14,7 +14,8 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import * as crypto from 'crypto';
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
-import { Register } from "../../../../entities/v1/authenticationEntity";
+import { LoginResponse,Register } from "../../../../entities/v1/authenticationEntity";
+import IVendor from "../../../../entities/v1/vendorEntity";
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -100,7 +101,7 @@ console.log("registerFromRedis vendor auth",registerFromRedis);
 
 
 
-               async vendorLogin(email: string, password: string): Promise<VendorLoginResponse> {
+               async vendorLogin(email: string, password: string): Promise<LoginResponse<IVendor,'vendor'>> {
                 try {
                     const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
                     console.log("vendor login service",vendor);

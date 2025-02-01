@@ -1,13 +1,16 @@
 import { container } from "tsyringe";
 import { Router } from "express";
-import { IVendorAuthController } from "../../../controllers/v1/interfaces/vendor/IVendorAuth.controller";
+import { IVendorAuthController } from "../../controllers/v1/interfaces/vendor/IVendorAuth.controller";
 
 const vendorAuthController = container.resolve<IVendorAuthController>('IVendorAuthController');
 
 const router = Router();
-router.use(()=>{
-    console.log("call is getting in route")
-})
+
+router.use((req, res, next) => {
+    console.log(`Incoming vendor request: ${req.method} ${req.url}`);
+    next();
+  });
+  
 router.post('/register', vendorAuthController.register);
 router.post('/otp',vendorAuthController.verifyOTP);
 router.post('/resent-otp', vendorAuthController.resendOtp );

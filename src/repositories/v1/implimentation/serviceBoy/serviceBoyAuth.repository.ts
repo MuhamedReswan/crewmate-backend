@@ -6,7 +6,6 @@ import { IServiceBoyAuthRepository } from "../../interfaces/serviceBoy/IServiceB
 import { Model } from "mongoose";
 import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
-import { Register } from "../../../../entities/v1/authenticationEntity";
 
 @injectable()
 export default class serviceBoyAuthRepository

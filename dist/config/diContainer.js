@@ -12,16 +12,24 @@ const vendorAuth_repository_1 = __importDefault(require("../repositories/v1/impl
 const vendorAuth_service_1 = __importDefault(require("../services/v1/implimentation/vendor/vendorAuth.service"));
 const serviceBoy_model_1 = require("../models/v1/serviceBoy.model");
 const vendor_model_1 = require("../models/v1/vendor.model");
-// Controller Registrations
+const admin_repository_1 = __importDefault(require("../repositories/v1/implimentation/admin/admin.repository"));
+const admin_service_1 = __importDefault(require("../services/v1/implimentation/admin/admin.service"));
+const admin_controller_1 = require("../controllers/v1/implimentation/admin/admin.controller");
+const admin_model_1 = require("../models/v1/admin.model");
+// Repository Registration
 tsyringe_1.container.register("IVendorAuthRepository", vendorAuth_repository_1.default);
 tsyringe_1.container.register("IServiceBoyAuthRepository", serviceBoyAuth_repository_1.default);
+tsyringe_1.container.register("IAdminRepository", admin_repository_1.default);
 // Service Registrations
 tsyringe_1.container.register("IVendorAuthService", vendorAuth_service_1.default);
 tsyringe_1.container.register("IServiceBoyAuthService", serviceBoyAuth_service_1.default);
-// Repository Registration
+tsyringe_1.container.register("IAdminService", admin_service_1.default);
+// Controller Registrations
 tsyringe_1.container.register("IVendorAuthController", vendorAuth_controller_1.default);
 tsyringe_1.container.register("IServiceBoyAuthController", serviceBoyAuth_controller_1.default);
+tsyringe_1.container.register("IAdminController", admin_controller_1.AdminController);
 // Model Registrations
 tsyringe_1.container.register("ServiceBoyModel", { useValue: serviceBoy_model_1.serviceBoyModel });
 tsyringe_1.container.register("VendorModel", { useValue: vendor_model_1.vendorModel });
+tsyringe_1.container.register("AdminModel", { useValue: admin_model_1.adminModel });
 exports.default = tsyringe_1.container;
