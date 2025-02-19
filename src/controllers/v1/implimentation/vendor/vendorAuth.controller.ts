@@ -23,7 +23,7 @@ export default class VendorAuthController implements IVendorAuthController{
              await this.vendorAuthService.generateOTP(email);
             res
             .status(HttpStatusCode.OK)
-            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.OK));
+            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.OK,{email}));
         } catch (error) {
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message: 'Internal Server Error'});
         }

@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { NODEMAILEREMAIL, NODEMAILERPASSWORD } from '../config/env';
+import { BadrequestError } from './errors/badRequest.error';
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -10,6 +11,11 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendOtpEmail = async (email: string, otp: string) => {
+  console.log("email from sendOtpEmail----",email);
+
+  if (!email) {
+    throw new BadrequestError("Email is required");
+}
     const htmlContent = `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -68,7 +74,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
         console.log('OTP sent successfully');
     } catch (err) {
         console.error('Error sending OTP email:', err);
-        throw new Error('Error sending OTP email');
+        throw new BadrequestError('Error sending OTP email');
     }
 };
 

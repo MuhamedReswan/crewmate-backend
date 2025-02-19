@@ -12,6 +12,6 @@ export type RequestHandler<
 ) => Promise<TReturn>;
 
 export type CreateToken = 
-| { role: "Service Boy"; data: IServiceBoy }
+| { role: "ServiceBoy"; data: IServiceBoy }
 | { role: "Admin"; data: IAdmin }
 | { role: "Vendor"; data: IVendor };
