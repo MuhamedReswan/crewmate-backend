@@ -13,6 +13,7 @@ setNewAccessToken:RequestHandler
 forgotPassword:RequestHandler
 googleRegister:RequestHandler
 googleLogin:RequestHandler
-resetPassword:RequestHandler
+resetPassword:RequestHandler,
+logout:RequestHandler
 
 }

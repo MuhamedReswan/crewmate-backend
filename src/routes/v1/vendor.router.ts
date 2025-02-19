@@ -13,7 +13,7 @@ router.use((req, res, next) => {
   
 router.post('/register', vendorAuthController.register);
 router.post('/otp',vendorAuthController.verifyOTP);
-router.post('/resent-otp', vendorAuthController.resendOtp );
+router.post('/resend-otp', vendorAuthController.resendOtp );
 router.post('/login', vendorAuthController.vendorLogin);
 router.post('/forgot-password', vendorAuthController.forgotPassword);
 router.post('/reset-password', vendorAuthController.resetPassword);

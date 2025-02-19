@@ -4,13 +4,13 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "ts-node-dev src/server.ts",
     "dev": "nodemon src/server.ts",
     "build": "tsc --build",
     "lint": "tsc --noEmit"
   },
   "keywords": [],
-  "author": "", 
+  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -35,6 +35,7 @@
     "nodemailer": "^6.9.16",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
+    "ts-node-dev": "^2.0.0",
     "tsyringe": "^4.8.0",
     "zod": "^3.24.1"
   }

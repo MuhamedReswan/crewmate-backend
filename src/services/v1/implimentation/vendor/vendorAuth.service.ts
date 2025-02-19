@@ -23,13 +23,19 @@ import IVendor from "../../../../entities/v1/vendorEntity";
 
 
     async register(name: string, email: string, password: string, mobile: string): Promise<void> {
-        console.log("vendorAut register got");
-const existingVendor = await this.vendorAuthRepository.findVendorByEmail(email);
-if(existingVendor) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
+        try {
+            console.log("vendorAut register got");
+            const existingVendor = await this.vendorAuthRepository.findVendorByEmail(email);
+            console.log("existingVendor",existingVendor);
+            if(existingVendor) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
+            
+            await setRedisData(`vendor:${email}`,JSON.stringify({name,email,password,mobile}),3600)
+            const registerFromRedis = await getRedisData(`vendor:${email}`);
+            console.log("registerFromRedis vendor auth",registerFromRedis);
+        } catch (error) {
+          throw error;  
+        }
 
-await setRedisData(`vendor:${email}`,JSON.stringify({name,email,password,mobile}),3600)
-const registerFromRedis = await getRedisData(`vendor:${email}`);
-console.log("registerFromRedis vendor auth",registerFromRedis);
     };
 
 

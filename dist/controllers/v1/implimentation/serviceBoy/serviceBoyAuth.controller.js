@@ -36,7 +36,7 @@ let ServiceBoyAuthController = class ServiceBoyAuthController {
                 yield this.serviceBoyAuthService.generateOTP(email);
                 res
                     .status(httpStatusCode_1.HttpStatusCode.CREATED)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.REGISTER_SUCCESS, httpStatusCode_1.HttpStatusCode.CREATED));
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.REGISTER_SUCCESS, httpStatusCode_1.HttpStatusCode.CREATED, email));
             }
             catch (error) {
                 next(error);
@@ -85,7 +85,7 @@ let ServiceBoyAuthController = class ServiceBoyAuthController {
                     sameSite: 'lax'
                 });
                 res.status(httpStatusCode_1.HttpStatusCode.OK)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGIN_SUCCESS, httpStatusCode_1.HttpStatusCode.OK));
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGIN_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, serviceBoy));
             }
             catch (error) {
                 next(error);
