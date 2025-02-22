@@ -12,12 +12,12 @@ router.post('/otp',serviceBoyAuthController.verifyOTP);
 router.post('/resend-otp', serviceBoyAuthController.resendOtp );
 router.post('/login', serviceBoyAuthController.serviceBoyLogin);
 router.post('/forgot-password', serviceBoyAuthController.forgotPassword);
-router.post('/reset-password', serviceBoyAuthController.resetPassword);
 router.post('/google-register', serviceBoyAuthController.googleRegister);
 router.post('/google-login', serviceBoyAuthController.googleLogin);
 router.post('/refresh-token',serviceBoyAuthController.setNewAccessToken);
 router.post('/logout',serviceBoyAuthController.logout)
 
+router.patch('/reset-password', serviceBoyAuthController.resetPassword);
 
 
 export default router;

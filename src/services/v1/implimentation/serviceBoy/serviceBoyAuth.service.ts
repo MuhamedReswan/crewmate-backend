@@ -33,6 +33,7 @@ import {
   LoginResponse,
   Register,
 } from "../../../../entities/v1/authenticationEntity";
+import { Role } from "../../../../constants/Role";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -151,10 +152,10 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
       console.log("serviceBoy login service", serviceBoy);
       if (!serviceBoy) {
-        throw new NotFoundError("Invalid credentials");
+        throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
       }
       const validPassword = await bcrypt.compare(password, serviceBoy.password);
-      if (!validPassword) throw new ValidationError("Invalid credentials");
+      if (!validPassword) throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
       console.log("validPassword login service", validPassword);
       const role = "ServiceBoy";
       const accessToken = generateAccessToken({ data: serviceBoy, role: role });
@@ -287,9 +288,9 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     }
   };
 
-  resetPasswordLink = async (token: string, email: string): Promise<void> => {
+  resetPasswordLink = async ( email: string, token: string, role:Role): Promise<void> => {
     try {
-      await sendForgotPasswordLink(email, token);
+      await sendForgotPasswordLink(email, token,role);
     } catch (error) {
       throw error;
     }

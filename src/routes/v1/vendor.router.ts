@@ -16,11 +16,11 @@ router.post('/otp',vendorAuthController.verifyOTP);
 router.post('/resend-otp', vendorAuthController.resendOtp );
 router.post('/login', vendorAuthController.vendorLogin);
 router.post('/forgot-password', vendorAuthController.forgotPassword);
-router.post('/reset-password', vendorAuthController.resetPassword);
 router.post('/refresh-token',vendorAuthController.setNewAccessToken);
 router.post('/google-register', vendorAuthController.googleRegister);
 router.post('/google-login', vendorAuthController.googleLogin);
 
+router.patch('/reset-password', vendorAuthController.resetPassword);
 
 
 

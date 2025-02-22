@@ -7,6 +7,7 @@ import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { IVendorAuthService } from "../../../../services/v1/interfaces/vendor/IVendorAuthService";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { sendForgotPasswordLink } from "../../../../utils/otp.util";
+import { Role } from "../../../../constants/Role";
 
 @injectable()
 export default class VendorAuthController implements IVendorAuthController{
@@ -86,8 +87,8 @@ res.status(HttpStatusCode.OK)
             try {
                 const {email} = req.body;
               const forgotToken = await this.vendorAuthService.forgotPassword(email);
-              if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND)
-                 await this.vendorAuthService.resetPasswordLink(email,forgotToken);
+              if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
+                 await this.vendorAuthService.resetPasswordLink(forgotToken,email,Role.VENDOR);
                 res.status(HttpStatusCode.OK)
     .json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
           
@@ -114,9 +115,9 @@ res.status(HttpStatusCode.OK)
         };
     
     
-resetPasswordLink = async (token:string,email:string): Promise<void>=>{
+resetPasswordLink = async (token:string,email:string,role:Role): Promise<void>=>{
     try {
-        await sendForgotPasswordLink(email,token);
+        await sendForgotPasswordLink(email,token,role);
     } catch (error) {
         throw error;
     }

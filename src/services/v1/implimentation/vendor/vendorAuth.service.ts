@@ -16,6 +16,7 @@ import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import { LoginResponse,Register } from "../../../../entities/v1/authenticationEntity";
 import IVendor from "../../../../entities/v1/vendorEntity";
+import { Role } from "../../../../constants/Role";
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -133,7 +134,7 @@ import IVendor from "../../../../entities/v1/vendorEntity";
 
                forgotPassword = async (email:string): Promise<string> =>{
                 try {
-                    const vendor = this.vendorAuthRepository.findVendorByEmail(email);
+                    const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
                     if(!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
                     const token = crypto.randomBytes(8).toString('hex');
                    await setRedisData(`forgotToken:${email}`, token , 1800 );
@@ -172,9 +173,10 @@ import IVendor from "../../../../entities/v1/vendorEntity";
 
 
 
-               resetPasswordLink = async (token:string,email:string): Promise<void>=>{
+               resetPasswordLink = async (token:string,email:string,role:Role): Promise<void>=>{
                    try {
-                       await sendForgotPasswordLink(email,token);
+                    console.log("email form vendor service",email,token);
+                       await sendForgotPasswordLink(email,token,role);
                    } catch (error) {
                        throw error;
                    }
