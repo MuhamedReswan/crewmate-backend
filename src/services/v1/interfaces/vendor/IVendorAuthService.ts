@@ -1,6 +1,7 @@
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
+import { Role } from "../../../../constants/Role";
 
 
  export interface IVendorAuthService {
@@ -8,10 +9,10 @@ import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
     generateOTP(email:string): Promise<void>
     verifyOTP(email: string, otp: string): Promise<void>
     resendOtp(email: string): Promise<void>
-vendorLogin(email: string, password: string): Promise<LoginResponse<IVendor,'vendor'>>  
+vendorLogin(email: string, password: string): Promise<LoginResponse<IVendor,Role.VENDOR>>  
     resetPasswordTokenVerify(email:string, token:string): Promise<void>
     resetPassword(password:string,email:string): Promise<void>
-    resetPasswordLink(token:string,email:string): Promise<void>
+    resetPasswordLink(token:string,email:string,role:Role.VENDOR): Promise<void>
     setNewAccessToken(refreshToken:string):Promise<CustomTokenResponse>
     googleRegister(data:Partial<IVendor>): Promise <void>
     googleLogin(data:Partial<IVendor>): Promise <void>

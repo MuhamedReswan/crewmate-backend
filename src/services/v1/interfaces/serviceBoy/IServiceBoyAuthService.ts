@@ -1,5 +1,6 @@
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity"
 import { Register } from "../../../../entities/v1/authenticationEntity";
+import { Role } from "../../../../constants/Role";
 export  interface ServiceBoyLoginResponse {
     serviceBoy: IServiceBoy; 
     accessToken: string;
@@ -24,5 +25,5 @@ export interface IServiceBoyAuthService {
     googleRegister(data:Register): Promise <void>
     googleLogin(data:Register): Promise <void>
     resetPassword(email:string, password:string): Promise<void>
-    resetPasswordLink(token:string,email:string): Promise<void>
+    resetPasswordLink(token:string,email:string,role:Role): Promise<void>
 }

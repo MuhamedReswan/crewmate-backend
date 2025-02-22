@@ -10,6 +10,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../../../utils/jwt.util";
+import { Role } from "../../../../constants/Role";
 
 @injectable()
 export default class ServiceBoyAuthController
@@ -205,7 +206,7 @@ export default class ServiceBoyAuthController
       );
       if (!forgotToken)
         throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
-      await this.serviceBoyAuthService.resetPasswordLink(email, forgotToken);
+      await this.serviceBoyAuthService.resetPasswordLink(email, forgotToken,Role.SERVICE_BOY);
       res
         .status(HttpStatusCode.OK)
         .json(
