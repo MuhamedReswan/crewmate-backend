@@ -222,7 +222,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
       if (!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
       const token = crypto.randomBytes(8).toString("hex");
-      await setRedisData(`forgotToken:${email}`, token, 1800);
+      await setRedisData(`forgotToken-SB:${email}`, token, 1800);
       return token;
     } catch (error) {
       throw error;
@@ -234,8 +234,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     token: string
   ): Promise<void> => {
     try {
-      const forgotTokenData = await getRedisData(`forgotToken:${email}`);
-      console.log("forgotTokenData from boy service", forgotTokenData);
+      const forgotTokenData = await getRedisData(`forgotToken-SB:${email}`);
       if (!forgotTokenData) {
         throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
       }
@@ -244,6 +243,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN
         );
       }
+      await deleteRedisData(`forgotToken-SB:${email}`)
     } catch (error) {
       throw error;
     }

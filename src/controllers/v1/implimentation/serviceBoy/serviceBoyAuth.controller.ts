@@ -226,11 +226,11 @@ export default class ServiceBoyAuthController
     next: NextFunction
   ): Promise<void> => {
     try {
-      const { email, password, forgotToken } = req.body;
-      if (forgotToken) {
+      const { email, password, token } = req.body;
+      if (token) {
         await this.serviceBoyAuthService.resetPasswordTokenVerify(
           email,
-          forgotToken
+          token
         );
         await this.serviceBoyAuthService.resetPassword(email, password);
       } else {
