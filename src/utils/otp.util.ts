@@ -159,7 +159,7 @@ if(role === Role.VENDOR){
                 <a href="http://localhost:5173/${userRole}/reset-password/${token}/${email}" class="button">Reset Password</a>
             </div>
             
-            <p>If you didn't request this password reset, you can safely ignore this email. The link will expire in 24 hours.</p>
+            <p>If you didn't request this password reset, you can safely ignore this email. The link will expire in 30 minutes.</p>
             
             <p>For security reasons, this password reset link can only be used once. If you need to reset your password again, please visit <a href="http://localhost:5173">Crewmate</a> and request another reset.</p>
             
@@ -183,7 +183,7 @@ if(role === Role.VENDOR){
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('OTP sent successfully');
+    console.log('email sent successfully');
 } catch (err) {
     console.error('Error sending OTP email:', err);
     throw err;

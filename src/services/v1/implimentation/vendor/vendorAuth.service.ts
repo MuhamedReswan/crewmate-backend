@@ -97,7 +97,7 @@ import { Role } from "../../../../constants/Role";
             try {
                 await deleteRedisData(`otpV${email}`);
                 const otp = createOtp();
-                await setRedisData(`otpV:${email}`, JSON.stringify({otp}),120);
+                await setRedisData(`otpV:${email}`, JSON.stringify({otp}),60);
                 let savedOtp = await getRedisData(`otpV:${email}`);
                 console.log("savedOtp",savedOtp);
                 await sendOtpEmail(email, otp);    
@@ -155,6 +155,7 @@ import { Role } from "../../../../constants/Role";
                   if( forgotTokenData != token){
                     throw new ValidationError(ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN);
                   }
+                     await deleteRedisData(`forgotToken:${email}`);
                 } catch (error) {
                     throw error;
                 }

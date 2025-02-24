@@ -100,9 +100,9 @@ res.status(HttpStatusCode.OK)
 
         resetPassword = async (req:Request, res:Response, next: NextFunction): Promise<void> => {
             try {
-               const {email, password,forgotToken} = req.body;
-               if(forgotToken){
-                await this.vendorAuthService.resetPasswordTokenVerify(email,forgotToken);
+               const {email, password,token} = req.body;
+               if(token){
+                await this.vendorAuthService.resetPasswordTokenVerify(email,token);
                 await this.vendorAuthService.resetPassword(email, password);
                }else{
                 await this.vendorAuthService.resetPassword(email, password);
