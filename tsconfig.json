@@ -11,6 +11,6 @@
         "outDir": "./dist",
         "rootDir": "./src"
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "src/middleware/authe"],
     "exclude": ["node_modules"]
 }

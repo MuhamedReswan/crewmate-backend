@@ -60,7 +60,7 @@ export default class ServiceBoyAuthController
       let serviceBoy = await this.serviceBoyAuthService.verifyOTP(email, otp);
       console.log("verifyotp", serviceBoy);
       if (serviceBoy) {
-        const role = "ServiceBoy";
+        const role = Role.SERVICE_BOY;
         const accessToken = generateAccessToken({
           data: serviceBoy,
           role: role,
@@ -249,48 +249,42 @@ export default class ServiceBoyAuthController
     }
   };
 
-  googleRegister = async (
+
+  googleAuth = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log("recieved body : ", req.body);
-      const { serviceBoyCredential } = req.body;
-      const name = serviceBoyCredential.name;
-      const email = serviceBoyCredential.email;
-      const password = serviceBoyCredential.sub;
-      const profileImage = serviceBoyCredential.picture;
-      const serviceBoy = await this.serviceBoyAuthService.googleRegister({
-        name,
-        email,
-        password,
-        profileImage,
+      const { googleToken } = req.body;
+      console.log("googleToken",googleToken);
+      const serviceBoy = await this.serviceBoyAuthService.googleAuth({googleToken});
+      console.log("serviceBoyInfo",serviceBoy);
+if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
+
+      console.log("serviceBoy from google login controller", serviceBoy);
+      // set access token and refresh token in coockies
+      res.cookie("refreshToken", serviceBoy.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        sameSite: "lax",
       });
-      console.log("serviceBoy in controllr google aut: ", serviceBoy);
+      res.cookie("accessToken", serviceBoy.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 15 * 60 * 1000,
+        sameSite: "lax",
+      });
       res
         .status(HttpStatusCode.OK)
         .json(
           responseHandler(
-            ResponseMessage.GOOGLE_REGISTER_SUCCESS,
-            HttpStatusCode.OK
+            ResponseMessage.LOGIN_SUCCESS,
+            HttpStatusCode.OK,
+            serviceBoy
           )
         );
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  googleLogin = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const { serviceBoyCredential } = req.body;
-      const name = serviceBoyCredential.name;
-      const email = serviceBoyCredential.email;
-      await this.serviceBoyAuthService.googleLogin({ email });
     } catch (error) {
       next(error);
     }
@@ -302,6 +296,7 @@ export default class ServiceBoyAuthController
     next: NextFunction
   ): Promise<void> => {
     try {
+      console.log("logout service boy invoked")
       res.clearCookie("accessToken").clearCookie("refreshToken");
       res
         .status(HttpStatusCode.OK)

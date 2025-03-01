@@ -144,31 +144,43 @@ setNewAccessToken = async (req:Request, res:Response, next:NextFunction): Promis
 };
 
 
-googleRegister = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
+googleAuth = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-        console.log('recieved body : ',req.body)
-        const { vendorCredential } = req.body
-        const name = vendorCredential.name
-        const email = vendorCredential.email 
-        const password = vendorCredential.sub
-        const profileImage = vendorCredential.picture
-        const vendor = await this.vendorAuthService.googleRegister({name,email,password,profileImage});
-        console.log("vendor in controllr google aut: ",vendor)
-        res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.GOOGLE_REGISTER_SUCCESS, HttpStatusCode.OK));
-    } catch (error) {
-        next(error)   
-    }
-};
+      const { googleToken } = req.body;
+      console.log("googleToken vendoer",googleToken);
+      const vendor = await this.vendorAuthService.googleAuth({googleToken});
+      console.log("vendorInfo",vendor);
+if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
-
-googleLogin = async (req:Request, res:Response, next:NextFunction): Promise<void> => {
-    try {
-        const { vendorCredential } = req.body
-        const name = vendorCredential.name
-        const email = vendorCredential.email 
-        await this.vendorAuthService.googleLogin({email});
+      console.log("vendor from google login controller", vendor);
+      // set access token and refresh token in coockies
+      res.cookie("refreshToken", vendor.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        sameSite: "lax",
+      });
+      res.cookie("accessToken", vendor.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 15 * 60 * 1000,
+        sameSite: "lax",
+      });
+      res
+        .status(HttpStatusCode.OK)
+        .json(
+          responseHandler(
+            ResponseMessage.LOGIN_SUCCESS,
+            HttpStatusCode.OK,
+            vendor
+          )
+        );
     } catch (error) {
-        next(error);
+      next(error);
     }
-};
 }
+  };
