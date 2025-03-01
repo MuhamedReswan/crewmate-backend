@@ -7,6 +7,7 @@ import { PORT,CLIENTURL } from "./config/env";
 import { connectDB } from "./config/connectDB";
 import cors from "cors"
 import { errorHandler } from "./middleware/errorHandler";
+import { authMiddleware } from "./middleware/authorization";
 
 
 const app : Application = express();
@@ -21,6 +22,7 @@ app.use(cors({
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 app.get("/", (req,res)=>{
     res.send("server started");
