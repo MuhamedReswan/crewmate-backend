@@ -11,8 +11,7 @@ serviceBoyLogin:RequestHandler
 resendOtp:RequestHandler,
 setNewAccessToken:RequestHandler
 forgotPassword:RequestHandler
-googleRegister:RequestHandler
-googleLogin:RequestHandler
+googleAuth:RequestHandler
 resetPassword:RequestHandler,
 logout:RequestHandler
 

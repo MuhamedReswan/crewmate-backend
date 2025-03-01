@@ -27,4 +27,8 @@ export enum ResponseMessage {
   FORGOT_PASSWORD_TOKEN_EXPIRED = "Reset password token expired",
   INVALID_FORGOT_PASSWORD_TOKEN = "invalid forgot password token",
   RESET_PASSWORD_SUCCESS = "Password changed successfully",
+
+GOOGLE_AUTH_FAILED = "Authentication failed",
+
+VALIDATION_FAILED = "server side validation failed"
 }

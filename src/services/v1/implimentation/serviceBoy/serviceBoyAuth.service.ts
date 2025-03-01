@@ -7,7 +7,6 @@ import {
 } from "../../../../utils/redis.util";
 import {
   IServiceBoyAuthService,
-  ServiceBoyLoginResponse,
 } from "../../interfaces/serviceBoy/IServiceBoyAuthService";
 import {
   sendForgotPasswordLink,
@@ -30,6 +29,7 @@ import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import * as crypto from "crypto";
 import {
+  GoogleLogin,
   LoginResponse,
   Register,
 } from "../../../../entities/v1/authenticationEntity";
@@ -126,6 +126,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           serviceBoyDataObject.password
         );
         serviceBoyDataObject.servicerId = servicerId;
+        serviceBoyDataObject.name = serviceBoyDataObject.name.toLowerCase();
         let createdBoy = await this.serviceBoyAuthRepository.createServiceBoy(
           serviceBoyDataObject
         );
@@ -146,7 +147,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
   async serviceBoyLogin(
     email: string,
     password: string
-  ): Promise<LoginResponse<IServiceBoy, "serviceBoy">> {
+  ): Promise<LoginResponse<IServiceBoy, Role.SERVICE_BOY>> {
     try {
       const serviceBoy =
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
@@ -157,7 +158,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
       const validPassword = await bcrypt.compare(password, serviceBoy.password);
       if (!validPassword) throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
       console.log("validPassword login service", validPassword);
-      const role = "ServiceBoy";
+      const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({ data: serviceBoy, role: role });
       const refreshToken = generateRefreshToken({
         data: serviceBoy,
@@ -249,28 +250,46 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     }
   };
 
-  googleRegister = async (data: Partial<IServiceBoy>): Promise<void> => {
-    try {
-      if (!data.email) throw new BadrequestError(ResponseMessage.INVALID_INPUT);
-      const existingServiceBoy =
-        await this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
-      if (existingServiceBoy) {
-        throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
-      }
-      await this.serviceBoyAuthRepository.createServiceBoy(data);
-    } catch (error) {
-      throw error;
-    }
-  };
 
-  googleLogin = async (data: Register): Promise<void> => {
+  googleAuth = async (data: GoogleLogin): Promise<LoginResponse<IServiceBoy, Role.SERVICE_BOY> | undefined> => {
     try {
-      const serviceBoy =
-        await this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
-      console.log("service boy from repository google login", serviceBoy);
-      if (!serviceBoy) {
-        throw new Error(ResponseMessage.USER_NOT_FOUND);
+      const {googleToken} = data;
+
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${googleToken}` }
+    });
+
+    console.log("response",response);
+
+    if (!response.ok) {
+        throw new ValidationError('google login falied');
+    }
+    
+    const responseData = await response.json();
+    console.log("responseData",responseData);
+let serviceBoy;
+    serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(responseData.email);   
+
+    if(!serviceBoy){
+        let {name,email, email_verified:isVerified,picture:profileImage } = responseData;
+        console.log("name before lowercase",name);
+        name= name.toLowerCase()
+        console.log("name after lowercase",name);
+         serviceBoy = await this.serviceBoyAuthRepository.createServiceBoy(
+          {name,email,isVerified,profileImage}
+        );
       }
+
+     if(!serviceBoy) return
+
+    const role = Role.SERVICE_BOY;
+    const accessToken = generateAccessToken({ data: serviceBoy, role: role });
+    const refreshToken = generateRefreshToken({
+      data: serviceBoy,
+      role: role,
+    });
+    return { serviceBoy, accessToken, refreshToken };
     } catch (error) {
       throw error;
     }

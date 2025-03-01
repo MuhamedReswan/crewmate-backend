@@ -14,7 +14,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import * as crypto from 'crypto';
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
-import { LoginResponse,Register } from "../../../../entities/v1/authenticationEntity";
+import { GoogleLogin, LoginResponse,Register } from "../../../../entities/v1/authenticationEntity";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { Role } from "../../../../constants/Role";
 
@@ -120,7 +120,7 @@ import { Role } from "../../../../constants/Role";
                 const validPassword = await bcrypt.compare(password,vendor.password);
                 if(!validPassword)throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
                     console.log("validPassword login service",validPassword);
-                    const role = 'Vendor';
+                    const role = Role.VENDOR;
                     const accessToken = generateAccessToken({ role, data: vendor });
                     const refreshToken = generateRefreshToken({ role, data: vendor });
                     console.log("refresh token",refreshToken);
@@ -209,29 +209,50 @@ import { Role } from "../../../../constants/Role";
    };
 
 
-   googleRegister = async(data: Register): Promise<void> => {
-       try {
-           const existingVendor =await this.vendorAuthRepository.findVendorByEmail(data.email);
-           if(existingVendor){
-               throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
-           }
-           await this.vendorAuthRepository.createVendor(data);
-       } catch (error) {
-           throw error;
-       } 
+      googleAuth = async (data: GoogleLogin): Promise<LoginResponse<IVendor, Role.VENDOR> | undefined> => {
+        try {
+          const {googleToken} = data;
+          console.log("googleToken vendor in service",googleToken);
+    
+          const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${googleToken}` }
+        });
+    
+        console.log("response vendor service",response);
+    
+        if (!response.ok) {
+            throw new ValidationError(ResponseMessage.GOOGLE_AUTH_FAILED);
+        }
+        
+        const responseData = await response.json();
+        console.log("responseData",responseData);
+    let vendor;
+        vendor = await this.vendorAuthRepository.findVendorByEmail(responseData.email);   
+    
+        if(!vendor){
+            let {name,email, email_verified:isVerified,picture:profileImage } = responseData;
+            console.log("name before lowercase",name);
+            name= name.toLowerCase()
+            console.log("name after lowercase",name);
+             vendor = await this.vendorAuthRepository.createVendor(
+              {name,email,isVerified,profileImage}
+            );
+          }
+    
+         if(!vendor) return
+    
+        const role = Role.VENDOR;
+        const accessToken = generateAccessToken({ data: vendor, role: role });
+        const refreshToken = generateRefreshToken({
+          data: vendor,
+          role: role,
+        });
+        return { vendor, accessToken, refreshToken };
+        } catch (error) {
+          throw error;
+        }
       };
-   
-   
-      googleLogin = async  (data: Register): Promise<void> => {
-       try {
-         const vendor =  await this.vendorAuthRepository.findVendorByEmail(data.email);
-           console.log("service boy from repository google login",vendor);
-           if(!vendor){
-               throw new Error(ResponseMessage.USER_NOT_FOUND);
-           }
-       } catch (error) {
-           throw error;
-       }
-      };
+
         
 }

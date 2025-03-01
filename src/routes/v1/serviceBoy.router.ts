@@ -1,23 +1,32 @@
 import { container } from "tsyringe";
 import { Router } from "express";
 import { IServiceBoyAuthController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoyAuthController"; 
+import { requestBodyValidator } from "../../middleware/requestValidation";
+import { forgotPasswordSchema, loginSchema, resetpasswordSchema, signupSchema } from "../../utils/validationSchema/auth.schema";
 
 
 const router = Router();
 const serviceBoyAuthController = container.resolve<IServiceBoyAuthController>('IServiceBoyAuthController');
 
 
-router.post('/register', serviceBoyAuthController.register);
-router.post('/otp',serviceBoyAuthController.verifyOTP);
+const validateLogin = requestBodyValidator(loginSchema);
+const validateSingUp = requestBodyValidator(signupSchema);
+const validateForgotPassword = requestBodyValidator(forgotPasswordSchema);
+const validatePassword = requestBodyValidator(resetpasswordSchema);
+
+
+
+router.post('/register', validateSingUp, serviceBoyAuthController.register);
+router.post('/otp', serviceBoyAuthController.verifyOTP);
 router.post('/resend-otp', serviceBoyAuthController.resendOtp );
-router.post('/login', serviceBoyAuthController.serviceBoyLogin);
-router.post('/forgot-password', serviceBoyAuthController.forgotPassword);
-router.post('/google-register', serviceBoyAuthController.googleRegister);
-router.post('/google-login', serviceBoyAuthController.googleLogin);
+router.post('/login', validateLogin, serviceBoyAuthController.serviceBoyLogin);
+router.post('/forgot-password', validateForgotPassword, serviceBoyAuthController.forgotPassword);
+router.post('/google-auth', serviceBoyAuthController.googleAuth);
 router.post('/refresh-token',serviceBoyAuthController.setNewAccessToken);
 router.post('/logout',serviceBoyAuthController.logout)
 
-router.patch('/reset-password', serviceBoyAuthController.resetPassword);
+router.patch('/reset-password', validatePassword, serviceBoyAuthController.resetPassword);
+
 
 
 export default router;

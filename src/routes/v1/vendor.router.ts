@@ -1,26 +1,32 @@
 import { container } from "tsyringe";
 import { Router } from "express";
 import { IVendorAuthController } from "../../controllers/v1/interfaces/vendor/IVendorAuth.controller";
+import { requestBodyValidator } from "../../middleware/requestValidation";
+import { forgotPasswordSchema, loginSchema, resetpasswordSchema, signupSchema } from "../../utils/validationSchema/auth.schema";
 
 const vendorAuthController = container.resolve<IVendorAuthController>('IVendorAuthController');
 
 const router = Router();
 
-router.use((req, res, next) => {
-    console.log(`Incoming vendor request: ${req.method} ${req.url}`);
-    next();
-  });
-  
-router.post('/register', vendorAuthController.register);
+// router.use((req, res, next) => {
+//     console.log(`Incoming vendor request: ${req.method} ${req.url}`);
+//     next();
+//   });
+
+const validateLogin = requestBodyValidator(loginSchema);
+const validateSingUp = requestBodyValidator(signupSchema);
+const validateForgotPassword = requestBodyValidator(forgotPasswordSchema);
+const validatePassword = requestBodyValidator(resetpasswordSchema);
+
+router.post('/register', validateSingUp, vendorAuthController.register);
 router.post('/otp',vendorAuthController.verifyOTP);
 router.post('/resend-otp', vendorAuthController.resendOtp );
-router.post('/login', vendorAuthController.vendorLogin);
-router.post('/forgot-password', vendorAuthController.forgotPassword);
+router.post('/login', validateLogin, vendorAuthController.vendorLogin);
+router.post('/forgot-password', validateForgotPassword, vendorAuthController.forgotPassword);
 router.post('/refresh-token',vendorAuthController.setNewAccessToken);
-router.post('/google-register', vendorAuthController.googleRegister);
-router.post('/google-login', vendorAuthController.googleLogin);
+router.post('/google-auth', vendorAuthController.googleAuth);
 
-router.patch('/reset-password', vendorAuthController.resetPassword);
+router.patch('/reset-password', validatePassword, vendorAuthController.resetPassword);
 
 
 

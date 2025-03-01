@@ -1,6 +1,6 @@
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
-import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
+import { GoogleLogin, LoginResponse, VendorLoginResponse } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
 
 
@@ -14,8 +14,7 @@ vendorLogin(email: string, password: string): Promise<LoginResponse<IVendor,Role
     resetPassword(password:string,email:string): Promise<void>
     resetPasswordLink(token:string,email:string,role:Role.VENDOR): Promise<void>
     setNewAccessToken(refreshToken:string):Promise<CustomTokenResponse>
-    googleRegister(data:Partial<IVendor>): Promise <void>
-    googleLogin(data:Partial<IVendor>): Promise <void>
+    googleAuth(data: GoogleLogin): Promise <VendorLoginResponse | undefined>
     forgotPassword(email: Partial<IVendor>):Promise<string>
 
 

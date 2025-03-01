@@ -8,6 +8,7 @@ import { ValidationError } from "../../../../utils/errors/validation.error";
 import { generateAccessToken, generateRefreshToken } from "../../../../utils/jwt.util";
 import IAdmin from "../../../../entities/v1/adminEntity";
 import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
+import { Role } from "../../../../constants/Role";
 @injectable()
 export default class AdminService implements IAdminService {
   constructor(
@@ -23,7 +24,7 @@ export default class AdminService implements IAdminService {
       const passwordVerified = await compare(password, admin.password);
       if (passwordVerified)
         throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
-          const role = 'Admin';
+          const role = Role.ADMIN;
                 const accessToken = generateAccessToken({data:admin,role:role});
                 const refreshToken = generateRefreshToken({data:admin,role:role});
                 console.log("refresh token admin",refreshToken);
