@@ -7,12 +7,12 @@ import { PORT,CLIENTURL } from "./config/env";
 import { connectDB } from "./config/connectDB";
 import cors from "cors"
 import { errorHandler } from "./middleware/errorHandler";
-import { authMiddleware } from "./middleware/authorization";
+import cookieParser from 'cookie-parser';
 
 
 const app : Application = express();
 
-
+app.use(cookieParser());
 app.use(cors({
     origin:CLIENTURL,
     methods:["GET","POST","PATCH","DELETE"],

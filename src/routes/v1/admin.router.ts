@@ -13,5 +13,6 @@ router.use((req, res, next) => {
 const adminController = container.resolve<IAdminController>('IAdminController');
 
 router.post('/login',adminController.verifyLogin);
+router.post('/logout',adminController.adminLogout);
 
 export default router;

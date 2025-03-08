@@ -190,10 +190,11 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     }
   }
 
-  async setNewAccessToken(refreshToken: string): Promise<any> {
+  async setNewAccessToken(Token: string): Promise<any> {
     try {
-      const decoded = await verifyRefreshToken(refreshToken);
-      const role = decoded?.role ?? "Service Boy";
+      console.log("wihtin setNewAccessToken serviceBOyAth service")
+      const decoded = await verifyRefreshToken(Token);
+      const role = decoded?.role ?? Role.SERVICE_BOY;
       console.log("sevice boy from setNewAccessToken from service", decoded);
       console.log("role from setNewAccessToken from service", role);
 
@@ -204,12 +205,15 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(
           decoded.email
         );
-      if (!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+      if (!serviceBoy) throw new UnAuthorizedError(ResponseMessage.USER_NOT_FOUND);
+      if(serviceBoy.isBlocked) throw new ValidationError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
 
       const accessToken = await generateAccessToken({ data: serviceBoy, role });
+      const refreshToken = await generateRefreshToken({ data: serviceBoy, role });
       return {
         accessToken,
-        message: ResponseMessage.ACCESS_TOKEN_SET,
+        refreshToken,
+        message: ResponseMessage.TOKEN_SET_SUCCESS,
         success: true,
       };
     } catch (error) {

@@ -15,22 +15,34 @@ export default class AdminService implements IAdminService {
     @inject("IAdminRepository") private adminReposritory: IAdminRepository
   ) {}
 
-  async verifyLogin(email: string, password: string): Promise<LoginResponse<IAdmin,'admin'>> {
+  async verifyLogin(email: string, password: string): Promise<LoginResponse<IAdmin,Role.ADMIN>> {
     try {
       console.log("verifylogin admin service");
-      let admin = await this.adminReposritory.findByEmail({ email });
-      if (!admin)
-        throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
-      const passwordVerified = await compare(password, admin.password);
-      if (passwordVerified)
+      // let admin = await this.adminReposritory.findByEmail({ email });
+      // if (!admin)
+      //   throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+      // const passwordVerified = await compare(password, admin.password);
+const adminPassword = process.env.ADMIN_PASSWORD;
+const  adminEmail= process.env.ADMIN_EMAIL;
+console.log("adminPassword",adminPassword)
+console.log("adminEmail",adminEmail)
+const admin = {
+  _id:"objectId",
+  name:"admin",
+  email:"admin@gmail.com",
+  role:Role.ADMIN
+}
+
+      if (password !== adminPassword || adminEmail !== email ){
         throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
+      } else {
           const role = Role.ADMIN;
                 const accessToken = generateAccessToken({data:admin,role:role});
                 const refreshToken = generateRefreshToken({data:admin,role:role});
                 console.log("refresh token admin",refreshToken);
                 console.log("accessToken token admin",accessToken);
                 return {admin,accessToken,refreshToken};
-
+      }
     } catch (error) {
       throw error;
     }

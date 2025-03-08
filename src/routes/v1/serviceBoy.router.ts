@@ -3,6 +3,7 @@ import { Router } from "express";
 import { IServiceBoyAuthController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoyAuthController"; 
 import { requestBodyValidator } from "../../middleware/requestValidation";
 import { forgotPasswordSchema, loginSchema, resetpasswordSchema, signupSchema } from "../../utils/validationSchema/auth.schema";
+import { authMiddleware } from "../../middleware/authorization";
 
 
 const router = Router();
@@ -27,6 +28,7 @@ router.post('/logout',serviceBoyAuthController.logout)
 
 router.patch('/reset-password', validatePassword, serviceBoyAuthController.resetPassword);
 
-
+//testing purpose
+router.post('/token-test',authMiddleware, serviceBoyAuthController.tokenTest)
 
 export default router;
