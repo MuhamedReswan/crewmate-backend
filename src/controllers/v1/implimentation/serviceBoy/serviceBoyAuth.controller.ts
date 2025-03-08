@@ -131,7 +131,7 @@ export default class ServiceBoyAuthController
       );
       console.log("serviceBoy from login controller", serviceBoy);
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", serviceBoy.accessToken, {
+      res.cookie("refreshToken", serviceBoy.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -311,4 +311,21 @@ if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
       next();
     }
   };
+
+
+
+   tokenTest = (req:Request, res:Response, next:NextFunction): void => {
+    try {
+      res
+      .status(HttpStatusCode.OK)
+      .json(
+        responseHandler(
+          "Test token success",
+          HttpStatusCode.OK,
+          true
+        ))
+    } catch (error) {
+      next()
+    }
+  }
 }

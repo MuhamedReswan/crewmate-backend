@@ -8,11 +8,6 @@ const vendorAuthController = container.resolve<IVendorAuthController>('IVendorAu
 
 const router = Router();
 
-// router.use((req, res, next) => {
-//     console.log(`Incoming vendor request: ${req.method} ${req.url}`);
-//     next();
-//   });
-
 const validateLogin = requestBodyValidator(loginSchema);
 const validateSingUp = requestBodyValidator(signupSchema);
 const validateForgotPassword = requestBodyValidator(forgotPasswordSchema);
@@ -25,8 +20,11 @@ router.post('/login', validateLogin, vendorAuthController.vendorLogin);
 router.post('/forgot-password', validateForgotPassword, vendorAuthController.forgotPassword);
 router.post('/refresh-token',vendorAuthController.setNewAccessToken);
 router.post('/google-auth', vendorAuthController.googleAuth);
+router.post('/logout',vendorAuthController.logout)
+
 
 router.patch('/reset-password', validatePassword, vendorAuthController.resetPassword);
+
 
 
 

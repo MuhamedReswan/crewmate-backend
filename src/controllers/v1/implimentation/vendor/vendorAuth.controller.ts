@@ -62,7 +62,7 @@ res.status(HttpStatusCode.OK)
             const {email, password} = req.body;
            const vendor =  await this.vendorAuthService.vendorLogin(email, password);
            // set access token and refresh token in coockies
-           res.cookie('refreshToken', vendor.accessToken,{
+           res.cookie('refreshToken', vendor.refreshToken,{
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -75,7 +75,7 @@ res.status(HttpStatusCode.OK)
             sameSite: 'lax'
            })
            res.status(HttpStatusCode.OK)
-           .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK))
+           .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK,vendor))
         } catch (error) {
             next(error);
         }
@@ -183,4 +183,28 @@ if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
       next(error);
     }
 }
+
+
+
+logout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      console.log("logout vendor invoked")
+      res.clearCookie("accessToken").clearCookie("refreshToken");
+      res
+        .status(HttpStatusCode.OK)
+        .json(
+          responseHandler(
+            ResponseMessage.LOGOUT_SUCCESS,
+            HttpStatusCode.OK,
+            true
+          )
+        );
+    } catch (error) {
+      next();
+    }
+  };
   };

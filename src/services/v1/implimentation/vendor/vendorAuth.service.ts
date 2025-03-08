@@ -187,7 +187,7 @@ import { Role } from "../../../../constants/Role";
  async setNewAccessToken (refreshToken:string): Promise <CustomTokenResponse>{
     try {
        const decoded =  await verifyRefreshToken(refreshToken);
-       const role = decoded?.role ?? "Vendor";
+       const role = decoded?.role ?? "vendor";
        console.log("vendor from setNewAccessToken from service",decoded);
        console.log("role from setNewAccessToken from service",role);
 

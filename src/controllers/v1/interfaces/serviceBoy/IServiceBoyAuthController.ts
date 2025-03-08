@@ -1,8 +1,11 @@
+import { NextFunction, Request, Response } from "express";
 import { RequestHandler } from "../../../../utils/type"
 export interface ITokenResult {
     accessToken: string;
   }
 
+  interface MiddlewareFunction {
+    (req: Request<any, any, any, any>, res: Response, next: NextFunction): void;  }
 
 export interface IServiceBoyAuthController {
 register:RequestHandler
@@ -13,6 +16,8 @@ setNewAccessToken:RequestHandler
 forgotPassword:RequestHandler
 googleAuth:RequestHandler
 resetPassword:RequestHandler,
-logout:RequestHandler
+logout:RequestHandler,
+
+tokenTest:MiddlewareFunction
 
 }

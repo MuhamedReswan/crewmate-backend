@@ -1,7 +1,10 @@
-import { Document } from "mongoose"
+import { Document, ObjectId } from "mongoose"
+import { Role } from "../../constants/Role";
 
-export default interface IAdmin extends Document{
+export default interface IAdmin {
+_id:string;
 email: string, 
-password: string
+password?: string
 name:string
+role:Role
 }

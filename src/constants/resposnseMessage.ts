@@ -15,7 +15,9 @@ export enum ResponseMessage {
 
   NO_REFRESH_TOKEN = "No refresh token",
   ACCESS_TOKEN_SET = "Access token set successfully",
+  TOKEN_SET_SUCCESS = "Token set succesfully",
   INVALID_REFRESH_TOKEN = "Invalid or expired refresh token",
+  INVALID_ACCESS_TOKEN = "Invalid access token",
 
   LOGOUT_SUCCESS = "logout success",
 
@@ -30,5 +32,8 @@ export enum ResponseMessage {
 
 GOOGLE_AUTH_FAILED = "Authentication failed",
 
-VALIDATION_FAILED = "server side validation failed"
+VALIDATION_FAILED = "server side validation failed",
+USER_BLOCKED_BY_ADMIN = "User is blocked by admin",
+
+INTERNAL_SERVER_ERROR = "Internal server error"
 }
