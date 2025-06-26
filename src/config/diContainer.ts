@@ -12,23 +12,36 @@ import AdminRepository from "../repositories/v1/implimentation/admin/admin.repos
 import AdminService from "../services/v1/implimentation/admin/admin.service";
 import { AdminController } from "../controllers/v1/implimentation/admin/admin.controller";
 import { adminModel } from "../models/v1/admin.model";
+import ServiceBoyService from "../services/v1/implimentation/serviceBoy/serviceBoy.service";
+import ServiceBoyController from "../controllers/v1/implimentation/serviceBoy/serviceBoy.controller";
+import ServiceBoyRepository from "../repositories/v1/implimentation/serviceBoy/serviceBoy.repository";
+import VendorController from "../controllers/v1/implimentation/vendor/vendor.controller";
+import VendorService from "../services/v1/implimentation/vendor/vendor.service";
+import VendorRepository from "../repositories/v1/implimentation/vendor/vendor.repository";
 
 
 // Repository Registration
 container.register("IVendorAuthRepository", VendorAuthRepository);
+container.register("IVendorRepository", VendorRepository);
 container.register("IServiceBoyAuthRepository", ServiceBoyAuthRepository);
+container.register("IServiceBoyRepository", ServiceBoyRepository);
 container.register("IAdminRepository",AdminRepository);
 
 // Service Registrations
 container.register("IVendorAuthService", VendorAuthService);
+container.register("IVendorService",VendorService);
 container.register("IServiceBoyAuthService", ServiceBoyAuthService);
+container.register("IServiceBoyService", ServiceBoyService);
 container.register("IAdminService", AdminService);
 
 
 // Controller Registrations
 container.register("IVendorAuthController", VendorAuthController);
+container.register("IVendorController",VendorController);
 container.register("IServiceBoyAuthController", ServiceBoyAuthController);
+container.register("IServiceBoyController", ServiceBoyController);
 container.register("IAdminController",AdminController);
+
 
 // Model Registrations
 container.register("ServiceBoyModel", { useValue: serviceBoyModel });

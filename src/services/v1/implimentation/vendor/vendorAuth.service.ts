@@ -46,7 +46,7 @@ import { Role } from "../../../../constants/Role";
             if(vendor) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
     
             const otp = createOtp();
-            await setRedisData(`otpV:${email}`, JSON.stringify({otp}),120);
+            await setRedisData(`otpV:${email}`, JSON.stringify({otp}),60);
             const savedOtp = await getRedisData(`otpV:${email}`);
             console.log("savedOtp",savedOtp);
             await sendOtpEmail(email, otp);
@@ -113,7 +113,7 @@ import { Role } from "../../../../constants/Role";
                     const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
                     console.log("vendor login service",vendor);
                 if(!vendor){
-                    throw new NotFoundError("Invalid credentials");
+                    throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
                 }
                 if(!vendor.password) throw new ValidationError("No password in vendor");
                 
@@ -187,7 +187,7 @@ import { Role } from "../../../../constants/Role";
  async setNewAccessToken (refreshToken:string): Promise <CustomTokenResponse>{
     try {
        const decoded =  await verifyRefreshToken(refreshToken);
-       const role = decoded?.role ?? "vendor";
+       const role = decoded?.role === Role.VENDOR ?Role.VENDOR  : Role.VENDOR;
        console.log("vendor from setNewAccessToken from service",decoded);
        console.log("role from setNewAccessToken from service",role);
 
@@ -218,9 +218,7 @@ import { Role } from "../../../../constants/Role";
             method: 'GET',
             headers: { 'Authorization': `Bearer ${googleToken}` }
         });
-    
-        console.log("response vendor service",response);
-    
+        
         if (!response.ok) {
             throw new ValidationError(ResponseMessage.GOOGLE_AUTH_FAILED);
         }

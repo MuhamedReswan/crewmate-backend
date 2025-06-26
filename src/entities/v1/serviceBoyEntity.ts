@@ -1,4 +1,5 @@
-import { Document, ObjectId } from "mongoose";
+import { Document, Types } from "mongoose";
+import { LocationData } from "../../types/type";
 
 export interface UnAvailable {
     date:Date,
@@ -6,7 +7,7 @@ export interface UnAvailable {
 }
 
 export default interface IServiceBoy extends Document {
-    _id:ObjectId;
+    _id:Types.ObjectId;
     name:string, 
     email:string,
     mobile:string,
@@ -15,16 +16,18 @@ export default interface IServiceBoy extends Document {
     profileImage:string,
     isBlocked:boolean,
     aadharNumber:string,
+    aadharImageBack:string,
+    aadharImageFront:string,
     servicerId:string,
     role:string; 
-    location:object,
+    location:LocationData,
     age:number,
     qualification:string,
     points:number,
     servicerID:string,
     offDates:UnAvailable[]
     date:Date,
-    walletId:ObjectId,
-    workHistoryId:ObjectId   
+    walletId:Types.ObjectId,
+    workHistoryId:Types.ObjectId   
 }
 

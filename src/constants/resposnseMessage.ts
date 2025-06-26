@@ -35,5 +35,8 @@ GOOGLE_AUTH_FAILED = "Authentication failed",
 VALIDATION_FAILED = "server side validation failed",
 USER_BLOCKED_BY_ADMIN = "User is blocked by admin",
 
-INTERNAL_SERVER_ERROR = "Internal server error"
+INTERNAL_SERVER_ERROR = "Internal server error",
+
+PROFILE_UPDATED = "Profile updated successfully",
+PROFILE_UPDATION_FAILED = "Profile updation failed",
 }
