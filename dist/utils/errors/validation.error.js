@@ -5,7 +5,7 @@ const custom_error_1 = require("./custom.error");
 class ValidationError extends custom_error_1.CustomError {
     constructor(message) {
         super(message);
-        this.statusCode = 400;
+        this.statusCode = 403;
         this.name = 'validationError';
     }
     serializeErrors() {

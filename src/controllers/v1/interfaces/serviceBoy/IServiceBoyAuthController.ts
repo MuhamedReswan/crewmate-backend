@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { RequestHandler } from "../../../../utils/type"
+import { RequestHandler } from "../../../../types/type"
 export interface ITokenResult {
     accessToken: string;
   }

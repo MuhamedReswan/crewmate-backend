@@ -16,6 +16,8 @@ exports.sendForgotPasswordLink = exports.sendOtpEmail = void 0;
 exports.createOtp = createOtp;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const env_1 = require("../config/env");
+const badRequest_error_1 = require("./errors/badRequest.error");
+const Role_1 = require("../constants/Role");
 const transporter = nodemailer_1.default.createTransport({
     service: 'Gmail',
     auth: {
@@ -24,6 +26,10 @@ const transporter = nodemailer_1.default.createTransport({
     }
 });
 const sendOtpEmail = (email, otp) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("email from sendOtpEmail----", email);
+    if (!email) {
+        throw new badRequest_error_1.BadrequestError("Email is required");
+    }
     const htmlContent = `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -81,7 +87,7 @@ const sendOtpEmail = (email, otp) => __awaiter(void 0, void 0, void 0, function*
     }
     catch (err) {
         console.error('Error sending OTP email:', err);
-        throw new Error('Error sending OTP email');
+        throw new badRequest_error_1.BadrequestError('Error sending OTP email');
     }
 });
 exports.sendOtpEmail = sendOtpEmail;
@@ -89,48 +95,93 @@ function createOtp() {
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
 ;
-const sendForgotPasswordLink = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
+const sendForgotPasswordLink = (email, token, role) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("email from sendForgotPasswordLink----", email);
+    console.log("token from sendForgotPasswordLink----", token);
+    console.log("role from sendForgotPasswordLink----", role);
+    if (!email) {
+        throw new badRequest_error_1.BadrequestError("Email is required");
+    }
+    let userRole;
+    if (role === Role_1.Role.VENDOR) {
+        userRole = 'vendor';
+    }
+    else if (role === Role_1.Role.SERVICE_BOY) {
+        userRole = 'service-boy';
+    }
     const htmlContent = `
-     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Verify your login</title>
-      <!--[if mso]><style type="text/css">body, table, td, a { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
-    </head>
-    <body style="font-family: Helvetica, Arial, sans-serif; margin: 0px; padding: 0px; background-color: #ffffff;">
-      <table role="presentation"
-        style="width: 100%; border-collapse: collapse; border: 0px; border-spacing: 0px; font-family: Arial, Helvetica, sans-serif; background-color: rgb(239, 239, 239);">
-        <tbody>
-          <tr>
-            <td align="center" style="padding: 1rem 2rem; vertical-align: top; width: 100%;">
-              <table role="presentation" style="max-width: 600px; border-collapse: collapse; border: 0px; border-spacing: 0px; text-align: left;">
-                <tbody>
-                  <tr>
-                    <td style="padding: 40px 0px 0px;">
-                      <div style="text-align: left;">
-                        <div style="padding-bottom: 20px;"><img src="https://i.ibb.co/Qbnj4mz/logo.png" alt="Company" style="width: 56px;"></div>
-                      </div>
-                      <div style="padding: 20px; background-color: rgb(255, 255, 255);">
-                        <div style="color: rgb(0, 0, 0); text-align: left;">
-                          http://localhost:3000/api/auth/v1/vendor/register ${token}
-                         
-                        </div>
-                      </div>
-                      <div style="padding-top: 20px; color: rgb(153, 153, 153); text-align: center;">
-                        
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </body>
-    </html>
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Your Crewmate Password</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 5px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color:#4B49AC;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="/api/placeholder/150/50" alt="Crewmate Logo" />
+        </div>
+        <div class="content">
+            <h2>Reset Your Password</h2>
+            <p>Hello,</p>
+            <p>We received a request to reset your password for your Crewmate account. Click the button below to reset it:</p>
+            
+            <div style="text-align: center;">
+                <a href="http://localhost:5173/${userRole}/reset-password/${token}/${email}" class="button">Reset Password</a>
+            </div>
+            
+            <p>If you didn't request this password reset, you can safely ignore this email. The link will expire in 30 minutes.</p>
+            
+            <p>For security reasons, this password reset link can only be used once. If you need to reset your password again, please visit <a href="http://localhost:5173">Crewmate</a> and request another reset.</p>
+            
+            <p>Best regards,<br>The Crewmate Team</p>
+        </div>
+        <div class="footer">
+            <p>This email was sent by Crewmate. Please do not reply to this email.</p>
+            <p>© 2025 Crewmate. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
     `;
     const mailOptions = {
         from: env_1.NODEMAILEREMAIL,
@@ -140,11 +191,11 @@ const sendForgotPasswordLink = (email, token) => __awaiter(void 0, void 0, void 
     };
     try {
         yield transporter.sendMail(mailOptions);
-        console.log('OTP sent successfully');
+        console.log('email sent successfully');
     }
     catch (err) {
         console.error('Error sending OTP email:', err);
-        throw new Error('Error sending OTP email');
+        throw err;
     }
 });
 exports.sendForgotPasswordLink = sendForgotPasswordLink;

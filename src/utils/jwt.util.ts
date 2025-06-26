@@ -1,7 +1,8 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from '../config/env';
 import { UnAuthorizedError } from './errors/unAuthorized.error';
-import { CreateToken } from './type';
+import { CreateToken, JwtPayload } from '../types/type';
+import { Role } from '../constants/Role';
 
 
 const accessTokenSecret = ACCESSTOKENSECRET 
@@ -27,7 +28,7 @@ export const generateRefreshToken = (details:CreateToken ) => {
         console.log(" generateRefreshToken",refreshTokenSecret)
 
         return jwt.sign({id:details.data?._id, email:details.data?.email,
-            name: details.data?.name, role:details.role}, refreshTokenSecret, {expiresIn: '7d'} );
+            name: details.data?.name, role:details.role }, refreshTokenSecret, {expiresIn: '7d'} );
     } catch (error) {
         throw error;
     }
@@ -52,9 +53,9 @@ try {
     if(!refreshTokenSecret){
         throw new Error('Refrsesh token secret in not defined')
     }
-          const tested = jwt.decode(token, { complete: true }) as JwtPayload;
-          console.log("rrrrrrrrrrrrrrrrrrrrrr",tested);
-          console.log(" verifyRefreshToken",refreshTokenSecret)
+        //   const tested = jwt.decode(token, { complete: true }) as JwtPayload;
+        //   console.log("rrrrrrrrrrrrrrrrrrrrrr",tested);
+        //   console.log(" verifyRefreshToken",refreshTokenSecret)
 
     
     const decoded = jwt.verify(token, refreshTokenSecret) as JwtPayload;

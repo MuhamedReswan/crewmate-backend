@@ -12,10 +12,12 @@ const env_1 = require("./config/env");
 const connectDB_1 = require("./config/connectDB");
 const cors_1 = __importDefault(require("cors"));
 const errorHandler_1 = require("./middleware/errorHandler");
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const app = (0, express_1.default)();
+app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
     origin: env_1.CLIENTURL,
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));

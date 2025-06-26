@@ -1,4 +1,4 @@
-import { RequestHandler } from "../../../../utils/type";
+import { RequestHandler } from "../../../../types/type";
 
 export interface IAdminController {
     verifyLogin: RequestHandler,

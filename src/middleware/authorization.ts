@@ -7,6 +7,14 @@ import { container } from "tsyringe";
 import { IServiceBoyAuthService } from "../services/v1/interfaces/serviceBoy/IServiceBoyAuthService";
 import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuthService";
 import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
+// import { JwtPayload } from "../types/type";
+
+
+
+// Extend Express Request type
+// export interface AuthenticatedRequest extends Request {
+//   user?: JwtPayload;
+// }
 
 // Resolve services from container
 const serviceBoyAuthService = container.resolve<IServiceBoyAuthService>(
@@ -23,10 +31,10 @@ export const authMiddleware = async (
 ) => {
   try {
     console.log("Middleware request--------------", req.cookies);
-    console.log(
-      "Middleware authorization------------",
-      req.headers["authorization"]
-    );
+    // console.log(
+    //   "Middleware authorization------------",
+    //   req.headers["authorization"]
+    // );
 
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
@@ -36,9 +44,12 @@ export const authMiddleware = async (
     // If access token exists, try verifying it
     if (accessToken) {
       const verfiedAccessToken = await verifyAccessToken(accessToken);
+      console.log("verfiedAccessToken", verfiedAccessToken )
       if (verfiedAccessToken) {
+        // req.user = { ...verfiedAccessToken } 
+        // console.log("req.user auth", req.user);
         return next();
-      }
+      }         
     }
 
     // If no access token or it's invalid, check for refresh token
@@ -73,6 +84,13 @@ export const authMiddleware = async (
         if (tokenRecreate) {
           // Set new refresh token and acesstoken in cookie
           console.log("tokenRecreate", tokenRecreate);
+
+      //     const verfiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
+      // console.log("verfiedAccessToken2", verfiedAccessToken )
+      // if (verfiedAccessToken) {
+      //   req.user = { ...verfiedAccessToken } 
+      //   console.log("req.user auth2", req.user);
+      // }
           res.cookie("refreshToken", tokenRecreate.refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",

@@ -21,23 +21,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -71,6 +61,7 @@ const validation_error_1 = require("../../../../utils/errors/validation.error");
 const jwt_util_1 = require("../../../../utils/jwt.util");
 const unAuthorized_error_1 = require("../../../../utils/errors/unAuthorized.error");
 const crypto = __importStar(require("crypto"));
+const Role_1 = require("../../../../constants/Role");
 let ServiceBoyAuthService = class ServiceBoyAuthService {
     constructor(serviceBoyAuthRepository) {
         this.forgotPassword = (email) => __awaiter(this, void 0, void 0, function* () {
@@ -78,8 +69,8 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 const serviceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
                 if (!serviceBoy)
                     throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
-                const token = crypto.randomBytes(8).toString('hex');
-                yield (0, redis_util_1.setRedisData)(`forgotToken:${email}`, token, 1800);
+                const token = crypto.randomBytes(8).toString("hex");
+                yield (0, redis_util_1.setRedisData)(`forgotToken-SB:${email}`, token, 1800);
                 return token;
             }
             catch (error) {
@@ -88,40 +79,49 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
         });
         this.resetPasswordTokenVerify = (email, token) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const forgotTokenData = yield (0, redis_util_1.getRedisData)(`forgotToken:${email}`);
-                console.log("forgotTokenData from boy service", forgotTokenData);
+                const forgotTokenData = yield (0, redis_util_1.getRedisData)(`forgotToken-SB:${email}`);
                 if (!forgotTokenData) {
                     throw new expired_error_1.ExpiredError(resposnseMessage_1.ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
                 }
                 if (forgotTokenData != token) {
                     throw new validation_error_1.ValidationError(resposnseMessage_1.ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN);
                 }
+                yield (0, redis_util_1.deleteRedisData)(`forgotToken-SB:${email}`);
             }
             catch (error) {
                 throw error;
             }
         });
-        this.googleRegister = (data) => __awaiter(this, void 0, void 0, function* () {
+        this.googleAuth = (data) => __awaiter(this, void 0, void 0, function* () {
             try {
-                if (!data.email)
-                    throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.INVALID_INPUT);
-                const existingServiceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
-                if (existingServiceBoy) {
-                    throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.EMAIL_ALREADY_USED);
+                const { googleToken } = data;
+                const response = yield fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${googleToken}` }
+                });
+                if (!response.ok) {
+                    throw new validation_error_1.ValidationError('google login falied');
                 }
-                yield this.serviceBoyAuthRepository.createServiceBoy(data);
-            }
-            catch (error) {
-                throw error;
-            }
-        });
-        this.googleLogin = (data) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                const serviceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(data.email);
-                console.log("service boy from repository google login", serviceBoy);
+                const responseData = yield response.json();
+                console.log("responseData", responseData);
+                let serviceBoy;
+                serviceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(responseData.email);
                 if (!serviceBoy) {
-                    throw new Error(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
+                    let { name, email, email_verified: isVerified, picture: profileImage } = responseData;
+                    console.log("name before lowercase", name);
+                    name = name.toLowerCase();
+                    console.log("name after lowercase", name);
+                    serviceBoy = yield this.serviceBoyAuthRepository.createServiceBoy({ name, email, isVerified, profileImage });
                 }
+                if (!serviceBoy)
+                    return;
+                const role = Role_1.Role.SERVICE_BOY;
+                const accessToken = (0, jwt_util_1.generateAccessToken)({ data: serviceBoy, role: role });
+                const refreshToken = (0, jwt_util_1.generateRefreshToken)({
+                    data: serviceBoy,
+                    role: role,
+                });
+                return { serviceBoy, accessToken, refreshToken };
             }
             catch (error) {
                 throw error;
@@ -136,9 +136,9 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 throw error;
             }
         });
-        this.resetPasswordLink = (token, email) => __awaiter(this, void 0, void 0, function* () {
+        this.resetPasswordLink = (email, token, role) => __awaiter(this, void 0, void 0, function* () {
             try {
-                yield (0, otp_util_1.sendForgotPasswordLink)(email, token);
+                yield (0, otp_util_1.sendForgotPasswordLink)(email, token, role);
             }
             catch (error) {
                 throw error;
@@ -193,12 +193,12 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 const savedOtp = yield (0, redis_util_1.getRedisData)(`otpB:${email}`);
                 console.log("savedOtp", savedOtp);
                 if (!savedOtp)
-                    throw new expired_error_1.ExpiredError('OTP expired');
+                    throw new expired_error_1.ExpiredError("OTP expired");
                 const { otp: savedOtpValue } = JSON.parse(savedOtp);
                 console.log("savedOtpValue", savedOtpValue);
                 console.log("otp", otp);
                 if (otp !== savedOtpValue)
-                    throw new validation_error_1.ValidationError('Invalid OTP');
+                    throw new validation_error_1.ValidationError("Invalid OTP");
                 let deleteotp = yield (0, redis_util_1.deleteRedisData)(`otpB:${email}`);
                 console.log("deleteotp", deleteotp);
                 let serviceBoyData = yield (0, redis_util_1.getRedisData)(`serviceBoy:${email}`);
@@ -210,6 +210,7 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                     const servicerId = `A-${number}`;
                     serviceBoyDataObject.password = yield (0, password_util_1.hashPassword)(serviceBoyDataObject.password);
                     serviceBoyDataObject.servicerId = servicerId;
+                    serviceBoyDataObject.name = serviceBoyDataObject.name.toLowerCase();
                     let createdBoy = yield this.serviceBoyAuthRepository.createServiceBoy(serviceBoyDataObject);
                     if (!createdBoy) {
                         throw new badRequest_error_1.BadrequestError(resposnseMessage_1.ResponseMessage.USER_NOT_CREATED);
@@ -217,6 +218,7 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                     number++;
                     console.log("createdBoy from service", createdBoy);
                     yield (0, redis_util_1.deleteRedisData)(`serviceBoy:${email}`);
+                    return createdBoy;
                 }
             }
             catch (error) {
@@ -231,15 +233,18 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 const serviceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
                 console.log("serviceBoy login service", serviceBoy);
                 if (!serviceBoy) {
-                    throw new notFound_error_1.NotFoundError("Invalid credentials");
+                    throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.INVALID_CREDINTIALS);
                 }
                 const validPassword = yield bcrypt_1.default.compare(password, serviceBoy.password);
                 if (!validPassword)
-                    throw new validation_error_1.ValidationError("Invalid credentials");
+                    throw new validation_error_1.ValidationError(resposnseMessage_1.ResponseMessage.INVALID_CREDINTIALS);
                 console.log("validPassword login service", validPassword);
-                const role = 'Service Boy';
+                const role = Role_1.Role.SERVICE_BOY;
                 const accessToken = (0, jwt_util_1.generateAccessToken)({ data: serviceBoy, role: role });
-                const refreshToken = (0, jwt_util_1.generateRefreshToken)({ data: serviceBoy, role: role });
+                const refreshToken = (0, jwt_util_1.generateRefreshToken)({
+                    data: serviceBoy,
+                    role: role,
+                });
                 console.log("refresh token", refreshToken);
                 console.log("accessToken token", accessToken);
                 return { serviceBoy, accessToken, refreshToken };
@@ -252,6 +257,9 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
     resendOtp(email) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(`"email from resend otp service":${email}`);
+                const redisData = yield (0, redis_util_1.getRedisData)(`otpB${email}`);
+                console.log("redisData from resend otp service", redisData);
                 yield (0, redis_util_1.deleteRedisData)(`otpB${email}`);
                 const otp = (0, otp_util_2.createOtp)();
                 yield (0, redis_util_1.setRedisData)(`otpB:${email}`, JSON.stringify({ otp }), 120);
@@ -264,12 +272,12 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
             }
         });
     }
-    setNewAccessToken(refreshToken) {
+    setNewAccessToken(Token) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
             try {
-                const decoded = yield (0, jwt_util_1.verifyRefreshToken)(refreshToken);
-                const role = (_a = decoded === null || decoded === void 0 ? void 0 : decoded.role) !== null && _a !== void 0 ? _a : "Service Boy";
+                console.log("wihtin setNewAccessToken serviceBOyAth service");
+                const decoded = yield (0, jwt_util_1.verifyRefreshToken)(Token);
+                const role = (decoded === null || decoded === void 0 ? void 0 : decoded.role) === Role_1.Role.SERVICE_BOY ? Role_1.Role.SERVICE_BOY : Role_1.Role.SERVICE_BOY;
                 console.log("sevice boy from setNewAccessToken from service", decoded);
                 console.log("role from setNewAccessToken from service", role);
                 if (!decoded || !decoded.email) {
@@ -277,11 +285,15 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 }
                 const serviceBoy = yield this.serviceBoyAuthRepository.findServiceBoyByEmail(decoded.email);
                 if (!serviceBoy)
-                    throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
-                const accessToken = yield (0, jwt_util_1.generateAccessToken)({ data: serviceBoy, role });
+                    throw new unAuthorized_error_1.UnAuthorizedError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
+                if (serviceBoy.isBlocked)
+                    throw new validation_error_1.ValidationError(resposnseMessage_1.ResponseMessage.USER_BLOCKED_BY_ADMIN);
+                const accessToken = yield (0, jwt_util_1.generateAccessToken)({ data: serviceBoy, role: Role_1.Role.SERVICE_BOY });
+                const refreshToken = yield (0, jwt_util_1.generateRefreshToken)({ data: serviceBoy, role: Role_1.Role.SERVICE_BOY });
                 return {
                     accessToken,
-                    message: resposnseMessage_1.ResponseMessage.ACCESS_TOKEN_SET,
+                    refreshToken,
+                    message: resposnseMessage_1.ResponseMessage.TOKEN_SET_SUCCESS,
                     success: true,
                 };
             }

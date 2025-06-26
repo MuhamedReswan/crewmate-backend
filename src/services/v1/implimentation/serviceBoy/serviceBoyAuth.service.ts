@@ -194,8 +194,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     try {
       console.log("wihtin setNewAccessToken serviceBOyAth service")
       const decoded = await verifyRefreshToken(Token);
-      const role = decoded?.role ?? Role.SERVICE_BOY;
-      console.log("sevice boy from setNewAccessToken from service", decoded);
+      const role = decoded?.role === Role.SERVICE_BOY ? Role.SERVICE_BOY : Role.SERVICE_BOY;
+            console.log("sevice boy from setNewAccessToken from service", decoded);
       console.log("role from setNewAccessToken from service", role);
 
       if (!decoded || !decoded.email) {
@@ -206,10 +206,10 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           decoded.email
         );
       if (!serviceBoy) throw new UnAuthorizedError(ResponseMessage.USER_NOT_FOUND);
-      if(serviceBoy.isBlocked) throw new ValidationError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
+      if(serviceBoy.isBlocked) throw new ValidationError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
 
-      const accessToken = await generateAccessToken({ data: serviceBoy, role });
-      const refreshToken = await generateRefreshToken({ data: serviceBoy, role });
+      const accessToken = await generateAccessToken({ data: serviceBoy, role:Role.SERVICE_BOY });
+      const refreshToken = await generateRefreshToken({ data: serviceBoy, role:Role.SERVICE_BOY });
       return {
         accessToken,
         refreshToken,
@@ -264,7 +264,6 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         headers: { 'Authorization': `Bearer ${googleToken}` }
     });
 
-    console.log("response",response);
 
     if (!response.ok) {
         throw new ValidationError('google login falied');

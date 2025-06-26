@@ -9,8 +9,9 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "outDir": "./dist",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "typeRoots": ["./node_modules/@types", "./src/types"],
     },
-    "include": ["src/**/*.ts", "src/middleware/authe"],
+    "include": ["src/**/*.ts", "src/middleware/*.ts","src/types/*.ts"],
     "exclude": ["node_modules"]
 }

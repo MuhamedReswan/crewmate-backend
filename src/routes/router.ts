@@ -1,7 +1,9 @@
 import { Router } from "express";
-import v1ServiceBoyAuthRouter from "./v1/serviceBoy.router";
-import v1VendorAuthRouter from "./v1/vendor.router";
+import v1ServiceBoyAuthRouter from "./v1/serviceBoyAuth.router";
+import v1ServiceBoyRouter from "./v1/serviceBoy.router";
+import v1VendorAuthRouter from "./v1/vendorAuth.router";
 import v1AdminAuthRouter from "./v1/admin.router";
+import v1VendorRouter from "./v1/vendor.router";
 // import { authMiddleware } from "../middleware/authorization";
 
 
@@ -11,9 +13,11 @@ router.use((req, res, next) => {
     next();
   });
 
-router.use('/api/v1/auth/service-boy', v1ServiceBoyAuthRouter);
-router.use('/api/v1/auth/vendor', v1VendorAuthRouter);
-router.use('/api/v1/auth/admin',v1AdminAuthRouter);
+  router.use('/api/v1/auth/service-boy', v1ServiceBoyAuthRouter);
+  router.use('/api/v1/auth/vendor', v1VendorAuthRouter);
+  router.use('/api/v1/auth/admin',v1AdminAuthRouter);
+  router.use('/api/v1/service-boy', v1ServiceBoyRouter);
+  router.use('/api/v1/vendor', v1VendorRouter);
 
 
 
