@@ -11,6 +11,7 @@ import {
   generateRefreshToken,
 } from "../../../../utils/jwt.util";
 import { Role } from "../../../../constants/Role";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
 export default class ServiceBoyAuthController
@@ -32,9 +33,10 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { name, email, password, mobile } = req.body;
-      console.log("req.body register controller", req.body);
+logger.debug("Register controller received: " + JSON.stringify(req.body));
       await this.serviceBoyAuthService.register(name, email, password, mobile);
       await this.serviceBoyAuthService.generateOTP(email);
+           logger.info(`OTP generated and sent to email: ${email}`);
       res
         .status(HttpStatusCode.CREATED)
         .json(
@@ -45,6 +47,7 @@ export default class ServiceBoyAuthController
           )
         );
     } catch (error) {
+      logger.error("Service Boy Register error: " + error);
       next(error);
     }
   };
@@ -56,9 +59,9 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { email, otp } = req.body;
-      console.log("req.body on controller", req.body);
+            logger.info(`Verifying OTP for email: ${email}`);
       let serviceBoy = await this.serviceBoyAuthService.verifyOTP(email, otp);
-      console.log("verifyotp", serviceBoy);
+      logger.debug("verifyOTP result: " + JSON.stringify(serviceBoy));
       if (serviceBoy) {
         const role = Role.SERVICE_BOY;
         const accessToken = generateAccessToken({
@@ -69,8 +72,7 @@ export default class ServiceBoyAuthController
           data: serviceBoy,
           role: role,
         });
-        console.log("refresh token", refreshToken);
-        console.log("accessToken token", accessToken);
+         logger.info(`OTP verified. Access and Refresh tokens generated for: ${email}`);
         res
           .status(HttpStatusCode.OK)
           .json(
@@ -91,6 +93,7 @@ export default class ServiceBoyAuthController
           );
       }
     } catch (error) {
+      logger.error(" Service Boy OTP Verification error", error);
       next(error);
     }
   };
@@ -102,8 +105,7 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { email } = req.body;
-      console.log("email from resend otp controller", email);
-
+      logger.info(`Resending OTP to email: ${email}`);
       await this.serviceBoyAuthService.resendOtp(email);
       res
         .status(HttpStatusCode.OK)
@@ -114,6 +116,7 @@ export default class ServiceBoyAuthController
           })
         );
     } catch (error) {
+      logger.error("Service Boy Resend OTP error", error);
       next(error);
     }
   };
@@ -129,7 +132,6 @@ export default class ServiceBoyAuthController
         email,
         password
       );
-      console.log("serviceBoy from login controller", serviceBoy);
       // set access token and refresh token in coockies
       res.cookie("refreshToken", serviceBoy.refreshToken, {
         httpOnly: true,
@@ -143,6 +145,7 @@ export default class ServiceBoyAuthController
         maxAge: 15 * 60 * 1000,
         sameSite: "lax",
       });
+      logger.info(`Login success for email: ${email}`);
       res
         .status(HttpStatusCode.OK)
         .json(
@@ -153,6 +156,7 @@ export default class ServiceBoyAuthController
           )
         );
     } catch (error) {
+      logger.error("Service Boy Login error", error);
       next(error);
     }
   };
@@ -165,6 +169,7 @@ export default class ServiceBoyAuthController
     try {
       const refreshToken = req.cookies?.refreshToken;
       if (!refreshToken) {
+         logger.warn("No refresh token found in cookies");
         res
           .status(HttpStatusCode.UNAUTHORIZED)
           .json(
@@ -177,19 +182,20 @@ export default class ServiceBoyAuthController
       const result = await this.serviceBoyAuthService.setNewAccessToken(
         refreshToken
       );
-      console.log("result of new access token form controller", result);
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 3600000,
         sameSite: "strict",
       });
+      logger.info("New access token set successfully");
       res
         .status(HttpStatusCode.OK)
         .json(
           responseHandler(ResponseMessage.ACCESS_TOKEN_SET, HttpStatusCode.OK)
         );
     } catch (error) {
+       logger.error("Set New Access Token error", error);
       next(error);
     }
   };
@@ -201,6 +207,7 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { email } = req.body;
+      logger.info(`Forgot password request for email: ${email}`);
       const forgotToken = await this.serviceBoyAuthService.forgotPassword(
         email
       );
@@ -216,6 +223,7 @@ export default class ServiceBoyAuthController
           )
         );
     } catch (error) {
+      logger.error("Forgot password error", error);
       next(error);
     }
   };
@@ -227,6 +235,7 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { email, password, token } = req.body;
+        logger.info(`Resetting password for email: ${email}`);
       if (token) {
         await this.serviceBoyAuthService.resetPasswordTokenVerify(
           email,
@@ -245,6 +254,7 @@ export default class ServiceBoyAuthController
           )
         );
     } catch (error) {
+            logger.error("Reset password error", error);
       next(error);
     }
   };
@@ -257,12 +267,11 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { googleToken } = req.body;
-      console.log("googleToken",googleToken);
-      const serviceBoy = await this.serviceBoyAuthService.googleAuth({googleToken});
-      console.log("serviceBoyInfo",serviceBoy);
+      logger.info("Google login token received");
+        const serviceBoy = await this.serviceBoyAuthService.googleAuth({googleToken});
+      logger.debug("Google auth result: " + JSON.stringify(serviceBoy));
 if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
-      console.log("serviceBoy from google login controller", serviceBoy);
       // set access token and refresh token in coockies
       res.cookie("refreshToken", serviceBoy.accessToken, {
         httpOnly: true,
@@ -286,6 +295,7 @@ if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           )
         );
     } catch (error) {
+      logger.error("Google login error", error);
       next(error);
     }
   };
@@ -296,7 +306,6 @@ if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log("logout service boy invoked")
       res.clearCookie("accessToken").clearCookie("refreshToken");
       res
         .status(HttpStatusCode.OK)
@@ -308,7 +317,8 @@ if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           )
         );
     } catch (error) {
-      next();
+        logger.error("Logout error", error);
+      next(error);
     }
   };
 
@@ -325,7 +335,8 @@ if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           true
         ))
     } catch (error) {
-      next()
+       logger.error("Token test error", error);
+      next(error)
     }
   }
 }

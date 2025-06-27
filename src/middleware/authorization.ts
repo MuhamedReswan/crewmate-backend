@@ -7,6 +7,7 @@ import { container } from "tsyringe";
 import { IServiceBoyAuthService } from "../services/v1/interfaces/serviceBoy/IServiceBoyAuthService";
 import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuthService";
 import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
+import logger from "../utils/logger.util";
 // import { JwtPayload } from "../types/type";
 
 
@@ -30,7 +31,7 @@ export const authMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    console.log("Middleware request--------------", req.cookies);
+    logger.info("Auth middleware triggered");
     // console.log(
     //   "Middleware authorization------------",
     //   req.headers["authorization"]
@@ -38,13 +39,13 @@ export const authMiddleware = async (
 
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
-    console.log("accessToken", accessToken);
-    console.log("refreshToken", refreshToken);
+    logger.debug(`Access token present: ${!!accessToken}`);
+    logger.debug(`Refresh token present: ${!!refreshToken}`);
 
     // If access token exists, try verifying it
     if (accessToken) {
       const verfiedAccessToken = await verifyAccessToken(accessToken);
-      console.log("verfiedAccessToken", verfiedAccessToken )
+      logger.info("Access token verified");
       if (verfiedAccessToken) {
         // req.user = { ...verfiedAccessToken } 
         // console.log("req.user auth", req.user);
@@ -54,6 +55,7 @@ export const authMiddleware = async (
 
     // If no access token or it's invalid, check for refresh token
     if (!refreshToken) {
+            logger.warn("No refresh token provided");
       res
         .status(HttpStatusCode.UNAUTHORIZED)
         .json(
@@ -62,7 +64,7 @@ export const authMiddleware = async (
             HttpStatusCode.UNAUTHORIZED
           )
         );
-      return; // Ensure we stop here
+      return; 
     } else {
 
       try {
@@ -78,12 +80,12 @@ export const authMiddleware = async (
         } else if (originalUrl.includes("/admin")) {
           // tokenRecreate = await adminService.setNewToken(refreshToken)
         } else {
-          console.log("url nor include the specifed role in auth middlware");
+        logger.warn("Unknown role in URL path:", { url: originalUrl });
         }
 
         if (tokenRecreate) {
           // Set new refresh token and acesstoken in cookie
-          console.log("tokenRecreate", tokenRecreate);
+        logger.info("New token generated for refresh");
 
       //     const verfiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
       // console.log("verfiedAccessToken2", verfiedAccessToken )
@@ -104,7 +106,7 @@ export const authMiddleware = async (
             sameSite: "lax",
           });
 
-          next();
+        return  next();
         }
       } catch (error) {
         res.clearCookie("refreshToken", {
@@ -126,11 +128,11 @@ export const authMiddleware = async (
               HttpStatusCode.UNAUTHORIZED
             )
           );
-        return; // Ensure we stop here
+        return; 
       }
     }
   } catch (error) {
-    console.error("Middleware error:", error);
+    logger.error("Auth middleware error", { error });
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
       .json(
@@ -140,6 +142,6 @@ export const authMiddleware = async (
         )
       );
   }
-  return; // Ensure we stop here
+  return; 
 };
 

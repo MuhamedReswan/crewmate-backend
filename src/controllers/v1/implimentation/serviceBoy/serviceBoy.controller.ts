@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
+import logger from "../../../../utils/logger.util";
 
 export interface IServiceBoyController{
     loadProfile:RequestHandler
@@ -18,10 +19,10 @@ export default class ServiceBoyController implements IServiceBoyController{
 
  loadProfile = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
         try {
-console.log("req.body",req);
-
+logger.info("req.body of service boy",req)
         } catch (error) {
-            console.log("loadProfile error",error);
+logger.error("ServiceBoyController: loadProfile error", { error });
+            next(error)
         }
     }
 
@@ -30,11 +31,11 @@ console.log("req.body",req);
 
 updateProfile  = async(req:any, res:Response, next:NextFunction):Promise<void> => {
     try {
-        console.log("req.body-----------------------",req.body);
-        console.log("req.file",req.files);
-        console.log("req.user",req.user);
-        // console.log("updateProfilereq",req?.user);
-        
+         logger.info("ServiceBoyController: updateProfile called", {
+        body: req.body,
+        files: req.files,
+        user: req.user,
+      });        
         const updatedProfile = await this.serviceBoyService.updateProfile(req.body,req.files);
         if(updatedProfile){
             res.status(200).json(responseHandler( ResponseMessage.PROFILE_UPDATED,HttpStatusCode.OK, updatedProfile));
@@ -42,7 +43,8 @@ updateProfile  = async(req:any, res:Response, next:NextFunction):Promise<void> =
             res.status(400).json(responseHandler( ResponseMessage.PROFILE_UPDATION_FAILED,HttpStatusCode.BAD_REQUEST));
         }
     } catch (error) {
-        
+              logger.error("ServiceBoyController: updateProfile error", { error });
+        next(error)
     }
 }
 

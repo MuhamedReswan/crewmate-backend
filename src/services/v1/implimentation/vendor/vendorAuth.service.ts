@@ -17,6 +17,7 @@ import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import { GoogleLogin, LoginResponse,Register } from "../../../../entities/v1/authenticationEntity";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { Role } from "../../../../constants/Role";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
     export default class VendorAuthService implements IVendorAuthService {
@@ -25,14 +26,13 @@ import { Role } from "../../../../constants/Role";
 
     async register(name: string, email: string, password: string, mobile: string): Promise<void> {
         try {
-            console.log("vendorAut register got");
+            logger.info("Vendor registration attempt", { email });
             const existingVendor = await this.vendorAuthRepository.findVendorByEmail(email);
-            console.log("existingVendor",existingVendor);
             if(existingVendor) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
             
             await setRedisData(`vendor:${email}`,JSON.stringify({name,email,password,mobile}),3600)
             const registerFromRedis = await getRedisData(`vendor:${email}`);
-            console.log("registerFromRedis vendor auth",registerFromRedis);
+          logger.debug("Vendor data stored in Redis", { email });
         } catch (error) {
           throw error;  
         }
@@ -48,11 +48,10 @@ import { Role } from "../../../../constants/Role";
             const otp = createOtp();
             await setRedisData(`otpV:${email}`, JSON.stringify({otp}),60);
             const savedOtp = await getRedisData(`otpV:${email}`);
-            console.log("savedOtp",savedOtp);
+            logger.debug("Saved OTP from generateOTP", { savedOtp });
             await sendOtpEmail(email, otp);
     
             } catch (error) {
-               console.log(error); 
                throw error;
             } 
         };
@@ -60,33 +59,25 @@ import { Role } from "../../../../constants/Role";
         async verifyOTP(email: string, otp: string): Promise<void> {
             try {
                 console.log("within verify otp in vendor authservice");
-                console.log(`email:${email},otp:${otp} serivce`);
-        
+                logger.debug("Verifying OTP in service", { email, otp });        
                 const savedOtp = await getRedisData(`otpV:${email}`);
-                console.log("savedOtp",savedOtp)
+                logger.debug("Saved OTP from Redis", { savedOtp });
                 if(!savedOtp) throw new ExpiredError(ResponseMessage.OTP_EXPIRED)
             
                 const {otp: savedOtpValue} = JSON.parse(savedOtp);
-                console.log("savedOtpValue",savedOtpValue);
-                console.log("otp",otp);
                 if(otp !== savedOtpValue) throw new BadrequestError(ResponseMessage.INVALID_OTP);
     
-                const deleteOtp = await deleteRedisData(`otpV:${email}`);
-                console.log("deleteotp",deleteOtp);
-                
+                await deleteRedisData(`otpV:${email}`);
+                logger.debug("OTP deleted from Redis", { email });                
                const vendorData  = await getRedisData(`vendor:${email}`)
-               console.log("vendorData  from serivice",vendorData);
                if(vendorData){
-                 const vendorDataObject = JSON.parse(vendorData);
-                 console.log("parsed vendorData  from serivice",vendorDataObject);
-    
+                 const vendorDataObject = JSON.parse(vendorData);    
                  vendorDataObject.password = await hashPassword(vendorDataObject.password);
-                const createdVendor = await this.vendorAuthRepository.createVendor(vendorDataObject);
-                console.log("createdVendor from service",createdVendor);
+                await this.vendorAuthRepository.createVendor(vendorDataObject);
+                logger.info("Vendor created from Redis data", { email });
                  await deleteRedisData(`vendor:${email}`); 
               }
             } catch (error) {
-                console.log(error);
                 throw error;
             }
         };
@@ -98,8 +89,8 @@ import { Role } from "../../../../constants/Role";
                 await deleteRedisData(`otpV${email}`);
                 const otp = createOtp();
                 await setRedisData(`otpV:${email}`, JSON.stringify({otp}),60);
+                logger.debug("OTP resent and saved in Redis", { email, otp, otpTime: new Date() });
                 let savedOtp = await getRedisData(`otpV:${email}`);
-                console.log("savedOtp",savedOtp);
                 await sendOtpEmail(email, otp);    
             } catch (error) {
                 throw error
@@ -111,20 +102,16 @@ import { Role } from "../../../../constants/Role";
                async vendorLogin(email: string, password: string): Promise<LoginResponse<IVendor,'vendor'>> {
                 try {
                     const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
-                    console.log("vendor login service",vendor);
                 if(!vendor){
                     throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
                 }
-                if(!vendor.password) throw new ValidationError("No password in vendor");
+                if(!vendor.password) throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
                 
                 const validPassword = await bcrypt.compare(password,vendor.password);
                 if(!validPassword)throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
-                    console.log("validPassword login service",validPassword);
                     const role = Role.VENDOR;
                     const accessToken = generateAccessToken({ role, data: vendor });
                     const refreshToken = generateRefreshToken({ role, data: vendor });
-                    console.log("refresh token",refreshToken);
-                    console.log("accessToken token",accessToken);
         return {vendor,accessToken,refreshToken};
                 } catch (error) {
                     throw error;
@@ -148,7 +135,6 @@ import { Role } from "../../../../constants/Role";
                resetPasswordTokenVerify = async (email:string, token:string): Promise<void> =>{
                 try {
                   const  forgotTokenData = await getRedisData(`forgotToken:${email}`);
-                  console.log("forgotTokenData from boy service",forgotTokenData);
                   if(!forgotTokenData){
                     throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
                   }
@@ -176,8 +162,8 @@ import { Role } from "../../../../constants/Role";
 
                resetPasswordLink = async (token:string,email:string,role:Role): Promise<void>=>{
                    try {
-                    console.log("email form vendor service",email,token);
-                       await sendForgotPasswordLink(email,token,role);
+                        logger.info("Sending reset password link", { email, role });
+                        await sendForgotPasswordLink(email,token,role);
                    } catch (error) {
                        throw error;
                    }
@@ -188,8 +174,6 @@ import { Role } from "../../../../constants/Role";
     try {
        const decoded =  await verifyRefreshToken(refreshToken);
        const role = decoded?.role === Role.VENDOR ?Role.VENDOR  : Role.VENDOR;
-       console.log("vendor from setNewAccessToken from service",decoded);
-       console.log("role from setNewAccessToken from service",role);
 
        if(!decoded || !decoded.email ){
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
@@ -212,7 +196,7 @@ import { Role } from "../../../../constants/Role";
       googleAuth = async (data: GoogleLogin): Promise<LoginResponse<IVendor, Role.VENDOR> | undefined> => {
         try {
           const {googleToken} = data;
-          console.log("googleToken vendor in service",googleToken);
+          logger.info("Google auth started");
     
           const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             method: 'GET',
@@ -224,22 +208,19 @@ import { Role } from "../../../../constants/Role";
         }
         
         const responseData = await response.json();
-        console.log("responseData",responseData);
-    let vendor;
+        let vendor;
         vendor = await this.vendorAuthRepository.findVendorByEmail(responseData.email);   
     
         if(!vendor){
             let {name,email, email_verified:isVerified,picture:profileImage } = responseData;
-            console.log("name before lowercase",name);
             name= name.toLowerCase()
-            console.log("name after lowercase",name);
              vendor = await this.vendorAuthRepository.createVendor(
               {name,email,isVerified,profileImage}
             );
           }
-    
+ 
          if(!vendor) return
-    
+
         const role = Role.VENDOR;
         const accessToken = generateAccessToken({ data: vendor, role: role });
         const refreshToken = generateRefreshToken({
@@ -250,7 +231,5 @@ import { Role } from "../../../../constants/Role";
         } catch (error) {
           throw error;
         }
-      };
-
-        
+      };   
 }

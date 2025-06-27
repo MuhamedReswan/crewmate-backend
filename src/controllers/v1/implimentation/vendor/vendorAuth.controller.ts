@@ -8,6 +8,7 @@ import { IVendorAuthService } from "../../../../services/v1/interfaces/vendor/IV
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { sendForgotPasswordLink } from "../../../../utils/otp.util";
 import { Role } from "../../../../constants/Role";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
 export default class VendorAuthController implements IVendorAuthController{
@@ -19,14 +20,14 @@ export default class VendorAuthController implements IVendorAuthController{
     register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { name, email, password, mobile } = req.body;
-            console.log("req.body register controller",req.body);
              await this.vendorAuthService.register( name, email, password, mobile );
              await this.vendorAuthService.generateOTP(email);
             res
-            .status(HttpStatusCode.OK)
-            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.OK,{email}));
+            .status(HttpStatusCode.CREATED)
+            .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.CREATED,{email}));
         } catch (error) {
-            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message: 'Internal Server Error'});
+                logger.error("Vendor registration failed", { error });
+       next(error);
         }
     };
 
@@ -34,12 +35,13 @@ export default class VendorAuthController implements IVendorAuthController{
     verifyOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { email, otp } = req.body;
-            console.log("req.body on controller",req.body);
+      logger.info("Verifying OTP for vendor", { email });
            let verify =  await this.vendorAuthService.verifyOTP(email, otp); 
-           console.log("verifyotp",verify)
+      logger.debug("OTP verified result", { verify });
             res.status(HttpStatusCode.CREATED)
             .json(responseHandler(ResponseMessage.OTP_VERIFICATION_SUCCESS,HttpStatusCode.CREATED))
         } catch (error) {
+                logger.error("Vendor OTP verification failed", { error });
             next(error);
         }
     };
@@ -48,10 +50,12 @@ export default class VendorAuthController implements IVendorAuthController{
     resendOtp = async (req: Request, res:Response, next: NextFunction):Promise<void> => {
         try {
             const {email} = req.body;
+                  logger.info("Resending OTP to vendor", { email });
 await this.vendorAuthService.resendOtp(email);
 res.status(HttpStatusCode.OK)
 .json(responseHandler(ResponseMessage.RESEND_OTP_SEND,HttpStatusCode.OK));
         } catch (error) {
+                logger.error("Resend OTP failed", { error });
             next(error)
         }
     };
@@ -77,6 +81,7 @@ res.status(HttpStatusCode.OK)
            res.status(HttpStatusCode.OK)
            .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK,vendor))
         } catch (error) {
+                logger.error("Vendor login failed", { error });
             next(error);
         }
     };
@@ -86,6 +91,7 @@ res.status(HttpStatusCode.OK)
     forgotPassword =  async (req:Request, res:Response, next:NextFunction): Promise<void> => {
             try {
                 const {email} = req.body;
+                      logger.info("Vendor forgot password request", { email });
               const forgotToken = await this.vendorAuthService.forgotPassword(email);
               if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
                  await this.vendorAuthService.resetPasswordLink(forgotToken,email,Role.VENDOR);
@@ -93,6 +99,7 @@ res.status(HttpStatusCode.OK)
     .json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
           
             } catch (error) {
+            logger.error("Forgot password process failed", { error });
                 next(error);
             }
         };
@@ -110,6 +117,7 @@ res.status(HttpStatusCode.OK)
                res.status(HttpStatusCode.OK)
                .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS,HttpStatusCode.OK));
             } catch (error) {
+                    logger.error("Reset password failed", { error });
                 next(error);
             }
         };
@@ -119,6 +127,7 @@ resetPasswordLink = async (token:string,email:string,role:Role): Promise<void>=>
     try {
         await sendForgotPasswordLink(email,token,role);
     } catch (error) {
+      logger.error("Error sending password reset link", { error });
         throw error;
     }
 };
@@ -129,16 +138,17 @@ setNewAccessToken = async (req:Request, res:Response, next:NextFunction): Promis
     try {
         const refreshToken = req.cookies?.refreshToken;
         if(!refreshToken){
+          logger.warn("No refresh token provided");
          res.status(HttpStatusCode.UNAUTHORIZED)
         .json(responseHandler(ResponseMessage.NO_REFRESH_TOKEN,HttpStatusCode.UNAUTHORIZED))
         }
         const result = await this.vendorAuthService.setNewAccessToken(refreshToken);
-        console.log("result of new access token form controller",result);
         res.cookie('accessToken',result.accessToken,
              { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000, sameSite: 'strict' });
               res.status(HttpStatusCode.OK)
              .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET,HttpStatusCode.OK));
             } catch (error) {
+                    logger.error("Setting new access token failed", { error });
                 next(error)
     }
 };
@@ -151,14 +161,12 @@ googleAuth = async (
   ): Promise<void> => {
     try {
       const { googleToken } = req.body;
-      console.log("googleToken vendoer",googleToken);
+      logger.info("Google auth started for vendor");
       const vendor = await this.vendorAuthService.googleAuth({googleToken});
-      console.log("vendorInfo",vendor);
 if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
-      console.log("vendor from google login controller", vendor);
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", vendor.accessToken, {
+      res.cookie("refreshToken", vendor.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -180,6 +188,7 @@ if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           )
         );
     } catch (error) {
+            logger.error("Vendor Google auth failed", { error });
       next(error);
     }
 }
@@ -204,7 +213,8 @@ logout = async (
           )
         );
     } catch (error) {
-      next();
+            logger.error("Vendor Logout failed", { error });
+      next(error);
     }
   };
   };

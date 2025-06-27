@@ -6,6 +6,7 @@ import { IServiceBoyAuthRepository } from "../../interfaces/serviceBoy/IServiceB
 import { Model } from "mongoose";
 import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
 export default class serviceBoyAuthRepository
@@ -19,9 +20,9 @@ export default class serviceBoyAuthRepository
 
     async findServiceBoyByEmail(email: string): Promise<IServiceBoy | null>{
         try {
+            logger.info(`Finding service boy by email: ${email}`)
             return await this.findOne({email});
         } catch (error) {
-            console.log(error);
             throw error
         }
     };
@@ -29,14 +30,10 @@ export default class serviceBoyAuthRepository
 
 async createServiceBoy(serviceBoyData: Partial<IServiceBoy>): Promise<IServiceBoy | null>{
     try {
-        console.log("createServiceBoy got");
-        console.log("serviceBoyData",serviceBoyData);
     
         let serviceBoyDetails =  await this.create(serviceBoyData);
-        console.log("serviceBoyDetails",serviceBoyDetails);
         return serviceBoyDetails;
     } catch (error) {
-        console.log("error from createServiceBoy repository",error)
         throw error
     }
 }
