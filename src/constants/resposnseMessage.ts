@@ -31,6 +31,7 @@ export enum ResponseMessage {
   RESET_PASSWORD_SUCCESS = "Password changed successfully",
 
 GOOGLE_AUTH_FAILED = "Authentication failed",
+USE_GOOGLE_AUTH = "Account was created using Google. Please use Google Sign-In.",
 
 VALIDATION_FAILED = "server side validation failed",
 USER_BLOCKED_BY_ADMIN = "User is blocked by admin",
@@ -39,4 +40,7 @@ INTERNAL_SERVER_ERROR = "Internal server error",
 
 PROFILE_UPDATED = "Profile updated successfully",
 PROFILE_UPDATION_FAILED = "Profile updation failed",
+
+ADMIN_CREDENTIAL_FAILED_TO_SET = "Admin credentials are not set in environment variables",
+ADMIN_CREDENTIALS_NOT_CONFIGURED = "Admin credentials not configured",
 }

@@ -6,6 +6,7 @@ import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import logger from "../../../../utils/logger.util";
 @injectable()
 export class AdminController implements IAdminController {
   constructor(@inject("IAdminService") private adminService: IAdminService) {}
@@ -16,22 +17,24 @@ export class AdminController implements IAdminController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log("within admin login controller");
+      logger.info("Admin login attempt", { email: req.body.email });
       const { email, password } = req.body;
       const admin = await this.adminService.verifyLogin(email, password);
-      if(!admin) throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
-      console.log("admin from login controller", admin);
+      if(!admin){
+        logger.warn("Invalid admin credentials", { email });
+        throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
+      } 
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", admin.accessToken, {
+      res.cookie("refreshToken", admin.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         sameSite: "lax",
       });
       res.cookie("accessToken", admin.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 15 * 60 * 1000,
+        maxAge: 15 * 60 * 1000, // 15 minutes
         sameSite: "lax",
       });
       res
@@ -40,7 +43,7 @@ export class AdminController implements IAdminController {
           responseHandler(ResponseMessage.LOGIN_SUCCESS, HttpStatusCode.OK,admin)
         );
     } catch (error) {
-      console.log("admin login error",error);
+      logger.error("Admin login error", { error });
       next(error);
     }
   };
@@ -53,7 +56,7 @@ export class AdminController implements IAdminController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log("logout admin invoked")
+      logger.info("Admin logout invoked");
       res.clearCookie("accessToken").clearCookie("refreshToken");
       res
         .status(HttpStatusCode.OK)
@@ -65,7 +68,8 @@ export class AdminController implements IAdminController {
           )
         );
     } catch (error) {
-      next();
+            logger.error("Admin logout error", { error });
+      next(error);
     }
   };
 }

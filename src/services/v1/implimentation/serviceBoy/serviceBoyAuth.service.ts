@@ -34,6 +34,7 @@ import {
   Register,
 } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -53,25 +54,21 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     mobile: string
   ): Promise<void> {
     try {
-      console.log("ServiceBoyServie register got");
       const existingServiceBoy =
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
-      console.log("existingServiceBoy", existingServiceBoy);
       if (existingServiceBoy) {
-        console.log("bad request thrown");
-        throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
+ logger.warn(`Email already used: ${email}`);
+         throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
       }
       let setServiceBoyData = await setRedisData(
         `serviceBoy:${email}`,
         JSON.stringify({ name, email, password, mobile }),
         3600
       );
-      console.log("setServiceBoyData", setServiceBoyData);
       let registerFromRedis = await getRedisData(`serviceBoy:${email}`);
-      console.log("registerFromRedis", registerFromRedis);
+ logger.info(`Registration data cached for ${email}`);
     } catch (error) {
-      console.log("bad ");
-      throw error;
+       throw error;
     }
   }
 
@@ -83,41 +80,32 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
       const otp = createOtp();
-      await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 120);
-      let savedOtp = await getRedisData(`otpB:${email}`);
-      console.log("savedOtp", savedOtp);
+      await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 60);
       await sendOtpEmail(email, otp);
+       logger.info(`OTP sent to ${email}`);
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
 
   async verifyOTP(email: string, otp: string): Promise<IServiceBoy | void> {
     try {
-      console.log("within verify otp in service");
-      console.log(`email:${email},otp:${otp} serivce`);
-
+     logger.info(`Verifying OTP for: ${email}`);
+    logger.debug(`Incoming OTP data`, { email, otp });
       const savedOtp = await getRedisData(`otpB:${email}`);
-      console.log("savedOtp", savedOtp);
+logger.debug(`Fetched saved OTP from Redis`, { savedOtp });
       if (!savedOtp) throw new ExpiredError("OTP expired");
 
       const { otp: savedOtpValue } = JSON.parse(savedOtp);
-      console.log("savedOtpValue", savedOtpValue);
-      console.log("otp", otp);
+ logger.debug(`Parsed savedOtpValue`, { savedOtpValue });
       if (otp !== savedOtpValue) throw new ValidationError("Invalid OTP");
 
       let deleteotp = await deleteRedisData(`otpB:${email}`);
-      console.log("deleteotp", deleteotp);
 
       let serviceBoyData = await getRedisData(`serviceBoy:${email}`);
-      console.log("serviceBoyData  from serivice", serviceBoyData);
       if (serviceBoyData) {
         let serviceBoyDataObject = JSON.parse(serviceBoyData);
-        console.log(
-          "parsed serviceBoyData  from serivice",
-          serviceBoyDataObject
-        );
+      logger.debug("Parsed serviceBoyData from service", { serviceBoyDataObject });
 
         let number = 1;
         const servicerId = `A-${number}`;
@@ -134,12 +122,10 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           throw new BadrequestError(ResponseMessage.USER_NOT_CREATED);
         }
         number++;
-        console.log("createdBoy from service", createdBoy);
         await deleteRedisData(`serviceBoy:${email}`);
         return createdBoy;
       }
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -151,21 +137,17 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     try {
       const serviceBoy =
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
-      console.log("serviceBoy login service", serviceBoy);
-      if (!serviceBoy) {
-        throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
+       if (!serviceBoy || !serviceBoy.password || !(await bcrypt.compare(password, serviceBoy.password))) {
+        logger.warn(`Invalid credentials for email: ${email}`);
+        throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
       }
-      const validPassword = await bcrypt.compare(password, serviceBoy.password);
-      if (!validPassword) throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
-      console.log("validPassword login service", validPassword);
+   
       const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({ data: serviceBoy, role: role });
       const refreshToken = generateRefreshToken({
         data: serviceBoy,
         role: role,
       });
-      console.log("refresh token", refreshToken);
-      console.log("accessToken token", accessToken);
       return { serviceBoy, accessToken, refreshToken };
     } catch (error) {
       throw error;
@@ -174,29 +156,23 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   async resendOtp(email: string): Promise<void> {
     try {
-      console.log(`"email from resend otp service":${email}`);
-
-      const redisData = await getRedisData(`otpB${email}`);
-      console.log("redisData from resend otp service", redisData);
-
+      logger.info(`Resend OTP for email service layer: ${email}`);
+     await getRedisData(`otpB${email}`);
       await deleteRedisData(`otpB${email}`);
       const otp = createOtp();
-      await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 120);
-      let savedOtp = await getRedisData(`otpB:${email}`);
-      console.log("savedOtp", savedOtp);
+      await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 60);
+      await getRedisData(`otpB:${email}`);
       await sendOtpEmail(email, otp);
     } catch (error) {
+            logger.error("Resend OTP error service layer", error);
       throw error;
     }
   }
 
   async setNewAccessToken(Token: string): Promise<any> {
     try {
-      console.log("wihtin setNewAccessToken serviceBOyAth service")
       const decoded = await verifyRefreshToken(Token);
       const role = decoded?.role === Role.SERVICE_BOY ? Role.SERVICE_BOY : Role.SERVICE_BOY;
-            console.log("sevice boy from setNewAccessToken from service", decoded);
-      console.log("role from setNewAccessToken from service", role);
 
       if (!decoded || !decoded.email) {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
@@ -210,6 +186,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
       const accessToken = await generateAccessToken({ data: serviceBoy, role:Role.SERVICE_BOY });
       const refreshToken = await generateRefreshToken({ data: serviceBoy, role:Role.SERVICE_BOY });
+            logger.info(`New tokens generated for: ${decoded.email}`);
       return {
         accessToken,
         refreshToken,
@@ -257,8 +234,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   googleAuth = async (data: GoogleLogin): Promise<LoginResponse<IServiceBoy, Role.SERVICE_BOY> | undefined> => {
     try {
+            logger.info("Google auth initiated");
       const {googleToken} = data;
-
       const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${googleToken}` }
@@ -270,15 +247,12 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     }
     
     const responseData = await response.json();
-    console.log("responseData",responseData);
 let serviceBoy;
     serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(responseData.email);   
 
     if(!serviceBoy){
         let {name,email, email_verified:isVerified,picture:profileImage } = responseData;
-        console.log("name before lowercase",name);
         name= name.toLowerCase()
-        console.log("name after lowercase",name);
          serviceBoy = await this.serviceBoyAuthRepository.createServiceBoy(
           {name,email,isVerified,profileImage}
         );
