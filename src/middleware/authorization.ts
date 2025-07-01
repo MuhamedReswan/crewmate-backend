@@ -32,11 +32,7 @@ export const authMiddleware = async (
 ) => {
   try {
     logger.info("Auth middleware triggered");
-    // console.log(
-    //   "Middleware authorization------------",
-    //   req.headers["authorization"]
-    // );
-
+  
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
     logger.debug(`Access token present: ${!!accessToken}`);
@@ -47,8 +43,6 @@ export const authMiddleware = async (
       const verfiedAccessToken = await verifyAccessToken(accessToken);
       logger.info("Access token verified");
       if (verfiedAccessToken) {
-        // req.user = { ...verfiedAccessToken } 
-        // console.log("req.user auth", req.user);
         return next();
       }         
     }
@@ -78,6 +72,7 @@ export const authMiddleware = async (
             refreshToken
           );
         } else if (originalUrl.includes("/admin")) {
+             logger.info("within authorization originalUrl.includes(/admin)");
           // tokenRecreate = await adminService.setNewToken(refreshToken)
         } else {
         logger.warn("Unknown role in URL path:", { url: originalUrl });

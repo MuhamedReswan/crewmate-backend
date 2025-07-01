@@ -43,7 +43,7 @@ export class AdminController implements IAdminController {
           responseHandler(ResponseMessage.LOGIN_SUCCESS, HttpStatusCode.OK,admin)
         );
     } catch (error) {
-      logger.error("Admin login error", { error });
+      logger.error("Admin login error", error );
       next(error);
     }
   };
@@ -68,7 +68,7 @@ export class AdminController implements IAdminController {
           )
         );
     } catch (error) {
-            logger.error("Admin logout error", { error });
+            logger.error("Admin logout error", error );
       next(error);
     }
   };

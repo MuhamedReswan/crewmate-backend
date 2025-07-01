@@ -32,9 +32,11 @@ import {
   GoogleLogin,
   LoginResponse,
   Register,
+  ServiceBoyLoginResponse,
 } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
+import { mapToServiceBoyLoginDTO } from "../../../../utils/mapper.util";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -133,15 +135,21 @@ logger.debug(`Fetched saved OTP from Redis`, { savedOtp });
   async serviceBoyLogin(
     email: string,
     password: string
-  ): Promise<LoginResponse<IServiceBoy, Role.SERVICE_BOY>> {
+  ): Promise<ServiceBoyLoginResponse> {
     try {
-      const serviceBoy =
+      let serviceBoyData =
         await this.serviceBoyAuthRepository.findServiceBoyByEmail(email);
-       if (!serviceBoy || !serviceBoy.password || !(await bcrypt.compare(password, serviceBoy.password))) {
-        logger.warn(`Invalid credentials for email: ${email}`);
-        throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
-      }
+
+         const isValidPassword =
+      serviceBoyData?.password && (await bcrypt.compare(password, serviceBoyData.password));
+
+    if (!serviceBoyData || !isValidPassword) {
+      logger.warn(`Invalid credentials for email: ${email}`);
+      throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
+    }
    
+ const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
+    
       const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({ data: serviceBoy, role: role });
       const refreshToken = generateRefreshToken({
@@ -164,7 +172,6 @@ logger.debug(`Fetched saved OTP from Redis`, { savedOtp });
       await getRedisData(`otpB:${email}`);
       await sendOtpEmail(email, otp);
     } catch (error) {
-            logger.error("Resend OTP error service layer", error);
       throw error;
     }
   }
@@ -172,6 +179,7 @@ logger.debug(`Fetched saved OTP from Redis`, { savedOtp });
   async setNewAccessToken(Token: string): Promise<any> {
     try {
       const decoded = await verifyRefreshToken(Token);
+      logger.debug("decodedrole",{decoded})
       const role = decoded?.role === Role.SERVICE_BOY ? Role.SERVICE_BOY : Role.SERVICE_BOY;
 
       if (!decoded || !decoded.email) {
@@ -232,7 +240,7 @@ logger.debug(`Fetched saved OTP from Redis`, { savedOtp });
   };
 
 
-  googleAuth = async (data: GoogleLogin): Promise<LoginResponse<IServiceBoy, Role.SERVICE_BOY> | undefined> => {
+  googleAuth = async (data: GoogleLogin): Promise<ServiceBoyLoginResponse | undefined> => {
     try {
             logger.info("Google auth initiated");
       const {googleToken} = data;
@@ -247,19 +255,19 @@ logger.debug(`Fetched saved OTP from Redis`, { savedOtp });
     }
     
     const responseData = await response.json();
-let serviceBoy;
-    serviceBoy = await this.serviceBoyAuthRepository.findServiceBoyByEmail(responseData.email);   
+let serviceBoyData;
+    serviceBoyData = await this.serviceBoyAuthRepository.findServiceBoyByEmail(responseData.email);   
 
-    if(!serviceBoy){
-        let {name,email, email_verified:isVerified,picture:profileImage } = responseData;
+    if(!serviceBoyData){
+        let {name,email,picture:profileImage } = responseData;
+        let isVerified = false;
         name= name.toLowerCase()
-         serviceBoy = await this.serviceBoyAuthRepository.createServiceBoy(
+         serviceBoyData = await this.serviceBoyAuthRepository.createServiceBoy(
           {name,email,isVerified,profileImage}
         );
       }
 
-     if(!serviceBoy) return
-
+      const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
     const role = Role.SERVICE_BOY;
     const accessToken = generateAccessToken({ data: serviceBoy, role: role });
     const refreshToken = generateRefreshToken({

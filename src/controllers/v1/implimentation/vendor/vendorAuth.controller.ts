@@ -26,7 +26,7 @@ export default class VendorAuthController implements IVendorAuthController{
             .status(HttpStatusCode.CREATED)
             .json(responseHandler(ResponseMessage.REGISTER_SUCCESS,HttpStatusCode.CREATED,{email}));
         } catch (error) {
-                logger.error("Vendor registration failed", { error });
+                logger.error("Vendor registration failed", error );
        next(error);
         }
     };
@@ -41,7 +41,7 @@ export default class VendorAuthController implements IVendorAuthController{
             res.status(HttpStatusCode.CREATED)
             .json(responseHandler(ResponseMessage.OTP_VERIFICATION_SUCCESS,HttpStatusCode.CREATED))
         } catch (error) {
-                logger.error("Vendor OTP verification failed", { error });
+                logger.error("Vendor OTP verification failed", error );
             next(error);
         }
     };
@@ -55,7 +55,7 @@ await this.vendorAuthService.resendOtp(email);
 res.status(HttpStatusCode.OK)
 .json(responseHandler(ResponseMessage.RESEND_OTP_SEND,HttpStatusCode.OK));
         } catch (error) {
-                logger.error("Resend OTP failed", { error });
+                logger.error("Resend OTP failed", error );
             next(error)
         }
     };
@@ -81,7 +81,7 @@ res.status(HttpStatusCode.OK)
            res.status(HttpStatusCode.OK)
            .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK,vendor))
         } catch (error) {
-                logger.error("Vendor login failed", { error });
+                logger.error("Vendor login failed", error );
             next(error);
         }
     };
@@ -99,7 +99,7 @@ res.status(HttpStatusCode.OK)
     .json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
           
             } catch (error) {
-            logger.error("Forgot password process failed", { error });
+            logger.error("Forgot password process failed", error );
                 next(error);
             }
         };
@@ -117,7 +117,7 @@ res.status(HttpStatusCode.OK)
                res.status(HttpStatusCode.OK)
                .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS,HttpStatusCode.OK));
             } catch (error) {
-                    logger.error("Reset password failed", { error });
+                    logger.error("Reset password failed", error );
                 next(error);
             }
         };
@@ -127,7 +127,7 @@ resetPasswordLink = async (token:string,email:string,role:Role): Promise<void>=>
     try {
         await sendForgotPasswordLink(email,token,role);
     } catch (error) {
-      logger.error("Error sending password reset link", { error });
+      logger.error("Error sending password reset link", error );
         throw error;
     }
 };
@@ -148,7 +148,7 @@ setNewAccessToken = async (req:Request, res:Response, next:NextFunction): Promis
               res.status(HttpStatusCode.OK)
              .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET,HttpStatusCode.OK));
             } catch (error) {
-                    logger.error("Setting new access token failed", { error });
+                    logger.error("Setting new access token failed", error );
                 next(error)
     }
 };
@@ -188,7 +188,7 @@ if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           )
         );
     } catch (error) {
-            logger.error("Vendor Google auth failed", { error });
+            logger.error("Vendor Google auth failed", error );
       next(error);
     }
 }
@@ -201,7 +201,6 @@ logout = async (
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log("logout vendor invoked")
       res.clearCookie("accessToken").clearCookie("refreshToken");
       res
         .status(HttpStatusCode.OK)
@@ -213,7 +212,7 @@ logout = async (
           )
         );
     } catch (error) {
-            logger.error("Vendor Logout failed", { error });
+            logger.error("Vendor Logout failed", error );
       next(error);
     }
   };
