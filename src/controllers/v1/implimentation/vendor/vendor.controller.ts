@@ -34,7 +34,7 @@ export default class VendorController implements IVendorController{
                     res.status(400).json(responseHandler( ResponseMessage.PROFILE_UPDATION_FAILED,HttpStatusCode.BAD_REQUEST));
                 }
  }catch(error){
-         logger.error("Error while updating vendor profile", { error});
+         logger.error("Error while updating vendor profile", error );
       next(error);
        }
      }

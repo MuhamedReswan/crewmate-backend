@@ -1,3 +1,4 @@
+import { ServiceBoyLoginDTO } from "../../dtos/serviceBoy.dto";
 import IServiceBoy from "./serviceBoyEntity";
 import IVendor from "./vendorEntity";
 
@@ -19,7 +20,7 @@ export interface BaseTokenResponse {
   }
 
   export  interface ServiceBoyLoginResponse {
-    serviceBoy: IServiceBoy; 
+    serviceBoy: ServiceBoyLoginDTO; 
     accessToken: string;
     refreshToken: string;
   }

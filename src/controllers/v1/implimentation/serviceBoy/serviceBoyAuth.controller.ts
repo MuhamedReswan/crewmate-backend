@@ -273,7 +273,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
 if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", serviceBoy.accessToken, {
+      res.cookie("refreshToken", serviceBoy.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000,

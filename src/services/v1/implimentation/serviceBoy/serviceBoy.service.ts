@@ -5,12 +5,16 @@ import { resizeImage } from "../../../../utils/sharp.util";
 import { ImageFiles, LocationData } from "../../../../types/type";
 import s3 from "../../../../utils/s3.util";
 import mongoose from "mongoose";
+import logger from "../../../../utils/logger.util";
 
 export interface IServiceBoyService {
   updateProfile(
     data: Partial<IServiceBoy>,
     files: any
-  ): Promise<IServiceBoy | undefined>;
+  ): Promise<IServiceBoy | undefined>
+  
+
+  LoadProfile (_id:Partial<IServiceBoy>):Promise<IServiceBoy | undefined> 
 }
 
 @injectable()
@@ -20,16 +24,26 @@ export default class ServiceBoyService implements IServiceBoyService {
     private serviceBoyRepository: IServiceBoyRepository
   ) {}
 
+
+  LoadProfile = async(_id:Partial<IServiceBoy>):Promise<IServiceBoy | undefined> => {
+    try {
+const serviceBoyProfile = await this.serviceBoyRepository.loadProfile(_id)
+return serviceBoyProfile
+       } catch (error) {
+      throw error;
+    }
+  };
+
+
+
+
   updateProfile = async (
     data: Partial<IServiceBoy>,
     files: ImageFiles
   ): Promise<IServiceBoy | undefined> => {
     try {
-      console.log("servicefiles", files);
-      console.log("test=========================data",data);
-      console.log(" Profile Image:", files.profileImage);
-      console.log("Aadhar Front:", files.aadharImageFront);
-      console.log(" Aadhar Back:", files.aadharImageBack);
+    logger.debug("Received profile update files", { files });
+      logger.debug("Initial profile update data", { data });
 
       const resizeAndAssignBuffer = async (
         imageArray?: { buffer: Buffer }[]
@@ -86,18 +100,18 @@ export default class ServiceBoyService implements IServiceBoyService {
           data.name
         );
       }
-      console.log("data before process location----------------------------------------- ", data);
+      logger.debug("Profile update data before location parsing", { data });
 
       if (typeof data.location === "string") {
         try {
           data.location = JSON.parse(data.location);
         } catch (error) {
-          console.error("Failed to parse location:", error);
+          logger.warn("Invalid location JSON string", { location: data.location, error });
           data.location = undefined; // Handle invalid location gracefully
         }
       }
 
-      console.log("data after process location----------------------------------- ", data);
+      logger.debug("Final profile update data", { data });
 
       const _id = data._id;
       delete data._id;
@@ -106,11 +120,11 @@ export default class ServiceBoyService implements IServiceBoyService {
         data
       );
 
-      console.log("updatedProfile service", updatedProfile);
+      logger.debug("Updated profile data", { updatedProfile });
       return updatedProfile;
     } catch (error) {
-      console.log("updateProfile service error", error);
       throw error;
     }
+  }
   };
-}
+

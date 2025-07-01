@@ -2,10 +2,12 @@ import { inject, injectable } from "tsyringe";
 import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { Model } from "mongoose";
+import logger from "../../../../utils/logger.util";
 
 
 export interface IServiceBoyRepository{
   updateProfile(id:Partial<IServiceBoy>, data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined>
+  loadProfile(id:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>
 }
 
 @injectable()
@@ -16,19 +18,34 @@ export default class ServiceBoyRepository extends BaseRepository<IServiceBoy> im
 
   async updateProfile(_id:Partial<IServiceBoy>,data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined> {
     try {
-      console.log("id from serviceboy repository",_id);
+   logger.debug("ID from ServiceBoyRepository.updateProfile", { _id });
+  logger.debug("Profile update data", { data });
 
 const updatedProfile = await this.updateOne(_id ,data);
-console.log("updatedProfile-----------------",updatedProfile);
-      console.log("data", data);
+logger.debug("Updated profile", { updatedProfile });
 
       if(updatedProfile){
         return updatedProfile;
       }
       return;
     } catch (error) {
-      console.error("Error updating profile:", error);
       throw error;
     }
   }
+
+async loadProfile(_id:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
+  try{
+const serviceBoyProfile = await  this.findOne(_id);
+
+logger.debug("serviceBoyProfile", { serviceBoyProfile });
+
+if(serviceBoyProfile) return serviceBoyProfile;
+return;
+
+   } catch (error) {
+      throw error;
+    }
+  
+}
+  
 }

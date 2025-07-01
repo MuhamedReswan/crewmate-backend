@@ -14,7 +14,7 @@ const uploadFields = upload.fields([
     { name: "profileImage", maxCount: 1 }, 
   ]);
 
-router.get('/profile',serviceBoyController.loadProfile);
+router.get('/profile/:id',serviceBoyController.loadProfile);
 
 router.post('/profile',authMiddleware,uploadFields,serviceBoyController.updateProfile);
 

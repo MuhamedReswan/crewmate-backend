@@ -27,7 +27,6 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 const  adminEmail= process.env.ADMIN_EMAIL;
 
   if (!adminEmail || !adminPassword) {
-        logger.error(ResponseMessage.ADMIN_CREDENTIAL_FAILED_TO_SET);
         throw new Error(ResponseMessage.ADMIN_CREDENTIALS_NOT_CONFIGURED);
       }
 

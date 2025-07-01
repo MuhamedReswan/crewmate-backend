@@ -28,10 +28,11 @@ export default class serviceBoyAuthRepository
     };
 
 
-async createServiceBoy(serviceBoyData: Partial<IServiceBoy>): Promise<IServiceBoy | null>{
+async createServiceBoy(serviceBoyData: Partial<IServiceBoy>): Promise<IServiceBoy>{
     try {
     
         let serviceBoyDetails =  await this.create(serviceBoyData);
+        logger.debug("serviceBoy created successfully", { serviceBoyDetails });
         return serviceBoyDetails;
     } catch (error) {
         throw error
@@ -47,6 +48,7 @@ async updateServiceBoyPassword(email:string, password:string): Promise<void>  {
         );
 
  if(!updatedServiceBoy){
+     logger.warn("Service boy not found during password update", { email });
 throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
  }
     } catch (error) {

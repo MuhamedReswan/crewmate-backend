@@ -10,6 +10,7 @@ import { Register } from "../../../../entities/v1/authenticationEntity";
 import { inject, injectable } from "tsyringe";
 import { Model } from "mongoose";
 import { partialUtil } from "zod/lib/helpers/partialUtil";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
 export default class VendorAuthRepository extends BaseRepository<IVendor> implements IVendorAuthRepository { 
@@ -18,23 +19,29 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
     }
     async findVendorByEmail(email: string): Promise<IVendor | null>{
         try {
-            return await vendorModel.findOne({email});
+
+             logger.info("Finding vendor by email", { email });
+      const vendor = await vendorModel.findOne({ email });
+
+      if (!vendor) {
+        logger.warn("No vendor found with given email", { email });
+      }
+
+      return vendor;
         } catch (error) {
-            console.log(error);
             throw error
         }
     };
 
 
-    async createVendor(vendorData: Partial<IVendor>): Promise<void>{
+    async createVendor(vendorData: Partial<IVendor>): Promise<IVendor>{
         try {
-            console.log("vendor got");
-            console.log("vendorData",vendorData);
+          logger.info("Creating vendor", { vendorData });
         
             let vendorDetails =  await this.create(vendorData);
-            console.log("vendorDetails from repo create",vendorDetails)
+            logger.debug("Vendor created successfully", { vendorDetails });
+            return vendorDetails
         } catch (error) {
-            console.log("error from createServiceBoy repository",error)
             throw error
         }
     };
@@ -46,7 +53,7 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
             const otp = createOtp();
             await setRedisData(`otpV:${email}`, JSON.stringify({otp}),120);
             let savedOtp = await getRedisData(`otpV:${email}`);
-            console.log("savedOtpV",savedOtp);
+      logger.debug("Saved OTP for vendor", { email, otp, savedOtp });
             await sendOtpEmail(email, otp);    
         } catch (error) {
             throw error
@@ -62,6 +69,7 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
                    );
            
             if(!updatedServiceBoy){
+            logger.warn("Vendor not found during password update", { email });
            throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
             }
                } catch (error) {

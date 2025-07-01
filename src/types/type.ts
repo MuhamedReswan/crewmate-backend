@@ -13,9 +13,9 @@ export type RequestHandler<
 ) => Promise<TReturn>;
 
 export type CreateToken = 
-| { role: Role.SERVICE_BOY; data: IServiceBoy }
-| { role: Role.ADMIN; data: IAdmin }
-| { role: Role.VENDOR; data: IVendor };
+| { role: Role.SERVICE_BOY; data: Partial<IServiceBoy> }
+| { role: Role.ADMIN; data: Partial<IAdmin> }
+| { role: Role.VENDOR; data: Partial<IVendor> };
 
 
 // export type UploadedFile = {

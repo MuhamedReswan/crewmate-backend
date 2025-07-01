@@ -58,7 +58,6 @@ import logger from "../../../../utils/logger.util";
 
         async verifyOTP(email: string, otp: string): Promise<void> {
             try {
-                console.log("within verify otp in vendor authservice");
                 logger.debug("Verifying OTP in service", { email, otp });        
                 const savedOtp = await getRedisData(`otpV:${email}`);
                 logger.debug("Saved OTP from Redis", { savedOtp });
@@ -208,19 +207,19 @@ import logger from "../../../../utils/logger.util";
         }
         
         const responseData = await response.json();
+        logger.info("google Auth vendor details", responseData)
         let vendor;
         vendor = await this.vendorAuthRepository.findVendorByEmail(responseData.email);   
     
         if(!vendor){
-            let {name,email, email_verified:isVerified,picture:profileImage } = responseData;
+            let {name,email, picture:profileImage } = responseData;
+            let isVerified= false
             name= name.toLowerCase()
              vendor = await this.vendorAuthRepository.createVendor(
               {name,email,isVerified,profileImage}
             );
           }
  
-         if(!vendor) return
-
         const role = Role.VENDOR;
         const accessToken = generateAccessToken({ data: vendor, role: role });
         const refreshToken = generateRefreshToken({
