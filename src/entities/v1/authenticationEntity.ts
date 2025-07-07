@@ -1,6 +1,5 @@
-import { ServiceBoyLoginDTO } from "../../dtos/serviceBoy.dto";
-import IServiceBoy from "./serviceBoyEntity";
-import IVendor from "./vendorEntity";
+import { ServiceBoyLoginDTO } from "../../dtos/v1/serviceBoy.dto";
+import { VendorLoginDTO } from "../../dtos/v1/vendor.dto";
 
  export interface Register {
     name?:string,
@@ -25,7 +24,7 @@ export interface BaseTokenResponse {
     refreshToken: string;
   }
   export  interface VendorLoginResponse {
-    vendor: IVendor; 
+    vendor: VendorLoginDTO; 
     accessToken: string;
     refreshToken: string;
   }

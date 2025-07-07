@@ -1,15 +1,20 @@
-import { ObjectId } from "mongoose";
+;
+import { Types } from "mongoose";
 import { LocationData } from "../../types/type";
 
-export default interface IVendor extends Document {
-    _id?:ObjectId;
-    name?:string, 
+export default interface IVendor {
+    _id:Types.ObjectId;
+    name:string, 
     email:string,
-    mobile?:string,
-    password?:string,
-    isVerified?:boolean,
-    profileImage?:string
-    licenceImage?:string,
-    licenceNumber?:string,
-    location?:LocationData
+    mobile:string,
+    password:string,
+    isVerified:boolean,
+    isBlocked:boolean,
+    profileImage:string,
+    licenceImage:string,
+    licenceNumber:string,
+    estd:string,
+    instaId:string,
+    location?:LocationData,
+    role:string; 
 }

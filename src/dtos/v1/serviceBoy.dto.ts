@@ -1,7 +1,6 @@
-import { Types } from "mongoose";
 
 export interface ServiceBoyLoginDTO {
-  _id: Types.ObjectId;
+  _id: string;
   name: string;
   email: string;
   isVerified:boolean;

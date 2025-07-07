@@ -1,11 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import { IServiceBoyRepository } from "../../../../repositories/v1/implimentation/serviceBoy/serviceBoy.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
-import { resizeImage } from "../../../../utils/sharp.util";
 import { ImageFiles, LocationData } from "../../../../types/type";
-import s3 from "../../../../utils/s3.util";
-import mongoose from "mongoose";
 import logger from "../../../../utils/logger.util";
+import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 
 export interface IServiceBoyService {
   updateProfile(
@@ -45,34 +43,7 @@ return serviceBoyProfile
     logger.debug("Received profile update files", { files });
       logger.debug("Initial profile update data", { data });
 
-      const resizeAndAssignBuffer = async (
-        imageArray?: { buffer: Buffer }[]
-      ) => {
-        if (imageArray && imageArray.length === 1) {
-          const resizedBuffer = await resizeImage(imageArray[0].buffer);
-          if (resizedBuffer) {
-            imageArray[0].buffer = resizedBuffer;
-          }
-        }
-      };
-
-      const processAndUploadImage = async (
-        imageArray?: { buffer: Buffer; mimetype: string }[],
-        imageType?: string,
-        userName?: string
-      ): Promise<string | undefined> => {
-        if (imageArray && imageArray.length === 1) {
-          await resizeAndAssignBuffer(imageArray);
-          let imageName = `${userName}-${imageType}-${Date.now()}`;
-          await s3.uploadImageToBucket(
-            imageArray[0].buffer,
-            imageArray[0].mimetype,
-            imageName
-          );
-          return s3.getImageUrlFromBucket(imageName);
-        }
-        return undefined;
-      };
+      
 
       // Process and upload profile image
       if (files.profileImage) {

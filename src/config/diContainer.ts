@@ -18,6 +18,8 @@ import ServiceBoyRepository from "../repositories/v1/implimentation/serviceBoy/s
 import VendorController from "../controllers/v1/implimentation/vendor/vendor.controller";
 import VendorService from "../services/v1/implimentation/vendor/vendor.service";
 import VendorRepository from "../repositories/v1/implimentation/vendor/vendor.repository";
+import CommonController from "../controllers/v1/implimentation/common/common.controller";
+import CommonService from "../services/v1/implimentation/common/common.service";
 
 
 // Repository Registration
@@ -33,6 +35,7 @@ container.register("IVendorService",VendorService);
 container.register("IServiceBoyAuthService", ServiceBoyAuthService);
 container.register("IServiceBoyService", ServiceBoyService);
 container.register("IAdminService", AdminService);
+container.register("ICommonService", CommonService);
 
 
 // Controller Registrations
@@ -41,6 +44,7 @@ container.register("IVendorController",VendorController);
 container.register("IServiceBoyAuthController", ServiceBoyAuthController);
 container.register("IServiceBoyController", ServiceBoyController);
 container.register("IAdminController",AdminController);
+container.register("ICommonController",CommonController);
 
 
 // Model Registrations

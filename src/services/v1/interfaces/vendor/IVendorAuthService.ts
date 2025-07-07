@@ -9,13 +9,13 @@ import { Role } from "../../../../constants/Role";
     generateOTP(email:string): Promise<void>
     verifyOTP(email: string, otp: string): Promise<void>
     resendOtp(email: string): Promise<void>
-vendorLogin(email: string, password: string): Promise<LoginResponse<IVendor,Role.VENDOR>>  
+    vendorLogin(email: string, password: string): Promise<VendorLoginResponse | undefined>  
     resetPasswordTokenVerify(email:string, token:string): Promise<void>
     resetPassword(password:string,email:string): Promise<void>
     resetPasswordLink(token:string,email:string,role:Role.VENDOR): Promise<void>
     setNewAccessToken(refreshToken:string):Promise<CustomTokenResponse>
     googleAuth(data: GoogleLogin): Promise <VendorLoginResponse | undefined>
-    forgotPassword(email: Partial<IVendor>):Promise<string>
+    forgotPassword(email: string):Promise<string>
 
 
 

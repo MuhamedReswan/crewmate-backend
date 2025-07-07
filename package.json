@@ -16,6 +16,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/mime-types": "^3.0.1",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.7",
     "nodemon": "^3.1.9",
@@ -28,6 +29,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^1.4.12",
     "@types/nodemailer": "^6.4.17",
+    "axios": "^1.10.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -35,6 +37,7 @@
     "express": "^4.21.2",
     "google-auth-library": "^9.15.1",
     "jsonwebtoken": "^9.0.2",
+    "mime-types": "^3.0.1",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
@@ -44,6 +47,7 @@
     "sharp": "^0.33.5",
     "ts-node-dev": "^2.0.0",
     "tsyringe": "^4.8.0",
+    "uuid": "^11.1.0",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
   }
