@@ -30,6 +30,7 @@ export enum ResponseMessage {
   INVALID_FORGOT_PASSWORD_TOKEN = "invalid forgot password token",
   RESET_PASSWORD_SUCCESS = "Password changed successfully",
 
+  LOGIN_VERIFICATION_FAILED = "Login failed",
 GOOGLE_AUTH_FAILED = "Authentication failed",
 USE_GOOGLE_AUTH = "Account was created using Google. Please use Google Sign-In.",
 
@@ -43,4 +44,10 @@ PROFILE_UPDATION_FAILED = "Profile updation failed",
 
 ADMIN_CREDENTIAL_FAILED_TO_SET = "Admin credentials are not set in environment variables",
 ADMIN_CREDENTIALS_NOT_CONFIGURED = "Admin credentials not configured",
+
+LOAD_PROFILE_SUCCESS = "Load profile success",
+IMAGE_URL_SUCCESS = "Image url fetched success",
+IMAGE_URL_FAILED = "wrong key for image",
+
+
 }

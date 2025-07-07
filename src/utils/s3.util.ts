@@ -1,6 +1,7 @@
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv'
+import logger from './logger.util';
 
 dotenv.config();
 
@@ -37,7 +38,8 @@ class S3Operations {
     return data;
   }
 
-  getImageUrlFromBucket = async (key: string) => {
+  getImageUrlFromBucket = async (key: string):Promise<string | undefined> => {
+      try {
     const imageUrl = await getSignedUrl(
       this.s3,
       new GetObjectCommand({
@@ -46,8 +48,16 @@ class S3Operations {
       }),
       { expiresIn: 604800 }
     );
-    return imageUrl;
+logger.debug("imageUrl from getImageUrlFromBucket",imageUrl )  
+if(imageUrl){
+  return imageUrl;
+}
+return;
+  } catch (error) {
+  logger.error("Failed to get image from S3", error);
+  throw error;
   }
+}
 
   deleteImageFromBucket = async (key: string) => {
     const deleteParams = {
@@ -68,6 +78,7 @@ class S3Operations {
 //     console.log(image.Body?.transformToString());
 //     return image.Body?.transformToString();
 //   }
+
 }
 
 export default new S3Operations();

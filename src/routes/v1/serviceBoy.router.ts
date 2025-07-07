@@ -16,7 +16,7 @@ const uploadFields = upload.fields([
 
 router.get('/profile/:id',serviceBoyController.loadProfile);
 
-router.post('/profile',authMiddleware,uploadFields,serviceBoyController.updateProfile);
+router.put('/profile',authMiddleware,uploadFields,serviceBoyController.updateProfile);
 
 
 export default router;

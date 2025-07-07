@@ -28,7 +28,7 @@ export default class ServiceBoyController implements IServiceBoyController{
             const serviceBoyProfile =   await this.serviceBoyService.LoadProfile({_id})
             logger.info("serviceBoyProfile from controleer",serviceBoyProfile)
 
-                res.status(200).json(responseHandler( "Load Profile Siccess",HttpStatusCode.OK,serviceBoyProfile ));
+                res.status(200).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, serviceBoyProfile ));
 
         } catch (error) {
 logger.error("ServiceBoyController: loadProfile error", error );
@@ -39,12 +39,11 @@ logger.error("ServiceBoyController: loadProfile error", error );
 
 
 
-updateProfile  = async(req:any, res:Response, next:NextFunction):Promise<void> => {
+updateProfile  = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
     try {
          logger.info("ServiceBoyController: updateProfile called", {
         body: req.body,
         files: req.files,
-        user: req.user,
       });        
         const updatedProfile = await this.serviceBoyService.updateProfile(req.body,req.files);
         if(updatedProfile){

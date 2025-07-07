@@ -4,7 +4,7 @@ import v1ServiceBoyRouter from "./v1/serviceBoy.router";
 import v1VendorAuthRouter from "./v1/vendorAuth.router";
 import v1AdminAuthRouter from "./v1/admin.router";
 import v1VendorRouter from "./v1/vendor.router";
-// import { authMiddleware } from "../middleware/authorization";
+import v1CommonRouter from "./v1/common.router";
 
 
 const router = Router();
@@ -18,6 +18,7 @@ router.use((req, res, next) => {
   router.use('/api/v1/auth/admin',v1AdminAuthRouter);
   router.use('/api/v1/service-boy', v1ServiceBoyRouter);
   router.use('/api/v1/vendor', v1VendorRouter);
+  router.use('/api/v1', v1CommonRouter);
 
 
 

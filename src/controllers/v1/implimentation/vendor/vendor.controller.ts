@@ -7,15 +7,32 @@ import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
+import { Types } from "mongoose";
 
 export interface IVendorController{
     updateVendorProfile:RequestHandler
+    loadVendorProfile:RequestHandler
 }
 
 @injectable()
 export default class VendorController implements IVendorController{
     constructor(@inject('IVendorService') private vendorService: IVendorService) {}
 
+    loadVendorProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        logger.info("req.params of vendor load profile", req.params);
+        const { id } = req.params;
+
+        const _id = new Types.ObjectId(id);
+        const vendorProfile = await this.vendorService.loadVendorProfile({ _id });
+        logger.info("vendorProfile from controller", vendorProfile);
+
+        res.status(200).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, vendorProfile));
+    } catch (error) {
+        logger.error("VendorController: loadProfile error", error);
+        next(error);
+    }
+}
 
      updateVendorProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
        try{

@@ -6,6 +6,7 @@ import logger from "../../../../utils/logger.util";
 
 export interface IVendorRepository{
     vendorUpdateProfile (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined>
+    loadProfile(id: Partial<IVendor>): Promise<IVendor | undefined>
 }
 
 @injectable()
@@ -29,4 +30,19 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
             throw error;
         }
     }
+
+
+async loadProfile(_id: Partial<IVendor>): Promise<IVendor | undefined> {
+  try {
+    const vendorProfile = await this.findOne(_id);
+
+    logger.debug("vendorProfile", { vendorProfile });
+
+    if (vendorProfile) return vendorProfile;
+    return;
+  } catch (error) {
+    throw error;
+  }
+}
+
 }

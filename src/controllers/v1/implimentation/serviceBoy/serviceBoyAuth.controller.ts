@@ -128,18 +128,23 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
   ): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const serviceBoy = await this.serviceBoyAuthService.serviceBoyLogin(
+      const serviceBoyData = await this.serviceBoyAuthService.serviceBoyLogin(
         email,
         password
       );
+
+    if (!serviceBoyData) {
+        throw new NotFoundError(ResponseMessage.LOGIN_VERIFICATION_FAILED);
+        }
+
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", serviceBoy.refreshToken, {
+      res.cookie("refreshToken", serviceBoyData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000,
         sameSite: "lax",
       });
-      res.cookie("accessToken", serviceBoy.accessToken, {
+      res.cookie("accessToken", serviceBoyData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 15 * 60 * 1000,
@@ -152,7 +157,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
           responseHandler(
             ResponseMessage.LOGIN_SUCCESS,
             HttpStatusCode.OK,
-            serviceBoy
+            serviceBoyData.serviceBoy
           )
         );
     } catch (error) {
@@ -268,18 +273,18 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const { googleToken } = req.body;
       logger.info("Google login token received");
-        const serviceBoy = await this.serviceBoyAuthService.googleAuth({googleToken});
-      logger.debug("Google auth result: " + JSON.stringify(serviceBoy));
-if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
+        const serviceBoyData = await this.serviceBoyAuthService.googleAuth({googleToken});
+      logger.debug("Google auth result: " + JSON.stringify(serviceBoyData));
+if(!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", serviceBoy.refreshToken, {
+      res.cookie("refreshToken", serviceBoyData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000,
         sameSite: "lax",
       });
-      res.cookie("accessToken", serviceBoy.accessToken, {
+      res.cookie("accessToken", serviceBoyData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 15 * 60 * 1000,
@@ -291,7 +296,7 @@ if(!serviceBoy) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           responseHandler(
             ResponseMessage.LOGIN_SUCCESS,
             HttpStatusCode.OK,
-            serviceBoy
+            serviceBoyData.serviceBoy
           )
         );
     } catch (error) {

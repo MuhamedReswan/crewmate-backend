@@ -64,22 +64,26 @@ res.status(HttpStatusCode.OK)
     vendorLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const {email, password} = req.body;
-           const vendor =  await this.vendorAuthService.vendorLogin(email, password);
+           const vendorData =  await this.vendorAuthService.vendorLogin(email, password);
+
+            if (!vendorData) {
+        throw new NotFoundError(ResponseMessage.LOGIN_VERIFICATION_FAILED);
+        }
            // set access token and refresh token in coockies
-           res.cookie('refreshToken', vendor.refreshToken,{
+           res.cookie('refreshToken', vendorData.refreshToken,{
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 30 * 24 * 60 * 60 * 1000,
             sameSite: 'lax'
            } );
-           res.cookie('accessToken', vendor.accessToken, {
+           res.cookie('accessToken', vendorData.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 15 * 60 * 1000,
             sameSite: 'lax'
            })
            res.status(HttpStatusCode.OK)
-           .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK,vendor))
+           .json(responseHandler(ResponseMessage.LOGIN_SUCCESS,HttpStatusCode.OK,vendorData.vendor))
         } catch (error) {
                 logger.error("Vendor login failed", error );
             next(error);
@@ -162,17 +166,17 @@ googleAuth = async (
     try {
       const { googleToken } = req.body;
       logger.info("Google auth started for vendor");
-      const vendor = await this.vendorAuthService.googleAuth({googleToken});
-if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
+      const vendorData = await this.vendorAuthService.googleAuth({googleToken});
+if(!vendorData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
       // set access token and refresh token in coockies
-      res.cookie("refreshToken", vendor.refreshToken, {
+      res.cookie("refreshToken", vendorData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000,
         sameSite: "lax",
       });
-      res.cookie("accessToken", vendor.accessToken, {
+      res.cookie("accessToken", vendorData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 15 * 60 * 1000,
@@ -184,7 +188,7 @@ if(!vendor) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
           responseHandler(
             ResponseMessage.LOGIN_SUCCESS,
             HttpStatusCode.OK,
-            vendor
+            vendorData.vendor
           )
         );
     } catch (error) {

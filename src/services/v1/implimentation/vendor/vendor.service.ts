@@ -5,9 +5,11 @@ import { ImageFiles } from "../../../../types/type";
 import { resizeImage } from "../../../../utils/sharp.util";
 import s3 from "../../../../utils/s3.util";
 import logger from "../../../../utils/logger.util";
+import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 
 export interface IVendorService {
   updateVendorProfile: (body: Partial<IVendor>, files: ImageFiles) => Promise<IVendor | undefined>;
+   loadVendorProfile (_id:Partial<IVendor>):Promise<IVendor | undefined> 
 }
 
 @injectable()
@@ -21,17 +23,21 @@ export default class VendorService implements IVendorService {
     try {
       logger.debug("Updating vendor profile", { data, files });
 
-      data.profileImage = await this.handleImageUpload(
-        files.profileImage,
-        "profileImage",
-        data.name
-      );
+      if(files.profileImage){
+        data.profileImage = await processAndUploadImage(
+          files.profileImage,
+          "profileImage",
+          data.name
+        );
+      }
 
-      data.licenceImage = await this.handleImageUpload(
-        files.licenceImage,
-        "licenceImage",
-        data.name
-      );
+      if(files.licenceImage){
+        data.licenceImage = await processAndUploadImage(
+          files.licenceImage,
+          "licenceImage",
+          data.name
+        );
+      }
 
       this.parseLocation(data);
 
@@ -42,8 +48,7 @@ export default class VendorService implements IVendorService {
       const updatedProfile = await this.vendorRepository.vendorUpdateProfile({ _id }, data);
 
       if (updatedProfile) {
-        const { _id, name, email, profileImage, licenceImage } = updatedProfile;
-        return { _id, name, email , profileImage, licenceImage } as IVendor;
+     return updatedProfile as IVendor;
       }
 
       return undefined;
@@ -52,29 +57,6 @@ export default class VendorService implements IVendorService {
     }
   };
 
-  // 🔹 Handles resizing and uploading a single image type
-  private async handleImageUpload(
-    imageArray?: { buffer: Buffer; mimetype: string }[],
-    imageType?: string,
-    userName?: string
-  ): Promise<string | undefined> {
-    if (imageArray && imageArray.length === 1) {
-      await this.resizeImageBuffer(imageArray);
-      const key = `${userName}-${imageType}-${Date.now()}`;
-      await s3.uploadImageToBucket(imageArray[0].buffer, imageArray[0].mimetype, key);
-      return key
-    }
-    return undefined;
-  }
-
-  private async resizeImageBuffer(imageArray: { buffer: Buffer }[]): Promise<void> {
-    if (imageArray.length === 1) {
-      const resizedBuffer = await resizeImage(imageArray[0].buffer);
-      if (resizedBuffer) {
-        imageArray[0].buffer = resizedBuffer;
-      }
-    }
-  }
 
   // 🔹 Safely parses JSON string for location
   private parseLocation(data: Partial<IVendor>) {
@@ -87,4 +69,13 @@ export default class VendorService implements IVendorService {
       }
     }
   }
+
+  loadVendorProfile = async (_id: Partial<IVendor>): Promise<IVendor | undefined> => {
+  try {
+    const vendorProfile = await this.vendorRepository.loadProfile(_id);
+    return vendorProfile;
+  } catch (error) {
+    throw error;
+  }
+}
 }
