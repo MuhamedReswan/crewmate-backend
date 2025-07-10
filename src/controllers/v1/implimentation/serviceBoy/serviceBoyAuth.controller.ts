@@ -7,24 +7,25 @@ import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import {
+  decodeRefreshToken,
   generateAccessToken,
   generateRefreshToken,
 } from "../../../../utils/jwt.util";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
+import { getRedisData, setRedisData } from "../../../../utils/redis.util";
+import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
+import { ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_MAX_AGE } from "../../../../config/env";
 
 @injectable()
 export default class ServiceBoyAuthController
   implements IServiceBoyAuthController
 {
-  private serviceBoyAuthService: IServiceBoyAuthService;
 
   constructor(
     @inject("IServiceBoyAuthService")
-    serviceBoyAuthService: IServiceBoyAuthService
-  ) {
-    this.serviceBoyAuthService = serviceBoyAuthService;
-  }
+   private _serviceBoyAuthService: IServiceBoyAuthService
+  ) {}
 
   register = async (
     req: Request,
@@ -34,8 +35,8 @@ export default class ServiceBoyAuthController
     try {
       const { name, email, password, mobile } = req.body;
 logger.debug("Register controller received: " + JSON.stringify(req.body));
-      await this.serviceBoyAuthService.register(name, email, password, mobile);
-      await this.serviceBoyAuthService.generateOTP(email);
+      await this._serviceBoyAuthService.register(name, email, password, mobile);
+      await this._serviceBoyAuthService.generateOTP(email);
            logger.info(`OTP generated and sent to email: ${email}`);
       res
         .status(HttpStatusCode.CREATED)
@@ -60,18 +61,25 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const { email, otp } = req.body;
             logger.info(`Verifying OTP for email: ${email}`);
-      let serviceBoy = await this.serviceBoyAuthService.verifyOTP(email, otp);
-      logger.debug("verifyOTP result: " + JSON.stringify(serviceBoy));
-      if (serviceBoy) {
+      let serviceBoyData = await this._serviceBoyAuthService.verifyOTP(email, otp);
+      logger.debug("verifyOTP result: " + JSON.stringify(serviceBoyData));
+      if (serviceBoyData) {
         const role = Role.SERVICE_BOY;
-        const accessToken = generateAccessToken({
-          data: serviceBoy,
-          role: role,
-        });
-        const refreshToken = generateRefreshToken({
-          data: serviceBoy,
-          role: role,
-        });
+
+         // set access token and refresh token in coockies
+      res.cookie("refreshToken", serviceBoyData.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: REFRESH_TOKEN_MAX_AGE,
+        sameSite: "lax",
+      });
+      res.cookie("accessToken", serviceBoyData.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: ACCESS_TOKEN_MAX_AGE,
+        sameSite: "lax",
+      });
+       
          logger.info(`OTP verified. Access and Refresh tokens generated for: ${email}`);
         res
           .status(HttpStatusCode.OK)
@@ -79,7 +87,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
             responseHandler(
               ResponseMessage.OTP_VERIFICATION_SUCCESS,
               HttpStatusCode.OK,
-              { serviceBoy, role }
+               serviceBoyData.serviceBoy 
             )
           );
       } else {
@@ -106,7 +114,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const { email } = req.body;
       logger.info(`Resending OTP to email: ${email}`);
-      await this.serviceBoyAuthService.resendOtp(email);
+      await this._serviceBoyAuthService.resendOtp(email);
       res
         .status(HttpStatusCode.OK)
         .json(
@@ -128,7 +136,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
   ): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const serviceBoyData = await this.serviceBoyAuthService.serviceBoyLogin(
+      const serviceBoyData = await this._serviceBoyAuthService.serviceBoyLogin(
         email,
         password
       );
@@ -141,13 +149,13 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       res.cookie("refreshToken", serviceBoyData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: REFRESH_TOKEN_MAX_AGE,
         sameSite: "lax",
       });
       res.cookie("accessToken", serviceBoyData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 15 * 60 * 1000,
+        maxAge: ACCESS_TOKEN_MAX_AGE,
         sameSite: "lax",
       });
       logger.info(`Login success for email: ${email}`);
@@ -184,13 +192,21 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
             )
           );
       }
-      const result = await this.serviceBoyAuthService.setNewAccessToken(
+
+
+          const isBlacklisted = await getRedisData(refreshToken);
+      if (isBlacklisted) {
+        throw new UnAuthorizedError(ResponseMessage.BLACK_LISTED_TOKEN);
+      }
+
+
+      const result = await this._serviceBoyAuthService.setNewAccessToken(
         refreshToken
       );
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 3600000,
+        maxAge: ACCESS_TOKEN_MAX_AGE,
         sameSite: "strict",
       });
       logger.info("New access token set successfully");
@@ -213,12 +229,12 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const { email } = req.body;
       logger.info(`Forgot password request for email: ${email}`);
-      const forgotToken = await this.serviceBoyAuthService.forgotPassword(
+      const forgotToken = await this._serviceBoyAuthService.forgotPassword(
         email
       );
       if (!forgotToken)
         throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
-      await this.serviceBoyAuthService.resetPasswordLink(email, forgotToken,Role.SERVICE_BOY);
+      await this._serviceBoyAuthService.resetPasswordLink(email, forgotToken,Role.SERVICE_BOY);
       res
         .status(HttpStatusCode.OK)
         .json(
@@ -242,13 +258,13 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       const { email, password, token } = req.body;
         logger.info(`Resetting password for email: ${email}`);
       if (token) {
-        await this.serviceBoyAuthService.resetPasswordTokenVerify(
+        await this._serviceBoyAuthService.resetPasswordTokenVerify(
           email,
           token
         );
-        await this.serviceBoyAuthService.resetPassword(email, password);
+        await this._serviceBoyAuthService.resetPassword(email, password);
       } else {
-        await this.serviceBoyAuthService.resetPassword(email, password);
+        await this._serviceBoyAuthService.resetPassword(email, password);
       }
       res
         .status(HttpStatusCode.OK)
@@ -273,7 +289,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const { googleToken } = req.body;
       logger.info("Google login token received");
-        const serviceBoyData = await this.serviceBoyAuthService.googleAuth({googleToken});
+        const serviceBoyData = await this._serviceBoyAuthService.googleAuth({googleToken});
       logger.debug("Google auth result: " + JSON.stringify(serviceBoyData));
 if(!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
@@ -281,13 +297,13 @@ if(!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
       res.cookie("refreshToken", serviceBoyData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: REFRESH_TOKEN_MAX_AGE,
         sameSite: "lax",
       });
       res.cookie("accessToken", serviceBoyData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 15 * 60 * 1000,
+        maxAge: ACCESS_TOKEN_MAX_AGE,
         sameSite: "lax",
       });
       res
@@ -311,6 +327,26 @@ if(!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
     next: NextFunction
   ): Promise<void> => {
     try {
+
+const refreshToken = req.cookies?.refreshToken;
+
+  if (!refreshToken) {
+   res.status(HttpStatusCode.BAD_REQUEST)
+   .json(
+    responseHandler
+    (ResponseMessage.INVALID_REFRESH_TOKEN,
+      HttpStatusCode.BAD_REQUEST));
+  }
+
+  const decoded =decodeRefreshToken(refreshToken);
+  logger.info("decoded token in sevicebOy logout controller",{decoded});
+    if (decoded?.exp) {
+      const now = Math.floor(Date.now() / 1000);
+      const ttl = decoded.exp - now;
+
+      await setRedisData(refreshToken, "blacklisted", ttl);
+    }
+      
       res.clearCookie("accessToken").clearCookie("refreshToken");
       res
         .status(HttpStatusCode.OK)

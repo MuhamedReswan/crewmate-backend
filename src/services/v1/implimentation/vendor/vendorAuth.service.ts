@@ -42,7 +42,7 @@ import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 export default class VendorAuthService implements IVendorAuthService {
   constructor(
     @inject("IVendorAuthRepository")
-    private vendorAuthRepository: IVendorAuthRepository
+    private _vendorAuthRepository: IVendorAuthRepository
   ) {}
 
   async register(
@@ -53,7 +53,7 @@ export default class VendorAuthService implements IVendorAuthService {
   ): Promise<void> {
     try {
       logger.info("Vendor registration attempt", { email });
-      const existingVendor = await this.vendorAuthRepository.findVendorByEmail(
+      const existingVendor = await this._vendorAuthRepository.findVendorByEmail(
         email
       );
       if (existingVendor)
@@ -73,7 +73,7 @@ export default class VendorAuthService implements IVendorAuthService {
 
   async generateOTP(email: string) {
     try {
-      const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
+      const vendor = await this._vendorAuthRepository.findVendorByEmail(email);
       if (vendor)
         throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
@@ -87,7 +87,7 @@ export default class VendorAuthService implements IVendorAuthService {
     }
   }
 
-  async verifyOTP(email: string, otp: string): Promise<void> {
+  async verifyOTP(email: string, otp: string): Promise<VendorLoginResponse | void> {
     try {
       logger.debug("Verifying OTP in service", { email, otp });
       const savedOtp = await getRedisData(`otpV:${email}`);
@@ -106,9 +106,37 @@ export default class VendorAuthService implements IVendorAuthService {
         vendorDataObject.password = await hashPassword(
           vendorDataObject.password
         );
-        await this.vendorAuthRepository.createVendor(vendorDataObject);
+
+       let createdVendor =  await this._vendorAuthRepository.createVendor(vendorDataObject);
+          if (!createdVendor) {
+          throw new BadrequestError(ResponseMessage.USER_NOT_CREATED);
+        }
+
         logger.info("Vendor created from Redis data", { email });
         await deleteRedisData(`vendor:${email}`);
+
+        const vendor = mapToVendorLoginDTO(createdVendor);
+      const role = Role.VENDOR;
+
+      const accessToken = generateAccessToken({
+        data: {
+          _id: createdVendor._id,
+          email: createdVendor.email,
+          name: createdVendor.name,
+        },
+        role,
+      });
+
+      const refreshToken = generateRefreshToken({
+        data: {
+          _id: createdVendor._id,
+          email: createdVendor.email,
+          name: createdVendor.name,
+        },
+        role,
+      });
+
+      return { vendor, accessToken, refreshToken };
       }
     } catch (error) {
       throw error;
@@ -137,7 +165,7 @@ export default class VendorAuthService implements IVendorAuthService {
     password: string
   ): Promise<VendorLoginResponse> {
     try {
-      const vendorData = await this.vendorAuthRepository.findVendorByEmail(
+      const vendorData = await this._vendorAuthRepository.findVendorByEmail(
         email
       );
       if (!vendorData) {
@@ -179,7 +207,7 @@ export default class VendorAuthService implements IVendorAuthService {
 
   forgotPassword = async (email: string): Promise<string> => {
     try {
-      const vendor = await this.vendorAuthRepository.findVendorByEmail(email);
+      const vendor = await this._vendorAuthRepository.findVendorByEmail(email);
       if (!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
       const token = crypto.randomBytes(8).toString("hex");
       await setRedisData(`forgotToken:${email}`, token, 1800);
@@ -212,7 +240,7 @@ export default class VendorAuthService implements IVendorAuthService {
   resetPassword = async (email: string, password: string): Promise<void> => {
     try {
       const hashedPassword = await hashPassword(password);
-      await this.vendorAuthRepository.updateVendorPassword(
+      await this._vendorAuthRepository.updateVendorPassword(
         email,
         hashedPassword
       );
@@ -242,7 +270,7 @@ export default class VendorAuthService implements IVendorAuthService {
       if (!decoded || !decoded.email) {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
       }
-      const vendor = await this.vendorAuthRepository.findVendorByEmail(
+      const vendor = await this._vendorAuthRepository.findVendorByEmail(
         decoded.email
       );
       if (!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
@@ -279,7 +307,7 @@ export default class VendorAuthService implements IVendorAuthService {
       const responseData = await response.json();
       logger.info("google Auth vendor details", responseData);
       
-      let vendorData  = await this.vendorAuthRepository.findVendorByEmail(
+      let vendorData  = await this._vendorAuthRepository.findVendorByEmail(
         responseData.email
       );
 
@@ -299,7 +327,7 @@ export default class VendorAuthService implements IVendorAuthService {
           }
         }
 
-        vendorData  = await this.vendorAuthRepository.createVendor({
+        vendorData  = await this._vendorAuthRepository.createVendor({
           name,
           email,
           isVerified,

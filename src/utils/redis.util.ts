@@ -54,4 +54,19 @@ export const deleteRedisData = async (key: string) => {
   }
 };
 
+
+(async () => {
+  try {
+    const existing = await redisClient.get("serviceBoy:idCounter");
+    if (!existing) {
+      await redisClient.set("serviceBoy:idCounter", "0");
+      console.log("Initialized serviceBoy:idCounter to 0");
+    } else {
+      console.log("serviceBoy:idCounter already exists with value:", existing);
+    }
+  } catch (error) {
+    console.error("Error initializing serviceBoy:idCounter:", error);
+  }
+})();
+
 export default redisClient;

@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from '../config/env';
 import { UnAuthorizedError } from './errors/unAuthorized.error';
 import { CreateToken, JwtPayload } from '../types/type';
-import { Role } from '../constants/Role';
 
 
 const accessTokenSecret = ACCESSTOKENSECRET 
@@ -53,15 +52,21 @@ try {
     if(!refreshTokenSecret){
         throw new Error('Refrsesh token secret in not defined')
     }
-        //   const tested = jwt.decode(token, { complete: true }) as JwtPayload;
-        //   console.log("rrrrrrrrrrrrrrrrrrrrrr",tested);
-        //   console.log(" verifyRefreshToken",refreshTokenSecret)
 
-    
     const decoded = jwt.verify(token, refreshTokenSecret) as JwtPayload;
     return decoded;
 } catch (error) {
     console.log("verify refresh token error",error)
     throw new UnAuthorizedError('Invalid refresh token')
 }
+};
+
+
+export const decodeRefreshToken = (token: string): JwtPayload | null => {
+  try {
+    return jwt.decode(token) as JwtPayload;
+  } catch (error) {
+    console.error("Failed to decode refresh token:", error);
+    return null;
+  }
 };

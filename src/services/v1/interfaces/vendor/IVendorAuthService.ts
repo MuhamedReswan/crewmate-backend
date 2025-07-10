@@ -7,7 +7,7 @@ import { Role } from "../../../../constants/Role";
  export interface IVendorAuthService {
     register(name:string, email:string, password:string,mobile:string): Promise<void>
     generateOTP(email:string): Promise<void>
-    verifyOTP(email: string, otp: string): Promise<void>
+    verifyOTP(email: string, otp: string): Promise<VendorLoginResponse | void>
     resendOtp(email: string): Promise<void>
     vendorLogin(email: string, password: string): Promise<VendorLoginResponse | undefined>  
     resetPasswordTokenVerify(email:string, token:string): Promise<void>

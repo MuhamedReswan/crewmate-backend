@@ -18,6 +18,7 @@ export enum ResponseMessage {
   TOKEN_SET_SUCCESS = "Token set succesfully",
   INVALID_REFRESH_TOKEN = "Invalid or expired refresh token",
   INVALID_ACCESS_TOKEN = "Invalid access token",
+  BLACK_LISTED_TOKEN = "Refresh token is blacklisted",
 
   LOGOUT_SUCCESS = "logout success",
 

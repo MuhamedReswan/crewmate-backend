@@ -8,6 +8,7 @@ import { IServiceBoyAuthService } from "../services/v1/interfaces/serviceBoy/ISe
 import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuthService";
 import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
 import logger from "../utils/logger.util";
+import { getRedisData } from "../utils/redis.util";
 // import { JwtPayload } from "../types/type";
 
 
@@ -63,6 +64,27 @@ export const authMiddleware = async (
 
       try {
         const originalUrl = req?.originalUrl;
+
+   const isBlacklisted = await getRedisData(refreshToken);
+   logger.warn("isBlacklisted Refresh token--------------------------------",{isBlacklisted});
+    if (isBlacklisted) {
+      logger.warn("Refresh token is blacklisted");
+      res.clearCookie("refreshToken", 
+        { httpOnly: true, secure: true, sameSite: "lax" });
+      res.clearCookie("accessToken",
+         { httpOnly: true, secure: true, sameSite: "lax" });
+
+       res
+        .status(HttpStatusCode.UNAUTHORIZED)
+        .json(
+          responseHandler(
+            ResponseMessage.BLACK_LISTED_TOKEN,
+            HttpStatusCode.UNAUTHORIZED
+          )
+        );
+        return;
+    }
+
         let tokenRecreate;
         // Create to new access token and refresh token based on the role
         if (originalUrl.includes("/service-boy")) {

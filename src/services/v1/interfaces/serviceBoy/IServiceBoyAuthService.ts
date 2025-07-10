@@ -5,7 +5,7 @@ import { Role } from "../../../../constants/Role";
 export interface IServiceBoyAuthService {
     register(name:string, email:string, password:string,mobile:string): Promise<void>
     generateOTP(email:string): Promise<void>
-    verifyOTP(email:string, otp:string): Promise<IServiceBoy | void>
+    verifyOTP(email:string, otp:string): Promise<ServiceBoyLoginResponse | void>
     serviceBoyLogin(email:string, password:string): Promise<ServiceBoyLoginResponse>
     resendOtp(email:string): Promise<void>
     setNewAccessToken(refreshToken:string):Promise<any>
