@@ -15,7 +15,7 @@ export interface IServiceBoyController{
 
 @injectable()
 export default class ServiceBoyController implements IServiceBoyController{
-    constructor(@inject("IServiceBoyService")private serviceBoyService:IServiceBoyService){}
+    constructor(@inject("IServiceBoyService")private _serviceBoyService:IServiceBoyService){}
 
 
  loadProfile = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
@@ -25,7 +25,7 @@ export default class ServiceBoyController implements IServiceBoyController{
             logger.info("req.params of service boy load profile",{id})
             
              const _id = new Types.ObjectId(id);
-            const serviceBoyProfile =   await this.serviceBoyService.LoadProfile({_id})
+            const serviceBoyProfile =   await this._serviceBoyService.LoadProfile({_id})
             logger.info("serviceBoyProfile from controleer",serviceBoyProfile)
 
                 res.status(200).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, serviceBoyProfile ));
@@ -45,7 +45,7 @@ updateProfile  = async(req:Request, res:Response, next:NextFunction):Promise<voi
         body: req.body,
         files: req.files,
       });        
-        const updatedProfile = await this.serviceBoyService.updateProfile(req.body,req.files);
+        const updatedProfile = await this._serviceBoyService.updateProfile(req.body,req.files);
         if(updatedProfile){
             res.status(200).json(responseHandler( ResponseMessage.PROFILE_UPDATED,HttpStatusCode.OK, updatedProfile));
         }else{

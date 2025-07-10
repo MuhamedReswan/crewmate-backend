@@ -14,7 +14,7 @@ export interface IVendorService {
 
 @injectable()
 export default class VendorService implements IVendorService {
-  constructor(@inject("IVendorRepository") private vendorRepository: IVendorRepository) {}
+  constructor(@inject("IVendorRepository") private _vendorRepository: IVendorRepository) {}
 
   public updateVendorProfile = async (
     data: Partial<IVendor>,
@@ -45,7 +45,7 @@ export default class VendorService implements IVendorService {
       const _id = data._id;
       delete data._id;
 
-      const updatedProfile = await this.vendorRepository.vendorUpdateProfile({ _id }, data);
+      const updatedProfile = await this._vendorRepository.vendorUpdateProfile({ _id }, data);
 
       if (updatedProfile) {
      return updatedProfile as IVendor;
@@ -72,7 +72,7 @@ export default class VendorService implements IVendorService {
 
   loadVendorProfile = async (_id: Partial<IVendor>): Promise<IVendor | undefined> => {
   try {
-    const vendorProfile = await this.vendorRepository.loadProfile(_id);
+    const vendorProfile = await this._vendorRepository.loadProfile(_id);
     return vendorProfile;
   } catch (error) {
     throw error;

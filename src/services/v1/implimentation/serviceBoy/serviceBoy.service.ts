@@ -19,13 +19,13 @@ export interface IServiceBoyService {
 export default class ServiceBoyService implements IServiceBoyService {
   constructor(
     @inject("IServiceBoyRepository")
-    private serviceBoyRepository: IServiceBoyRepository
+    private _serviceBoyRepository: IServiceBoyRepository
   ) {}
 
 
   LoadProfile = async(_id:Partial<IServiceBoy>):Promise<IServiceBoy | undefined> => {
     try {
-const serviceBoyProfile = await this.serviceBoyRepository.loadProfile(_id)
+const serviceBoyProfile = await this._serviceBoyRepository.loadProfile(_id)
 return serviceBoyProfile
        } catch (error) {
       throw error;
@@ -86,7 +86,7 @@ return serviceBoyProfile
 
       const _id = data._id;
       delete data._id;
-      const updatedProfile = await this.serviceBoyRepository.updateProfile(
+      const updatedProfile = await this._serviceBoyRepository.updateProfile(
         { _id: _id },
         data
       );

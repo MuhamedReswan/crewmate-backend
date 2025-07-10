@@ -16,7 +16,7 @@ export interface IVendorController{
 
 @injectable()
 export default class VendorController implements IVendorController{
-    constructor(@inject('IVendorService') private vendorService: IVendorService) {}
+    constructor(@inject('IVendorService') private _vendorService: IVendorService) {}
 
     loadVendorProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -24,7 +24,7 @@ export default class VendorController implements IVendorController{
         const { id } = req.params;
 
         const _id = new Types.ObjectId(id);
-        const vendorProfile = await this.vendorService.loadVendorProfile({ _id });
+        const vendorProfile = await this._vendorService.loadVendorProfile({ _id });
         logger.info("vendorProfile from controller", vendorProfile);
 
         res.status(200).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, vendorProfile));
@@ -41,7 +41,7 @@ export default class VendorController implements IVendorController{
         files: req.files,
       });
 
-    const updateVendorProfile = await this.vendorService.updateVendorProfile(
+    const updateVendorProfile = await this._vendorService.updateVendorProfile(
         req.body,
         req.files as ImageFiles)
 

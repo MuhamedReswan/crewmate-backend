@@ -13,13 +13,13 @@ import logger from "../../../../utils/logger.util";
 @injectable()
 export default class AdminService implements IAdminService {
   constructor(
-    @inject("IAdminRepository") private adminReposritory: IAdminRepository
+    @inject("IAdminRepository") private _adminReposritory: IAdminRepository
   ) {}
 
   async verifyLogin(email: string, password: string): Promise<LoginResponse<IAdmin,Role.ADMIN>> {
     try {
       logger.info("Admin login attempt", { email });
-      // let admin = await this.adminReposritory.findByEmail({ email });
+      // let admin = await this._adminReposritory.findByEmail({ email });
       // if (!admin)
       //   throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
       // const passwordVerified = await compare(password, admin.password);
