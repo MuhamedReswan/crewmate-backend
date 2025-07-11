@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
+import { container } from "tsyringe";
 import { HttpStatusCode } from "../constants/httpStatusCode";
 import { responseHandler } from "../utils/responseHandler.util";
 import { ResponseMessage } from "../constants/resposnseMessage";
 import { verifyAccessToken } from "../utils/jwt.util";
-import { container } from "tsyringe";
 import { IServiceBoyAuthService } from "../services/v1/interfaces/serviceBoy/IServiceBoyAuthService";
 import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuthService";
-import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
+// import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
 import logger from "../utils/logger.util";
 import { getRedisData } from "../utils/redis.util";
 // import { JwtPayload } from "../types/type";
@@ -24,7 +24,7 @@ const serviceBoyAuthService = container.resolve<IServiceBoyAuthService>(
 );
 const vendorAuthService =
   container.resolve<IVendorAuthService>("IVendorAuthService");
-const AdminService = container.resolve<IAdminService>("IAdminService");
+// const AdminService = container.resolve<IAdminService>("IAdminService");
 
 export const authMiddleware = async (
   req: Request,
@@ -126,6 +126,7 @@ export const authMiddleware = async (
         return  next();
         }
       } catch (error) {
+        logger.error("Error while validating or regenerating tokens",error);
         res.clearCookie("refreshToken", {
           httpOnly: true,
           secure: true,

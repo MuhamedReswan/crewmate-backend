@@ -6,7 +6,7 @@ const redisClient = createClient({
 });
 
 redisClient.on("error", (err) => { 
-  console.error("Redis Client Error", err)
+  console.error("Redis Client Error", err);
 });
 
 redisClient.on("connect", () => {
@@ -26,10 +26,10 @@ export const setRedisData = async (key:string, value:string, ttl?:number) => {
       await redisClient.set(key, value);
     }
 console.log(`Data for ${key} saved successfully`);
-return true
+return true;
   } catch (error) {
     console.error(`Error saving data for ${key}:`, error);
-    return false
+    return false;
   }
 };
 

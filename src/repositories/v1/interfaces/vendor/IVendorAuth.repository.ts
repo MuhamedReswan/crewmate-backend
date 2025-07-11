@@ -1,4 +1,3 @@
-import { Register } from "../../../../entities/v1/authenticationEntity";
 import IVendor from "../../../../entities/v1/vendorEntity";
 
 export interface IVendorAuthRepository {

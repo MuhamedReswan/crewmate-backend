@@ -2,8 +2,6 @@ import { inject, injectable } from "tsyringe";
 import { IVendorRepository } from "../../../../repositories/v1/implimentation/vendor/vendor.repository";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { ImageFiles } from "../../../../types/type";
-import { resizeImage } from "../../../../utils/sharp.util";
-import s3 from "../../../../utils/s3.util";
 import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 
@@ -77,5 +75,5 @@ export default class VendorService implements IVendorService {
   } catch (error) {
     throw error;
   }
-}
+};
 }

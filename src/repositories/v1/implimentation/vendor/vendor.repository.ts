@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
+import { Model } from "mongoose";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { BaseRepository } from "../base/base.repository";
-import { Model } from "mongoose";
 import logger from "../../../../utils/logger.util";
 
 export interface IVendorRepository{
@@ -29,7 +29,7 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
             console.error("Error updating profile:", error);
             throw error;
         }
-    }
+    };
 
 
 async loadProfile(_id: Partial<IVendor>): Promise<IVendor | undefined> {

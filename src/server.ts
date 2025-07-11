@@ -1,13 +1,13 @@
 import "reflect-metadata";
 import "./config/diContainer";
 import express, {Application} from "express";
-import router from "./routes/router";
 import morgan from "morgan";
+import cors from "cors";
+import cookieParser from 'cookie-parser';
+import router from "./routes/router";
 import { PORT,CLIENTURL } from "./config/env";
 import { connectDB } from "./config/connectDB";
-import cors from "cors"
 import { errorHandler } from "./middleware/errorHandler";
-import cookieParser from 'cookie-parser';
 
 
 const app : Application = express();
@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req,res)=>{
     res.send("server started");
-})
+});
 
 app.use("/", router);
 

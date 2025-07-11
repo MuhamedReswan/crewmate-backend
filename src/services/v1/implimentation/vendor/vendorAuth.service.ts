@@ -1,4 +1,6 @@
 import { inject, injectable } from "tsyringe";
+import bcrypt from "bcrypt";
+import * as crypto from "crypto";
 import { IVendorAuthService } from "../../interfaces/vendor/IVendorAuthService";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import {
@@ -16,23 +18,18 @@ import {
 import { ExpiredError } from "../../../../utils/errors/expired.error";
 import { hashPassword } from "../../../../utils/password.util";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import bcrypt from "bcrypt";
 import { ValidationError } from "../../../../utils/errors/validation.error";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
 } from "../../../../utils/jwt.util";
-import * as crypto from "crypto";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import {
   GoogleLogin,
-  LoginResponse,
-  Register,
   VendorLoginResponse,
 } from "../../../../entities/v1/authenticationEntity";
-import IVendor from "../../../../entities/v1/vendorEntity";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
@@ -64,7 +61,7 @@ export default class VendorAuthService implements IVendorAuthService {
         JSON.stringify({ name, email, password, mobile }),
         3600
       );
-      const registerFromRedis = await getRedisData(`vendor:${email}`);
+      await getRedisData(`vendor:${email}`);
       logger.debug("Vendor data stored in Redis", { email });
     } catch (error) {
       throw error;
@@ -153,7 +150,7 @@ export default class VendorAuthService implements IVendorAuthService {
         otp,
         otpTime: new Date(),
       });
-      let savedOtp = await getRedisData(`otpV:${email}`);
+      await getRedisData(`otpV:${email}`);
       await sendOtpEmail(email, otp);
     } catch (error) {
       throw error;

@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
+import { Model } from "mongoose";
 import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
-import { Model } from "mongoose";
 import logger from "../../../../utils/logger.util";
 
 

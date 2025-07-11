@@ -1,4 +1,4 @@
-import sharp from 'sharp'
+import sharp from 'sharp';
 
 const resizeImage = async (buffer: Buffer) => {
      try {
@@ -9,8 +9,8 @@ const resizeImage = async (buffer: Buffer) => {
       .toBuffer();
         
      } catch (error) {
-        console.log(error)
+        console.log(error);
      }
-}
+};
 
 export { resizeImage };

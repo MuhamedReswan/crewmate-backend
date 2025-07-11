@@ -189,5 +189,5 @@ if(role === Role.VENDOR){
     throw err;
 }
 
-}
+};
 

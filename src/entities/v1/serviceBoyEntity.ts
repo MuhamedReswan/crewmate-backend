@@ -29,5 +29,5 @@ export default interface IServiceBoy extends Document {
     date:Date,
     walletId:Types.ObjectId,
     workHistoryId:Types.ObjectId   
-}
+};;;;;;;;;;
 
