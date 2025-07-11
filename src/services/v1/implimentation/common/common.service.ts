@@ -1,4 +1,3 @@
-import { inject } from "tsyringe";
 import s3Util from "../../../../utils/s3.util";
 import logger from "../../../../utils/logger.util";
 
@@ -12,7 +11,7 @@ export default class CommonService implements ICommonService {
   streamImageByKey = async(key:string):Promise<string | undefined> =>  {
     try{
 let imageUrl = await s3Util.getImageUrlFromBucket(key);
-logger.info("imageUrl",{imageUrl})
+logger.info("imageUrl",{imageUrl});
 if(imageUrl){
     return imageUrl;
 }
@@ -20,6 +19,6 @@ return;
     }catch(error){
         throw error;
     }
-  }
+  };
   
 }

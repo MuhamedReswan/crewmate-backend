@@ -1,6 +1,6 @@
-import { NextFunction, Request, response, Response } from "express";
-import { IVendorAuthController } from "../../interfaces/vendor/IVendorAuth.controller";
+import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import { IVendorAuthController } from "../../interfaces/vendor/IVendorAuth.controller";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
@@ -58,7 +58,6 @@ export default class VendorAuthController implements IVendorAuthController {
       let vendorData = await this._vendorAuthService.verifyOTP(email, otp);
       logger.debug("OTP verified result", { vendorData });
       if (vendorData) {
-        const role = Role.VENDOR;
         // set access token and refresh token in coockies
         res.cookie("refreshToken", vendorData.refreshToken, {
           httpOnly: true,

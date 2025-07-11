@@ -1,7 +1,6 @@
 
 import * as z from 'zod';
 import { Role } from '../../constants/Role';
-import { token } from 'morgan';
 
 //Singup validation 
 export const signupSchema = z.object({
@@ -27,7 +26,7 @@ export const signupSchema = z.object({
   terms: z.boolean().refine(val => val === true, { 
     message: "You must agree to the terms and conditions" 
   }).optional()
-})
+});
 
 
 // Login validation
@@ -70,7 +69,7 @@ export const resetpasswordSchema = z.object({
     .min(1, { message: "Email is required" })
     .email({ message: "Invalid email address" })
     .trim(),
-})
+});
 
 
 // Types for each schema

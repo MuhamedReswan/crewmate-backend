@@ -1,7 +1,6 @@
 import z, {ZodSchema } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 import { HttpStatusCode } from '../constants/httpStatusCode';
-import { ValidationError } from '../utils/errors/validation.error';
 import { ResponseMessage } from '../constants/resposnseMessage';
 import logger from '../utils/logger.util';
 
@@ -17,18 +16,18 @@ function requestBodyValidator(schema: ZodSchema) {
             const err =  error.errors.map((e:any) => ({
                 field: e.path.join('.'),
                 message: e.message,
-              }))
+              }));
             
               res.json({
                  status: HttpStatusCode.BAD_REQUEST,
                  message: ResponseMessage.VALIDATION_FAILED,
                  error: err
-              })              
+              });              
            }
                  logger.error("Unexpected error during body validation:", error);
-           throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`)
+           throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-    }
+    };
 }
 
 
@@ -44,18 +43,18 @@ function requestQueryValidator(schema: ZodSchema) {
             const err =  error.errors.map((e:any) => ({
                 field: e.path.join('.'),
                 message: e.message,
-              }))
+              }));
             
               res.json({
                  status: HttpStatusCode.BAD_REQUEST,
                  message: ResponseMessage.VALIDATION_FAILED,
                  error: err
-              })              
+              });              
            }
                  logger.error("Unexpected error during query validation:", error);
-           throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`)
+           throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-    }
+    };
 }
 
 
@@ -71,18 +70,18 @@ function requestParamsValidator(schema: ZodSchema) {
             const err =  error.errors.map((e:any) => ({
                 field: e.path.join('.'),
                 message: e.message,
-              }))
+              }));
             
               res.json({
                  status: HttpStatusCode.BAD_REQUEST,
                  message: ResponseMessage.VALIDATION_FAILED,
                  error: err
-              })              
+              });              
            }
             logger.error("Unexpected error during params validation:", error);
-           throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`)
+           throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-    }
+    };
 }
 
-export {requestBodyValidator, requestParamsValidator, requestQueryValidator }
+export {requestBodyValidator, requestParamsValidator, requestQueryValidator };

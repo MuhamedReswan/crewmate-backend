@@ -1,6 +1,5 @@
-import IVendor from "../../../../entities/v1/vendorEntity";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
-import { GoogleLogin, LoginResponse, VendorLoginResponse } from "../../../../entities/v1/authenticationEntity";
+import { GoogleLogin, VendorLoginResponse } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
 
 

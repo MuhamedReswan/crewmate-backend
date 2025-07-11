@@ -1,8 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { IAdminService } from "../../interfaces/admin/IAdminService";
 import { IAdminRepository } from "../../../../repositories/v1/interfaces/admin/IAdminRepository";
-import { compare } from "bcrypt";
-import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { ValidationError } from "../../../../utils/errors/validation.error";
 import { generateAccessToken, generateRefreshToken } from "../../../../utils/jwt.util";
@@ -35,7 +33,7 @@ const admin:IAdmin = {
   name:"admin",
   email:adminEmail,
   role:Role.ADMIN
-}
+};
 
       if (password !== adminPassword || adminEmail !== email ){
         logger.warn("Invalid admin login credentials", { attemptedEmail: email });

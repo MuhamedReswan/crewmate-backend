@@ -20,7 +20,7 @@ router.post('/login', validateLogin, vendorAuthController.vendorLogin);
 router.post('/forgot-password', validateForgotPassword, vendorAuthController.forgotPassword);
 router.post('/refresh-token',vendorAuthController.setNewAccessToken);
 router.post('/google-auth', vendorAuthController.googleAuth);
-router.post('/logout',vendorAuthController.logout)
+router.post('/logout',vendorAuthController.logout);
 
 
 router.patch('/reset-password', validatePassword, vendorAuthController.resetPassword);

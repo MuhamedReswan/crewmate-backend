@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
+import { Model } from "mongoose";
 import { IAdminRepository } from "../../interfaces/admin/IAdminRepository";
-import { Model, model } from "mongoose";
 import IAdmin from "../../../../entities/v1/adminEntity";
 import { BaseRepository } from "../base/base.repository";
 

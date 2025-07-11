@@ -4,7 +4,7 @@ export class ValidationError extends CustomError{
     statusCode: number = 403;
     constructor(message: string){
         super(message);
-        this.name = 'validationError'
+        this.name = 'validationError';
     }
 
 serializeErrors(){

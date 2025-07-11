@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
+import { NextFunction, Request, Response } from "express";
 import { IAdminController } from "../../interfaces/admin/IAdminController";
 import { IAdminService } from "../../../../services/v1/interfaces/admin/IAdminService";
-import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { responseHandler } from "../../../../utils/responseHandler.util";

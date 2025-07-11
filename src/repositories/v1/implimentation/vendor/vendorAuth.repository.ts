@@ -1,3 +1,5 @@
+import { inject, injectable } from "tsyringe";
+import { Model } from "mongoose";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { vendorModel } from "../../../../models/v1/vendor.model";
@@ -6,10 +8,6 @@ import { createOtp, sendOtpEmail } from "../../../../utils/otp.util";
 import { deleteRedisData, getRedisData, setRedisData } from "../../../../utils/redis.util";
 import { IVendorAuthRepository } from "../../interfaces/vendor/IVendorAuth.repository";
 import { BaseRepository } from "../base/base.repository";
-import { Register } from "../../../../entities/v1/authenticationEntity";
-import { inject, injectable } from "tsyringe";
-import { Model } from "mongoose";
-import { partialUtil } from "zod/lib/helpers/partialUtil";
 import logger from "../../../../utils/logger.util";
 
 @injectable()
@@ -29,7 +27,7 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
 
       return vendor;
         } catch (error) {
-            throw error
+            throw error;
         }
     };
 
@@ -40,9 +38,9 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
         
             let vendorDetails =  await this.create(vendorData);
             logger.debug("Vendor created successfully", { vendorDetails });
-            return vendorDetails
+            return vendorDetails;
         } catch (error) {
-            throw error
+            throw error;
         }
     };
 
@@ -56,7 +54,7 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
       logger.debug("Saved OTP for vendor", { email, otp, savedOtp });
             await sendOtpEmail(email, otp);    
         } catch (error) {
-            throw error
+            throw error;
         }
            };
 
@@ -73,7 +71,7 @@ export default class VendorAuthRepository extends BaseRepository<IVendor> implem
            throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
             }
                } catch (error) {
-                   throw error
+                   throw error;
                }
            };
 }

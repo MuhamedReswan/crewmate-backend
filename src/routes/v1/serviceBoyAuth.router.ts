@@ -24,14 +24,14 @@ router.post('/login', validateLogin, serviceBoyAuthController.serviceBoyLogin);
 router.post('/forgot-password', validateForgotPassword, serviceBoyAuthController.forgotPassword);
 router.post('/google-auth', serviceBoyAuthController.googleAuth);
 router.post('/refresh-token',serviceBoyAuthController.setNewAccessToken);
-router.post('/logout',serviceBoyAuthController.logout)
+router.post('/logout',serviceBoyAuthController.logout);
 
 router.patch('/reset-password', validatePassword, serviceBoyAuthController.resetPassword);
 
-router.post('/profile')
+router.post('/profile');
 
 //testing purpose
-router.post('/token-test',authMiddleware, serviceBoyAuthController.tokenTest)
+router.post('/token-test',authMiddleware, serviceBoyAuthController.tokenTest);
 
 export default router;
 

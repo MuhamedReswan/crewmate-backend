@@ -2,12 +2,13 @@ import jwt from 'jsonwebtoken';
 import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from '../config/env';
 import { UnAuthorizedError } from './errors/unAuthorized.error';
 import { CreateToken, JwtPayload } from '../types/type';
+import logger from './logger.util';
 
 
-const accessTokenSecret = ACCESSTOKENSECRET 
-const refreshTokenSecret = REFRESHTOKENSECRET 
-console.log("accessTokenSecret",accessTokenSecret)
-console.log("refreshTokenSecret",refreshTokenSecret)
+const accessTokenSecret = ACCESSTOKENSECRET; 
+const refreshTokenSecret = REFRESHTOKENSECRET; 
+console.log("accessTokenSecret",accessTokenSecret);
+console.log("refreshTokenSecret",refreshTokenSecret);
 
 
 export const generateAccessToken = (details:CreateToken ) => {
@@ -22,9 +23,9 @@ export const generateAccessToken = (details:CreateToken ) => {
 export const generateRefreshToken = (details:CreateToken ) => {
     try {
         if(!refreshTokenSecret){
-            throw new Error('Refrsesh token secret in not defined')
+            throw new Error('Refrsesh token secret in not defined');
         }
-        console.log(" generateRefreshToken",refreshTokenSecret)
+        console.log(" generateRefreshToken",refreshTokenSecret);
 
         return jwt.sign({id:details.data?._id, email:details.data?.email,
             name: details.data?.name, role:details.role }, refreshTokenSecret, {expiresIn: '7d'} );
@@ -42,6 +43,7 @@ export const verifyAccessToken = (token: string): JwtPayload |undefined => {
         } 
         return jwt.verify(token, accessTokenSecret) as JwtPayload;
     } catch (error) {
+        logger.error("Failed to verify access token", error );
         return undefined;
     }
 };
@@ -50,14 +52,14 @@ export const verifyAccessToken = (token: string): JwtPayload |undefined => {
 export const verifyRefreshToken = (token: string): JwtPayload => {
 try {
     if(!refreshTokenSecret){
-        throw new Error('Refrsesh token secret in not defined')
+        throw new Error('Refrsesh token secret in not defined');
     }
 
     const decoded = jwt.verify(token, refreshTokenSecret) as JwtPayload;
     return decoded;
 } catch (error) {
-    console.log("verify refresh token error",error)
-    throw new UnAuthorizedError('Invalid refresh token')
+    console.log("verify refresh token error",error);
+    throw new UnAuthorizedError('Invalid refresh token');
 }
 };
 

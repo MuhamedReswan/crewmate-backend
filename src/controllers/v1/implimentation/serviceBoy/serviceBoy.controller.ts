@@ -1,12 +1,12 @@
 import { inject, injectable } from "tsyringe";
+import { NextFunction, Request, Response } from "express";
+import { Types } from "mongoose";
 import { IServiceBoyService } from "../../../../services/v1/implimentation/serviceBoy/serviceBoy.service";
 import { RequestHandler } from "../../../../types/type";
-import { NextFunction, Request, Response } from "express";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
-import { Types } from "mongoose";
 
 export interface IServiceBoyController{
     loadProfile:RequestHandler
@@ -20,21 +20,21 @@ export default class ServiceBoyController implements IServiceBoyController{
 
  loadProfile = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
         try {
-            logger.info("req.body of service boy",req.params)
+            logger.info("req.body of service boy",req.params);
             let { id} = req.params;
-            logger.info("req.params of service boy load profile",{id})
+            logger.info("req.params of service boy load profile",{id});
             
              const _id = new Types.ObjectId(id);
-            const serviceBoyProfile =   await this._serviceBoyService.LoadProfile({_id})
-            logger.info("serviceBoyProfile from controleer",serviceBoyProfile)
+            const serviceBoyProfile =   await this._serviceBoyService.LoadProfile({_id});
+            logger.info("serviceBoyProfile from controleer",serviceBoyProfile);
 
                 res.status(200).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, serviceBoyProfile ));
 
         } catch (error) {
 logger.error("ServiceBoyController: loadProfile error", error );
-            next(error)
+            next(error);
         }
-    }
+    };
 
 
 
@@ -53,8 +53,8 @@ updateProfile  = async(req:Request, res:Response, next:NextFunction):Promise<voi
         }
     } catch (error) {
               logger.error("ServiceBoyController: updateProfile error", error );
-        next(error)
+        next(error);
     }
-}
+};
 
 }

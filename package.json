@@ -7,7 +7,8 @@
     "start": "ts-node-dev src/server.ts",
     "dev": "nodemon src/server.ts",
     "build": "tsc --build",
-    "lint": "tsc --noEmit"
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "keywords": [],
   "author": "",
@@ -19,8 +20,13 @@
     "@types/mime-types": "^3.0.1",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.7",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "eslint": "^9.30.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.32.0",
     "nodemon": "^3.1.9",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",

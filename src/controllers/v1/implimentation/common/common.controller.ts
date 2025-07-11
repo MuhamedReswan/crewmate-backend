@@ -1,7 +1,6 @@
 import { inject, injectable } from "tsyringe";
-import { ICommonService } from "../../../../services/v1/implimentation/common/common.service";
 import { NextFunction, Request, Response } from "express";
-
+import { ICommonService } from "../../../../services/v1/implimentation/common/common.service";
 import { RequestHandler } from "../../../../types/type";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
@@ -35,7 +34,7 @@ export default class CommonController implements ICommonController {
         next(error);
     }
 
-  }
+  };
 
   }
 

@@ -1,10 +1,9 @@
-import { Document, ObjectId } from "mongoose"
 import { Role } from "../../constants/Role";
 
 export default interface IAdmin {
 _id:string;
-email: string, 
-password?: string
-name:string
-role:Role
+email: string;
+password?: string;
+name:string;
+role:Role;
 }

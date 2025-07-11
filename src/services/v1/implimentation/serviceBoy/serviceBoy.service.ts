@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { IServiceBoyRepository } from "../../../../repositories/v1/implimentation/serviceBoy/serviceBoy.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
-import { ImageFiles, LocationData } from "../../../../types/type";
+import { ImageFiles } from "../../../../types/type";
 import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 
@@ -25,8 +25,8 @@ export default class ServiceBoyService implements IServiceBoyService {
 
   LoadProfile = async(_id:Partial<IServiceBoy>):Promise<IServiceBoy | undefined> => {
     try {
-const serviceBoyProfile = await this._serviceBoyRepository.loadProfile(_id)
-return serviceBoyProfile
+const serviceBoyProfile = await this._serviceBoyRepository.loadProfile(_id);
+return serviceBoyProfile;
        } catch (error) {
       throw error;
     }
@@ -96,6 +96,6 @@ return serviceBoyProfile
     } catch (error) {
       throw error;
     }
-  }
+  };
   };
 

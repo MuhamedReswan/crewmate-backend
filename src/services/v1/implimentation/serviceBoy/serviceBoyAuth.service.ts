@@ -1,4 +1,6 @@
 import { injectable, inject } from "tsyringe";
+import bcrypt from "bcrypt";
+import * as crypto from "crypto";
 import { IServiceBoyAuthRepository } from "../../../../repositories/v1/interfaces/serviceBoy/IServiceBoyAuth.repository";
 import redisClient, {
   deleteRedisData,
@@ -16,20 +18,15 @@ import { ExpiredError } from "../../../../utils/errors/expired.error";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import bcrypt from "bcrypt";
 import { ValidationError } from "../../../../utils/errors/validation.error";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
 } from "../../../../utils/jwt.util";
-import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
-import * as crypto from "crypto";
 import {
   GoogleLogin,
-  LoginResponse,
-  Register,
   ServiceBoyLoginResponse,
 } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
@@ -61,12 +58,12 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         logger.warn(`Email already used: ${email}`);
         throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
       }
-      let setServiceBoyData = await setRedisData(
+         await setRedisData(
         `serviceBoy:${email}`,
         JSON.stringify({ name, email, password, mobile }),
         3600
       );
-      let registerFromRedis = await getRedisData(`serviceBoy:${email}`);
+      await getRedisData(`serviceBoy:${email}`);
       logger.info(`Registration data cached for ${email}`);
     } catch (error) {
       throw error;
@@ -202,7 +199,7 @@ const servicerId = `A-${number}`;
       await getRedisData(`otpB${email}`);
       await deleteRedisData(`otpB${email}`);
       const otp = createOtp();
-      logger.info("resend otp------------",{otp})
+      logger.info("resend otp------------",{otp});
       await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 60);
       await getRedisData(`otpB:${email}`);
       await sendOtpEmail(email, otp);
@@ -215,11 +212,7 @@ const servicerId = `A-${number}`;
     try {
       const decoded = await verifyRefreshToken(Token);
       logger.debug("decodedrole", { decoded });
-      const role =
-        decoded?.role === Role.SERVICE_BOY
-          ? Role.SERVICE_BOY
-          : Role.SERVICE_BOY;
-
+   
       if (!decoded || !decoded.email) {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
       }

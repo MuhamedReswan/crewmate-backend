@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
+import { Model } from "mongoose";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { serviceBoyModel } from "../../../../models/v1/serviceBoy.model";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { IServiceBoyAuthRepository } from "../../interfaces/serviceBoy/IServiceBoyAuth.repository"; 
-import { Model } from "mongoose";
 import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import logger from "../../../../utils/logger.util";
@@ -20,10 +20,10 @@ export default class serviceBoyAuthRepository
 
     async findServiceBoyByEmail(email: string): Promise<IServiceBoy | null>{
         try {
-            logger.info(`Finding service boy by email: ${email}`)
+            logger.info(`Finding service boy by email: ${email}`);
             return await this.findOne({email});
         } catch (error) {
-            throw error
+            throw error;
         }
     };
 
@@ -35,7 +35,7 @@ async createServiceBoy(serviceBoyData: Partial<IServiceBoy>): Promise<IServiceBo
         logger.debug("serviceBoy created successfully", { serviceBoyDetails });
         return serviceBoyDetails;
     } catch (error) {
-        throw error
+        throw error;
     }
 }
 

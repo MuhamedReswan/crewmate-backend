@@ -1,5 +1,4 @@
-import IServiceBoy from "../../../../entities/v1/serviceBoyEntity"
-import { GoogleLogin, Register, ServiceBoyLoginResponse } from "../../../../entities/v1/authenticationEntity";
+import { GoogleLogin, ServiceBoyLoginResponse } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
 
 export interface IServiceBoyAuthService {

@@ -1,13 +1,12 @@
 import { inject, injectable } from "tsyringe";
-import { IVendorService } from "../../../../services/v1/implimentation/vendor/vendor.service";
 import { NextFunction, Request, Response } from "express";
-import { promises } from "dns";
+import { Types } from "mongoose";
+import { IVendorService } from "../../../../services/v1/implimentation/vendor/vendor.service";
 import { ImageFiles, RequestHandler } from "../../../../types/type";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
-import { Types } from "mongoose";
 
 export interface IVendorController{
     updateVendorProfile:RequestHandler
@@ -32,7 +31,7 @@ export default class VendorController implements IVendorController{
         logger.error("VendorController: loadProfile error", error);
         next(error);
     }
-}
+};
 
      updateVendorProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
        try{
@@ -43,7 +42,7 @@ export default class VendorController implements IVendorController{
 
     const updateVendorProfile = await this._vendorService.updateVendorProfile(
         req.body,
-        req.files as ImageFiles)
+        req.files as ImageFiles);
 
           if(updateVendorProfile){
                     res.status(200).json(responseHandler( ResponseMessage.PROFILE_UPDATED,HttpStatusCode.OK, updateVendorProfile));
@@ -54,5 +53,5 @@ export default class VendorController implements IVendorController{
          logger.error("Error while updating vendor profile", error );
       next(error);
        }
-     }
+     };
     }

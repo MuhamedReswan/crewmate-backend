@@ -1,16 +1,12 @@
-import { NextFunction, Request, response, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { inject, injectable } from "tsyringe";
 import { IServiceBoyAuthService } from "../../../../services/v1/interfaces/serviceBoy/IServiceBoyAuthService";
 import { IServiceBoyAuthController } from "../../interfaces/serviceBoy/IServiceBoyAuthController";
-import { inject, injectable } from "tsyringe";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import {
-  decodeRefreshToken,
-  generateAccessToken,
-  generateRefreshToken,
-} from "../../../../utils/jwt.util";
+import { decodeRefreshToken } from "../../../../utils/jwt.util";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { getRedisData, setRedisData } from "../../../../utils/redis.util";
@@ -64,7 +60,6 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       let serviceBoyData = await this._serviceBoyAuthService.verifyOTP(email, otp);
       logger.debug("verifyOTP result: " + JSON.stringify(serviceBoyData));
       if (serviceBoyData) {
-        const role = Role.SERVICE_BOY;
 
          // set access token and refresh token in coockies
       res.cookie("refreshToken", serviceBoyData.refreshToken, {
@@ -374,10 +369,10 @@ const refreshToken = req.cookies?.refreshToken;
           "Test token success",
           HttpStatusCode.OK,
           true
-        ))
+        ));
     } catch (error) {
        logger.error("Token test error", error);
-      next(error)
+      next(error);
     }
-  }
+  };
 }

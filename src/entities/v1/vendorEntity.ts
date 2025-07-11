@@ -17,4 +17,4 @@ export default interface IVendor {
     instaId:string,
     location?:LocationData,
     role:string; 
-}
+};;;;;;;;;;
