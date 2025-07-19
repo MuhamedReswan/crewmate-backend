@@ -9,15 +9,16 @@ exports.requestQueryValidator = requestQueryValidator;
 const zod_1 = __importDefault(require("zod"));
 const httpStatusCode_1 = require("../constants/httpStatusCode");
 const resposnseMessage_1 = require("../constants/resposnseMessage");
+const logger_util_1 = __importDefault(require("../utils/logger.util"));
 function requestBodyValidator(schema) {
     return (req, res, next) => {
         try {
-            console.log("with body validator middleware backend");
+            logger_util_1.default.info("Validating request body");
             schema.parse(req.body);
             next();
         }
         catch (error) {
-            console.log("zod Error", error);
+            logger_util_1.default.error("Zod validation error (body):", error);
             if (error instanceof zod_1.default.ZodError) {
                 const err = error.errors.map((e) => ({
                     field: e.path.join('.'),
@@ -29,6 +30,7 @@ function requestBodyValidator(schema) {
                     error: err
                 });
             }
+            logger_util_1.default.error("Unexpected error during body validation:", error);
             throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     };
@@ -36,11 +38,12 @@ function requestBodyValidator(schema) {
 function requestQueryValidator(schema) {
     return (req, res, next) => {
         try {
+            logger_util_1.default.info("Validating request query");
             schema.parse(req.query);
             next();
         }
         catch (error) {
-            console.log("zod Error", error);
+            logger_util_1.default.error("Zod validation error (query):", error);
             if (error instanceof zod_1.default.ZodError) {
                 const err = error.errors.map((e) => ({
                     field: e.path.join('.'),
@@ -52,6 +55,7 @@ function requestQueryValidator(schema) {
                     error: err
                 });
             }
+            logger_util_1.default.error("Unexpected error during query validation:", error);
             throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     };
@@ -59,11 +63,12 @@ function requestQueryValidator(schema) {
 function requestParamsValidator(schema) {
     return (req, res, next) => {
         try {
+            logger_util_1.default.info("Validating request params");
             schema.parse(req.params);
             next();
         }
         catch (error) {
-            console.log("zod Error", error);
+            logger_util_1.default.error("Zod validation error (params):", error);
             if (error instanceof zod_1.default.ZodError) {
                 const err = error.errors.map((e) => ({
                     field: e.path.join('.'),
@@ -75,6 +80,7 @@ function requestParamsValidator(schema) {
                     error: err
                 });
             }
+            logger_util_1.default.error("Unexpected error during params validation:", error);
             throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     };

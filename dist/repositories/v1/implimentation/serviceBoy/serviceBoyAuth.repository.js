@@ -20,13 +20,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const tsyringe_1 = require("tsyringe");
+const mongoose_1 = require("mongoose");
 const resposnseMessage_1 = require("../../../../constants/resposnseMessage");
 const serviceBoy_model_1 = require("../../../../models/v1/serviceBoy.model");
 const notFound_error_1 = require("../../../../utils/errors/notFound.error");
-const mongoose_1 = require("mongoose");
 const base_repository_1 = require("../base/base.repository");
+const logger_util_1 = __importDefault(require("../../../../utils/logger.util"));
 let serviceBoyAuthRepository = class serviceBoyAuthRepository extends base_repository_1.BaseRepository {
     constructor(model) {
         super(model);
@@ -34,10 +38,10 @@ let serviceBoyAuthRepository = class serviceBoyAuthRepository extends base_repos
     findServiceBoyByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                logger_util_1.default.info(`Finding service boy by email: ${email}`);
                 return yield this.findOne({ email });
             }
             catch (error) {
-                console.log(error);
                 throw error;
             }
         });
@@ -46,14 +50,11 @@ let serviceBoyAuthRepository = class serviceBoyAuthRepository extends base_repos
     createServiceBoy(serviceBoyData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log("createServiceBoy got");
-                console.log("serviceBoyData", serviceBoyData);
                 let serviceBoyDetails = yield this.create(serviceBoyData);
-                console.log("serviceBoyDetails", serviceBoyDetails);
+                logger_util_1.default.debug("serviceBoy created successfully", { serviceBoyDetails });
                 return serviceBoyDetails;
             }
             catch (error) {
-                console.log("error from createServiceBoy repository", error);
                 throw error;
             }
         });
@@ -63,6 +64,7 @@ let serviceBoyAuthRepository = class serviceBoyAuthRepository extends base_repos
             try {
                 const updatedServiceBoy = yield serviceBoy_model_1.serviceBoyModel.findOneAndUpdate({ email }, { password });
                 if (!updatedServiceBoy) {
+                    logger_util_1.default.warn("Service boy not found during password update", { email });
                     throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND);
                 }
             }

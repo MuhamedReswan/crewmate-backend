@@ -23,6 +23,6 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # 9. Start the app using compiled JS in dist/
-# CMD ["node", "dist/server.js"] // 
-CMD ["npx", "nodemon", "--watch", "src", "src/index.ts"] 
+# CMD ["npx", "nodemon", "--watch", "src", "src/index.ts"] 
+CMD ["node", "dist/server.js"] 
 

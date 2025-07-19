@@ -1,0 +1,24 @@
+# Dockerfile.dev
+FROM node:20-alpine
+
+# Set working dir
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Install ts-node-dev globally
+RUN npm install -g ts-node-dev
+
+# Copy source files
+COPY . .
+
+# Expose your backend port
+EXPOSE 3000
+
+# Set dev mode
+ENV NODE_ENV=development
+
+# Start with hot reload
+CMD ["npm", "run", "dev"]

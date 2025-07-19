@@ -1,26 +1,33 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+import stringify from "safe-stable-stringify"; 
 
 const logFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.timestamp(),
   winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'stack'] }),
   winston.format.printf(({ level, message, timestamp, stack, metadata }) => {
-    const metaString = metadata && Object.keys(metadata).length > 0
-      ? ` | ${JSON.stringify(metadata)}`
-      : '';
+    let metaString = '';
+
+    if (metadata && Object.keys(metadata).length > 0) {
+      try {
+        metaString = ` | ${stringify(metadata)}`; 
+      } catch (err) {
+        metaString = ' | [Could not stringify metadata]';
+      }
+    }
+
     return stack
       ? `[${timestamp}] ${level.toUpperCase()}: ${message}${metaString}\n${stack}`
       : `[${timestamp}] ${level.toUpperCase()}: ${message}${metaString}`;
   })
 );
 
-// Daily rotating file transport for errors
 const errorFileTransport = new DailyRotateFile({
   filename: 'logs/error-%DATE%.log',
   datePattern: 'YYYY-MM-DD',
   level: 'error',
-  maxFiles: '7d', // delete files older than 7 days
+  maxFiles: '7d',
   zippedArchive: true,
 });
 

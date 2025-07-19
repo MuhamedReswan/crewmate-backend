@@ -3,10 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyRefreshToken = exports.verifyAccessToken = exports.generateRefreshToken = exports.generateAccessToken = void 0;
+exports.decodeRefreshToken = exports.verifyRefreshToken = exports.verifyAccessToken = exports.generateRefreshToken = exports.generateAccessToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../config/env");
 const unAuthorized_error_1 = require("./errors/unAuthorized.error");
+const logger_util_1 = __importDefault(require("./logger.util"));
 const accessTokenSecret = env_1.ACCESSTOKENSECRET;
 const refreshTokenSecret = env_1.REFRESHTOKENSECRET;
 console.log("accessTokenSecret", accessTokenSecret);
@@ -43,6 +44,7 @@ const verifyAccessToken = (token) => {
         return jsonwebtoken_1.default.verify(token, accessTokenSecret);
     }
     catch (error) {
+        logger_util_1.default.error("Failed to verify access token", error);
         return undefined;
     }
 };
@@ -52,9 +54,6 @@ const verifyRefreshToken = (token) => {
         if (!refreshTokenSecret) {
             throw new Error('Refrsesh token secret in not defined');
         }
-        //   const tested = jwt.decode(token, { complete: true }) as JwtPayload;
-        //   console.log("rrrrrrrrrrrrrrrrrrrrrr",tested);
-        //   console.log(" verifyRefreshToken",refreshTokenSecret)
         const decoded = jsonwebtoken_1.default.verify(token, refreshTokenSecret);
         return decoded;
     }
@@ -64,3 +63,13 @@ const verifyRefreshToken = (token) => {
     }
 };
 exports.verifyRefreshToken = verifyRefreshToken;
+const decodeRefreshToken = (token) => {
+    try {
+        return jsonwebtoken_1.default.decode(token);
+    }
+    catch (error) {
+        console.error("Failed to decode refresh token:", error);
+        return null;
+    }
+};
+exports.decodeRefreshToken = decodeRefreshToken;

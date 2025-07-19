@@ -22,13 +22,13 @@ exports.BaseRepository = void 0;
 const mongoose_1 = require("mongoose");
 const tsyringe_1 = require("tsyringe");
 let BaseRepository = class BaseRepository {
-    constructor(model) {
-        this.model = model;
+    constructor(_model) {
+        this._model = _model;
     }
     create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const createdDocument = yield this.model.create(data);
+                const createdDocument = yield this._model.create(data);
                 return createdDocument;
             }
             catch (error) {
@@ -41,7 +41,7 @@ let BaseRepository = class BaseRepository {
     findOne(filter) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const document = yield this.model.findOne(filter).exec();
+                const document = yield this._model.findOne(filter).exec();
                 return document;
             }
             catch (error) {
@@ -54,7 +54,7 @@ let BaseRepository = class BaseRepository {
     updateOne(filter, updateData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const updatedDocument = yield this.model.findOneAndUpdate(filter, updateData, { new: true }).exec();
+                const updatedDocument = yield this._model.findOneAndUpdate(filter, updateData, { new: true }).exec();
                 return updatedDocument;
             }
             catch (error) {
@@ -67,7 +67,7 @@ let BaseRepository = class BaseRepository {
     deleteOne(filter) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const deletedDocument = yield this.model.findOneAndDelete(filter).exec();
+                const deletedDocument = yield this._model.findOneAndDelete(filter).exec();
                 return deletedDocument;
             }
             catch (error) {
@@ -80,7 +80,7 @@ let BaseRepository = class BaseRepository {
     deleteMany(filter) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const deleted = yield this.model.deleteMany(filter).exec();
+                const deleted = yield this._model.deleteMany(filter).exec();
                 return deleted.deletedCount || 0;
             }
             catch (error) {

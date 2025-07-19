@@ -1,18 +1,18 @@
-
 services:
   backend:
-    build: .
-    container_name: crewmate-backend
+    container_name: crewmate-backend-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - redis
-    restart: unless-stopped
     volumes:
       - .:/app
       - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - redis
 
   redis:
     image: redis:7-alpine

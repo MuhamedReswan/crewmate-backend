@@ -62,4 +62,19 @@ const deleteRedisData = (key) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteRedisData = deleteRedisData;
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const existing = yield redisClient.get("serviceBoy:idCounter");
+        if (!existing) {
+            yield redisClient.set("serviceBoy:idCounter", "0");
+            console.log("Initialized serviceBoy:idCounter to 0");
+        }
+        else {
+            console.log("serviceBoy:idCounter already exists with value:", existing);
+        }
+    }
+    catch (error) {
+        console.error("Error initializing serviceBoy:idCounter:", error);
+    }
+}))();
 exports.default = redisClient;

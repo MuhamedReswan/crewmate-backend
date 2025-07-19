@@ -14,6 +14,6 @@ const uploadFields = multer_1.default.fields([
     { name: "aadharImageBack", maxCount: 1 },
     { name: "profileImage", maxCount: 1 },
 ]);
-router.get('/profile', serviceBoyController.loadProfile);
-router.post('/profile', authorization_1.authMiddleware, uploadFields, serviceBoyController.updateProfile);
+router.get('/profile/:id', serviceBoyController.loadProfile);
+router.put('/profile', authorization_1.authMiddleware, uploadFields, serviceBoyController.updateProfile);
 exports.default = router;
