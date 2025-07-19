@@ -19,21 +19,31 @@ const admin_model_1 = require("../models/v1/admin.model");
 const serviceBoy_service_1 = __importDefault(require("../services/v1/implimentation/serviceBoy/serviceBoy.service"));
 const serviceBoy_controller_1 = __importDefault(require("../controllers/v1/implimentation/serviceBoy/serviceBoy.controller"));
 const serviceBoy_repository_1 = __importDefault(require("../repositories/v1/implimentation/serviceBoy/serviceBoy.repository"));
+const vendor_controller_1 = __importDefault(require("../controllers/v1/implimentation/vendor/vendor.controller"));
+const vendor_service_1 = __importDefault(require("../services/v1/implimentation/vendor/vendor.service"));
+const vendor_repository_1 = __importDefault(require("../repositories/v1/implimentation/vendor/vendor.repository"));
+const common_controller_1 = __importDefault(require("../controllers/v1/implimentation/common/common.controller"));
+const common_service_1 = __importDefault(require("../services/v1/implimentation/common/common.service"));
 // Repository Registration
 tsyringe_1.container.register("IVendorAuthRepository", vendorAuth_repository_1.default);
+tsyringe_1.container.register("IVendorRepository", vendor_repository_1.default);
 tsyringe_1.container.register("IServiceBoyAuthRepository", serviceBoyAuth_repository_1.default);
 tsyringe_1.container.register("IServiceBoyRepository", serviceBoy_repository_1.default);
 tsyringe_1.container.register("IAdminRepository", admin_repository_1.default);
 // Service Registrations
 tsyringe_1.container.register("IVendorAuthService", vendorAuth_service_1.default);
+tsyringe_1.container.register("IVendorService", vendor_service_1.default);
 tsyringe_1.container.register("IServiceBoyAuthService", serviceBoyAuth_service_1.default);
 tsyringe_1.container.register("IServiceBoyService", serviceBoy_service_1.default);
 tsyringe_1.container.register("IAdminService", admin_service_1.default);
+tsyringe_1.container.register("ICommonService", common_service_1.default);
 // Controller Registrations
 tsyringe_1.container.register("IVendorAuthController", vendorAuth_controller_1.default);
+tsyringe_1.container.register("IVendorController", vendor_controller_1.default);
 tsyringe_1.container.register("IServiceBoyAuthController", serviceBoyAuth_controller_1.default);
 tsyringe_1.container.register("IServiceBoyController", serviceBoy_controller_1.default);
 tsyringe_1.container.register("IAdminController", admin_controller_1.AdminController);
+tsyringe_1.container.register("ICommonController", common_controller_1.default);
 // Model Registrations
 tsyringe_1.container.register("ServiceBoyModel", { useValue: serviceBoy_model_1.serviceBoyModel });
 tsyringe_1.container.register("VendorModel", { useValue: vendor_model_1.vendorModel });

@@ -20,6 +20,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const tsyringe_1 = require("tsyringe");
 const httpStatusCode_1 = require("../../../../constants/httpStatusCode");
@@ -28,82 +31,120 @@ const resposnseMessage_1 = require("../../../../constants/resposnseMessage");
 const notFound_error_1 = require("../../../../utils/errors/notFound.error");
 const otp_util_1 = require("../../../../utils/otp.util");
 const Role_1 = require("../../../../constants/Role");
+const logger_util_1 = __importDefault(require("../../../../utils/logger.util"));
+const redis_util_1 = require("../../../../utils/redis.util");
+const jwt_util_1 = require("../../../../utils/jwt.util");
+const unAuthorized_error_1 = require("../../../../utils/errors/unAuthorized.error");
+const env_1 = require("../../../../config/env");
 let VendorAuthController = class VendorAuthController {
-    constructor(vendorAuthService) {
-        this.vendorAuthService = vendorAuthService;
+    constructor(_vendorAuthService) {
+        this._vendorAuthService = _vendorAuthService;
         this.register = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, email, password, mobile } = req.body;
-                console.log("req.body register controller", req.body);
-                yield this.vendorAuthService.register(name, email, password, mobile);
-                yield this.vendorAuthService.generateOTP(email);
+                yield this._vendorAuthService.register(name, email, password, mobile);
+                yield this._vendorAuthService.generateOTP(email);
                 res
-                    .status(httpStatusCode_1.HttpStatusCode.OK)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.REGISTER_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, { email }));
+                    .status(httpStatusCode_1.HttpStatusCode.CREATED)
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.REGISTER_SUCCESS, httpStatusCode_1.HttpStatusCode.CREATED, { email }));
             }
             catch (error) {
-                res.status(httpStatusCode_1.HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
+                logger_util_1.default.error("Vendor registration failed", error);
+                next(error);
             }
         });
         this.verifyOTP = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, otp } = req.body;
-                console.log("req.body on controller", req.body);
-                let verify = yield this.vendorAuthService.verifyOTP(email, otp);
-                console.log("verifyotp", verify);
-                res.status(httpStatusCode_1.HttpStatusCode.CREATED)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.OTP_VERIFICATION_SUCCESS, httpStatusCode_1.HttpStatusCode.CREATED));
+                logger_util_1.default.info("Verifying OTP for vendor", { email });
+                let vendorData = yield this._vendorAuthService.verifyOTP(email, otp);
+                logger_util_1.default.debug("OTP verified result", { vendorData });
+                if (vendorData) {
+                    // set access token and refresh token in coockies
+                    res.cookie("refreshToken", vendorData.refreshToken, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        maxAge: env_1.REFRESH_TOKEN_MAX_AGE,
+                        sameSite: "lax",
+                    });
+                    res.cookie("accessToken", vendorData.accessToken, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        maxAge: env_1.ACCESS_TOKEN_MAX_AGE,
+                        sameSite: "lax",
+                    });
+                    res
+                        .status(httpStatusCode_1.HttpStatusCode.OK)
+                        .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.OTP_VERIFICATION_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, vendorData.vendor));
+                }
+                else {
+                    res
+                        .status(httpStatusCode_1.HttpStatusCode.BAD_REQUEST)
+                        .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.USER_NOT_FOUND, httpStatusCode_1.HttpStatusCode.BAD_REQUEST));
+                }
             }
             catch (error) {
+                logger_util_1.default.error("Vendor OTP verification failed", error);
                 next(error);
             }
         });
         this.resendOtp = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
-                yield this.vendorAuthService.resendOtp(email);
-                res.status(httpStatusCode_1.HttpStatusCode.OK)
+                logger_util_1.default.info("Resending OTP to vendor", { email });
+                yield this._vendorAuthService.resendOtp(email);
+                res
+                    .status(httpStatusCode_1.HttpStatusCode.OK)
                     .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.RESEND_OTP_SEND, httpStatusCode_1.HttpStatusCode.OK));
             }
             catch (error) {
+                logger_util_1.default.error("Resend OTP failed", error);
                 next(error);
             }
         });
         this.vendorLogin = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, password } = req.body;
-                const vendor = yield this.vendorAuthService.vendorLogin(email, password);
+                const vendorData = yield this._vendorAuthService.vendorLogin(email, password);
+                if (!vendorData) {
+                    throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.LOGIN_VERIFICATION_FAILED);
+                }
                 // set access token and refresh token in coockies
-                res.cookie('refreshToken', vendor.refreshToken, {
+                res.cookie("refreshToken", vendorData.refreshToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    maxAge: 30 * 24 * 60 * 60 * 1000,
-                    sameSite: 'lax'
+                    secure: process.env.NODE_ENV === "production",
+                    maxAge: env_1.REFRESH_TOKEN_MAX_AGE,
+                    sameSite: "lax",
                 });
-                res.cookie('accessToken', vendor.accessToken, {
+                res.cookie("accessToken", vendorData.accessToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    maxAge: 15 * 60 * 1000,
-                    sameSite: 'lax'
+                    secure: process.env.NODE_ENV === "production",
+                    maxAge: env_1.ACCESS_TOKEN_MAX_AGE,
+                    sameSite: "lax",
                 });
-                res.status(httpStatusCode_1.HttpStatusCode.OK)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGIN_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, vendor));
+                res
+                    .status(httpStatusCode_1.HttpStatusCode.OK)
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGIN_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, vendorData.vendor));
             }
             catch (error) {
+                logger_util_1.default.error("Vendor login failed", error);
                 next(error);
             }
         });
         this.forgotPassword = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
-                const forgotToken = yield this.vendorAuthService.forgotPassword(email);
+                logger_util_1.default.info("Vendor forgot password request", { email });
+                const forgotToken = yield this._vendorAuthService.forgotPassword(email);
                 if (!forgotToken)
                     throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
-                yield this.vendorAuthService.resetPasswordLink(forgotToken, email, Role_1.Role.VENDOR);
-                res.status(httpStatusCode_1.HttpStatusCode.OK)
+                yield this._vendorAuthService.resetPasswordLink(forgotToken, email, Role_1.Role.VENDOR);
+                res
+                    .status(httpStatusCode_1.HttpStatusCode.OK)
                     .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.FORGOT_PASSWORD_LINK_SEND, httpStatusCode_1.HttpStatusCode.OK));
             }
             catch (error) {
+                logger_util_1.default.error("Forgot password process failed", error);
                 next(error);
             }
         });
@@ -111,16 +152,18 @@ let VendorAuthController = class VendorAuthController {
             try {
                 const { email, password, token } = req.body;
                 if (token) {
-                    yield this.vendorAuthService.resetPasswordTokenVerify(email, token);
-                    yield this.vendorAuthService.resetPassword(email, password);
+                    yield this._vendorAuthService.resetPasswordTokenVerify(email, token);
+                    yield this._vendorAuthService.resetPassword(email, password);
                 }
                 else {
-                    yield this.vendorAuthService.resetPassword(email, password);
+                    yield this._vendorAuthService.resetPassword(email, password);
                 }
-                res.status(httpStatusCode_1.HttpStatusCode.OK)
+                res
+                    .status(httpStatusCode_1.HttpStatusCode.OK)
                     .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.RESET_PASSWORD_SUCCESS, httpStatusCode_1.HttpStatusCode.OK));
             }
             catch (error) {
+                logger_util_1.default.error("Reset password failed", error);
                 next(error);
             }
         });
@@ -129,6 +172,7 @@ let VendorAuthController = class VendorAuthController {
                 yield (0, otp_util_1.sendForgotPasswordLink)(email, token, role);
             }
             catch (error) {
+                logger_util_1.default.error("Error sending password reset link", error);
                 throw error;
             }
         });
@@ -137,67 +181,102 @@ let VendorAuthController = class VendorAuthController {
             try {
                 const refreshToken = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.refreshToken;
                 if (!refreshToken) {
-                    res.status(httpStatusCode_1.HttpStatusCode.UNAUTHORIZED)
+                    logger_util_1.default.warn("No refresh token provided");
+                    res
+                        .status(httpStatusCode_1.HttpStatusCode.UNAUTHORIZED)
                         .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.NO_REFRESH_TOKEN, httpStatusCode_1.HttpStatusCode.UNAUTHORIZED));
                 }
-                const result = yield this.vendorAuthService.setNewAccessToken(refreshToken);
-                console.log("result of new access token form controller", result);
-                res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000, sameSite: 'strict' });
-                res.status(httpStatusCode_1.HttpStatusCode.OK)
+                const isBlacklisted = yield (0, redis_util_1.getRedisData)(refreshToken);
+                if (isBlacklisted) {
+                    throw new unAuthorized_error_1.UnAuthorizedError(resposnseMessage_1.ResponseMessage.BLACK_LISTED_TOKEN);
+                }
+                const result = yield this._vendorAuthService.setNewAccessToken(refreshToken);
+                res.cookie("accessToken", result.accessToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    maxAge: env_1.ACCESS_TOKEN_MAX_AGE,
+                    sameSite: "strict",
+                });
+                res
+                    .status(httpStatusCode_1.HttpStatusCode.OK)
                     .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.ACCESS_TOKEN_SET, httpStatusCode_1.HttpStatusCode.OK));
             }
             catch (error) {
+                logger_util_1.default.error("Setting new access token failed", error);
                 next(error);
             }
         });
         this.googleAuth = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { googleToken } = req.body;
-                console.log("googleToken vendoer", googleToken);
-                const vendor = yield this.vendorAuthService.googleAuth({ googleToken });
-                console.log("vendorInfo", vendor);
-                if (!vendor)
+                logger_util_1.default.info("Google auth started for vendor");
+                const vendorData = yield this._vendorAuthService.googleAuth({
+                    googleToken,
+                });
+                if (!vendorData)
                     throw new notFound_error_1.NotFoundError(resposnseMessage_1.ResponseMessage.GOOGLE_AUTH_FAILED);
-                console.log("vendor from google login controller", vendor);
                 // set access token and refresh token in coockies
-                res.cookie("refreshToken", vendor.accessToken, {
+                res.cookie("refreshToken", vendorData.refreshToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
-                    maxAge: 30 * 24 * 60 * 60 * 1000,
+                    maxAge: env_1.REFRESH_TOKEN_MAX_AGE,
                     sameSite: "lax",
                 });
-                res.cookie("accessToken", vendor.accessToken, {
+                res.cookie("accessToken", vendorData.accessToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
-                    maxAge: 15 * 60 * 1000,
+                    maxAge: env_1.ACCESS_TOKEN_MAX_AGE,
                     sameSite: "lax",
                 });
                 res
                     .status(httpStatusCode_1.HttpStatusCode.OK)
-                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGIN_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, vendor));
+                    .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGIN_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, vendorData.vendor));
             }
             catch (error) {
+                logger_util_1.default.error("Vendor Google auth failed", error);
                 next(error);
             }
         });
         this.logout = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
-                console.log("logout vendor invoked");
-                res.clearCookie("accessToken").clearCookie("refreshToken");
+                const refreshToken = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.refreshToken;
+                if (!refreshToken) {
+                    res
+                        .status(httpStatusCode_1.HttpStatusCode.BAD_REQUEST)
+                        .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.INVALID_REFRESH_TOKEN, httpStatusCode_1.HttpStatusCode.BAD_REQUEST));
+                }
+                const decoded = (0, jwt_util_1.decodeRefreshToken)(refreshToken);
+                logger_util_1.default.info("decoded token in vendor logout controller", { decoded });
+                if (decoded === null || decoded === void 0 ? void 0 : decoded.exp) {
+                    const now = Math.floor(Date.now() / 1000);
+                    const ttl = decoded.exp - now;
+                    yield (0, redis_util_1.setRedisData)(refreshToken, "blacklisted", ttl);
+                }
+                res.clearCookie("refreshToken", {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                });
+                res.clearCookie("accessToken", {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                });
                 res
                     .status(httpStatusCode_1.HttpStatusCode.OK)
                     .json((0, responseHandler_util_1.responseHandler)(resposnseMessage_1.ResponseMessage.LOGOUT_SUCCESS, httpStatusCode_1.HttpStatusCode.OK, true));
             }
             catch (error) {
-                next();
+                logger_util_1.default.error("Vendor Logout failed", error);
+                next(error);
             }
         });
     }
 };
 VendorAuthController = __decorate([
     (0, tsyringe_1.injectable)(),
-    __param(0, (0, tsyringe_1.inject)('IVendorAuthService')),
+    __param(0, (0, tsyringe_1.inject)("IVendorAuthService")),
     __metadata("design:paramtypes", [Object])
 ], VendorAuthController);
 exports.default = VendorAuthController;
-;

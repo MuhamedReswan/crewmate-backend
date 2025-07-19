@@ -285,9 +285,14 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       const { googleToken } = req.body;
       logger.info("Google login token received");
         const serviceBoyData = await this._serviceBoyAuthService.googleAuth({googleToken});
-      logger.debug("Google auth result: " + JSON.stringify(serviceBoyData));
+      console.log("Google auth result: " + JSON.stringify(serviceBoyData));
 if(!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
+console.log("google auth controller serviceBoyData",serviceBoyData);
+
+console.log("google auth controller serviceBoyData.serviceBoy",serviceBoyData.serviceBoy);
+
+logger.info("Google login token received",{})
       // set access token and refresh token in coockies
       res.cookie("refreshToken", serviceBoyData.refreshToken, {
         httpOnly: true,
@@ -335,6 +340,7 @@ const refreshToken = req.cookies?.refreshToken;
 
   const decoded =decodeRefreshToken(refreshToken);
   logger.info("decoded token in sevicebOy logout controller",{decoded});
+
     if (decoded?.exp) {
       const now = Math.floor(Date.now() / 1000);
       const ttl = decoded.exp - now;
@@ -342,7 +348,18 @@ const refreshToken = req.cookies?.refreshToken;
       await setRedisData(refreshToken, "blacklisted", ttl);
     }
       
-      res.clearCookie("accessToken").clearCookie("refreshToken");
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+      
       res
         .status(HttpStatusCode.OK)
         .json(

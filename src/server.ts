@@ -8,6 +8,7 @@ import router from "./routes/router";
 import { PORT,CLIENTURL } from "./config/env";
 import { connectDB } from "./config/connectDB";
 import { errorHandler } from "./middleware/errorHandler";
+import logger from "./utils/logger.util";
 
 
 const app : Application = express();
@@ -22,7 +23,7 @@ app.use(cors({
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+logger.info("✅ Winston logger is working");
 
 
 app.get("/", (req,res)=>{
