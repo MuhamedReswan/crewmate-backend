@@ -87,6 +87,7 @@ export const authMiddleware = async (
 
         let tokenRecreate;
         // Create to new access token and refresh token based on the role
+        logger.info("athorization middlware url",{originalUrl})
         if (originalUrl.includes("/service-boy")) {
           tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
         } else if (originalUrl.includes("/vendor")) {

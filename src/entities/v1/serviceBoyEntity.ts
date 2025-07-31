@@ -1,5 +1,6 @@
 import { Document, Types } from "mongoose";
 import { LocationData } from "../../types/type";
+import { VerificationStatusType } from "../../constants/verificationStatus";
 
 export interface UnAvailable {
     date:Date,
@@ -12,7 +13,7 @@ export default interface IServiceBoy extends Document {
     email:string,
     mobile:string,
     password:string,
-    isVerified:boolean,
+    isVerified:VerificationStatusType,
     profileImage:string,
     isBlocked:boolean,
     aadharNumber:string,
@@ -29,5 +30,5 @@ export default interface IServiceBoy extends Document {
     date:Date,
     walletId:Types.ObjectId,
     workHistoryId:Types.ObjectId   
-};;;;;;;;;;
+}
 

@@ -41,7 +41,7 @@ export class AdminController implements IAdminController {
       res
         .status(HttpStatusCode.OK)
         .json(
-          responseHandler(ResponseMessage.LOGIN_SUCCESS, HttpStatusCode.OK,admin)
+          responseHandler(ResponseMessage.LOGIN_SUCCESS, HttpStatusCode.OK,admin.admin)
         );
     } catch (error) {
       logger.error("Admin login error", error );
