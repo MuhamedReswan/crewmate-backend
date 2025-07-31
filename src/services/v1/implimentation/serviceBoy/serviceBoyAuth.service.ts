@@ -33,6 +33,7 @@ import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
+import { VerificationStatus } from "../../../../constants/verificationStatus";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -308,7 +309,7 @@ const servicerId = `A-${number}`;
 
       if (!serviceBoyData) {
         let { name, email, picture: profileImage } = responseData;
-        let isVerified = false;
+        let isVerified = VerificationStatus.Pending;
         name = name.toLowerCase();
 
     let profileImageKey: string | undefined = undefined;

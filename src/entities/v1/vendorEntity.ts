@@ -1,6 +1,7 @@
 ;
 import { Types } from "mongoose";
 import { LocationData } from "../../types/type";
+import { VerificationStatusType } from "../../constants/verificationStatus";
 
 export default interface IVendor {
     _id:Types.ObjectId;
@@ -8,7 +9,7 @@ export default interface IVendor {
     email:string,
     mobile:string,
     password:string,
-    isVerified:boolean,
+    isVerified:VerificationStatusType,
     isBlocked:boolean,
     profileImage:string,
     licenceImage:string,
@@ -17,4 +18,4 @@ export default interface IVendor {
     instaId:string,
     location?:LocationData,
     role:string; 
-};;;;;;;;;;
+}

@@ -2,6 +2,7 @@ import mongoose, {  Schema } from 'mongoose';
 import IServiceBoy from '../../entities/v1/serviceBoyEntity';
 import { Role } from '../../constants/Role';
 import { LocationSchema } from './location.model';
+import { VerificationStatus } from '../../constants/verificationStatus';
 
 
 const UnAvailableSchema = new Schema({
@@ -14,7 +15,7 @@ const UnAvailableSchema = new Schema({
   name: { type: String },
   email: { type: String, required: true, unique: true },
   mobile: { type: String },
-  isVerified: { type: Boolean, default: false },
+  isVerified: { type: String, default:VerificationStatus.Pending},
   isBlocked: {type: Boolean, default: false},
   profileImage: { type: String },
   aadharNumber: { type: String, unique:true, sparse: true},

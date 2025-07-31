@@ -34,6 +34,7 @@ import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
+import { VerificationStatus } from "../../../../constants/verificationStatus";
 
 @injectable()
 export default class VendorAuthService implements IVendorAuthService {
@@ -310,7 +311,7 @@ export default class VendorAuthService implements IVendorAuthService {
 
       if (!vendorData ) {
         let { name, email, picture: profileImage } = responseData;
-        let isVerified = false;
+        let isVerified = VerificationStatus.Pending;
         name = name.toLowerCase();
 
             let profileImageKey: string | undefined = undefined;
