@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
-import { IServiceBoyAuthService } from "../../../../services/v1/interfaces/serviceBoy/IServiceBoyAuthService";
-import { IServiceBoyAuthController } from "../../interfaces/serviceBoy/IServiceBoyAuthController";
+import { IServiceBoyAuthService } from "../../../../services/v1/interfaces/serviceBoy/IServiceBoyAuth.service";
+import { IServiceBoyAuthController } from "../../interfaces/serviceBoy/IServiceBoyAuth.controller";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";

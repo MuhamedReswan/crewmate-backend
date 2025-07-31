@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { IAdminController } from "../../controllers/v1/interfaces/admin/IAdminController";
+import { IAdminAuthController } from "../../controllers/v1/interfaces/admin/IAdminAuth.controller";
 
 
 const router = Router();
@@ -10,7 +10,7 @@ router.use((req, res, next) => {
     next();
   });
 
-const adminController = container.resolve<IAdminController>('IAdminController');
+const adminController = container.resolve<IAdminAuthController>('IAdminAuthController');
 
 router.post('/login',adminController.verifyLogin);
 router.post('/logout',adminController.adminLogout);

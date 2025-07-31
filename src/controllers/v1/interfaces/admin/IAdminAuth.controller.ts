@@ -1,6 +1,6 @@
 import { RequestHandler } from "../../../../types/type";
 
-export interface IAdminController {
+export interface IAdminAuthController {
     verifyLogin: RequestHandler,
     adminLogout: RequestHandler
 

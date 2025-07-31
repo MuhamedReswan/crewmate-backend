@@ -2,7 +2,7 @@ import { Router } from "express";
 import v1ServiceBoyAuthRouter from "./v1/serviceBoyAuth.router";
 import v1ServiceBoyRouter from "./v1/serviceBoy.router";
 import v1VendorAuthRouter from "./v1/vendorAuth.router";
-import v1AdminAuthRouter from "./v1/admin.router";
+import v1AdminAuthRouter from "./v1/adminAuth.router";
 import v1VendorRouter from "./v1/vendor.router";
 import v1CommonRouter from "./v1/common.router";
 

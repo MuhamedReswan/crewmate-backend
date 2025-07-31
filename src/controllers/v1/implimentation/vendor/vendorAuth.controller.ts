@@ -4,7 +4,7 @@ import { IVendorAuthController } from "../../interfaces/vendor/IVendorAuth.contr
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { IVendorAuthService } from "../../../../services/v1/interfaces/vendor/IVendorAuthService";
+import { IVendorAuthService } from "../../../../services/v1/interfaces/vendor/IVendorAuth.service";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { sendForgotPasswordLink } from "../../../../utils/otp.util";
 import { Role } from "../../../../constants/Role";
