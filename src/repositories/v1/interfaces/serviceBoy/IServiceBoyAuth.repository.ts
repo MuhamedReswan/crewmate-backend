@@ -1,5 +1,5 @@
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
-import { IBaseRepository } from "../base/IBaseRepository";
+import { IBaseRepository } from "../base/IBase.repository";
 
 export interface IServiceBoyAuthRepository extends IBaseRepository<IServiceBoy>{
     findServiceBoyByEmail(email:string):Promise<IServiceBoy | null>;

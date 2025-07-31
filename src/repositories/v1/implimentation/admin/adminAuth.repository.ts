@@ -1,11 +1,11 @@
 import { inject, injectable } from "tsyringe";
 import { Model } from "mongoose";
-import { IAdminRepository } from "../../interfaces/admin/IAdminRepository";
 import IAdmin from "../../../../entities/v1/adminEntity";
 import { BaseRepository } from "../base/base.repository";
+import { IAdminAuthRepository } from "../../interfaces/admin/IAdminAuth.repository";
 
 @injectable()
-export default class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository  {
+export default class AdminAuthRepository extends BaseRepository<IAdmin> implements IAdminAuthRepository  {
  constructor(@inject("AdminModel") model: Model<IAdmin>){
 super(model);
  }   

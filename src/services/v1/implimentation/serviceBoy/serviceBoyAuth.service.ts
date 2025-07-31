@@ -7,7 +7,7 @@ import redisClient, {
   getRedisData,
   setRedisData,
 } from "../../../../utils/redis.util";
-import { IServiceBoyAuthService } from "../../interfaces/serviceBoy/IServiceBoyAuthService";
+import { IServiceBoyAuthService } from "../../interfaces/serviceBoy/IServiceBoyAuth.service";
 import {
   sendForgotPasswordLink,
   sendOtpEmail,

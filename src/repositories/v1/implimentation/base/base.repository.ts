@@ -1,6 +1,6 @@
 import { Model } from 'mongoose';
 import { injectable } from 'tsyringe';
-import { IBaseRepository } from '../../interfaces/base/IBaseRepository';
+import { IBaseRepository } from '../../interfaces/base/IBase.repository';
 
 @injectable()
 export  class BaseRepository <T> implements IBaseRepository<T> {

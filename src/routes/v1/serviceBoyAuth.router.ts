@@ -1,6 +1,6 @@
 import { container } from "tsyringe";
 import { Router } from "express";
-import { IServiceBoyAuthController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoyAuthController"; 
+import { IServiceBoyAuthController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoyAuth.controller"; 
 import { requestBodyValidator } from "../../middleware/requestValidation";
 import { forgotPasswordSchema, loginSchema, resetpasswordSchema, signupSchema } from "../../utils/validationSchema/auth.schema";
 import { authMiddleware } from "../../middleware/authorization";

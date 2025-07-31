@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import bcrypt from "bcrypt";
 import * as crypto from "crypto";
-import { IVendorAuthService } from "../../interfaces/vendor/IVendorAuthService";
+import { IVendorAuthService } from "../../interfaces/vendor/IVendorAuth.service";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import {
   deleteRedisData,
