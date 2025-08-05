@@ -10,9 +10,9 @@ router.use((req, res, next) => {
     next();
   });
 
-const adminController = container.resolve<IAdminAuthController>('IAdminAuthController');
+const adminAuthController = container.resolve<IAdminAuthController>('IAdminAuthController');
 
-router.post('/login',adminController.verifyLogin);
-router.post('/logout',adminController.adminLogout);
+router.post('/login',adminAuthController.verifyLogin);
+router.post('/logout',adminAuthController.adminLogout);
 
 export default router;

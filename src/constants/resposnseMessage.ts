@@ -50,5 +50,10 @@ LOAD_PROFILE_SUCCESS = "Load profile success",
 IMAGE_URL_SUCCESS = "Image url fetched success",
 IMAGE_URL_FAILED = "wrong key for image",
 
+LOAD_VERIFICATION_SUCCESS = "Load verification success",
+NO_VERIFICATION_STATUS = "No verifaction status found to update",
+VERIFICATION_STATUS_UPDATE_SUCCESS = "Verification success "
+
+
 
 }

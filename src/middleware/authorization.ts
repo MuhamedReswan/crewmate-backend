@@ -88,15 +88,16 @@ export const authMiddleware = async (
         let tokenRecreate;
         // Create to new access token and refresh token based on the role
         logger.info("athorization middlware url",{originalUrl})
-        if (originalUrl.includes("/service-boy")) {
-          tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
-        } else if (originalUrl.includes("/vendor")) {
+        if (originalUrl.includes("/admin")) {
+             logger.info("within authorization originalUrl.includes(/admin)");
+          // tokenRecreate = await adminService.setNewToken(refreshToken)
+        } 
+         else if (originalUrl.includes("/vendor")) {
           tokenRecreate = await vendorAuthService.setNewAccessToken(
             refreshToken
           );
-        } else if (originalUrl.includes("/admin")) {
-             logger.info("within authorization originalUrl.includes(/admin)");
-          // tokenRecreate = await adminService.setNewToken(refreshToken)
+        } else if (originalUrl.includes("/service-boy")) {
+          tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
         } else {
         logger.warn("Unknown role in URL path:", { url: originalUrl });
         }

@@ -15,7 +15,6 @@ logger.info("imageUrl",{imageUrl});
 if(imageUrl){
     return imageUrl;
 }
-return;
     }catch(error){
         throw error;
     }

@@ -74,6 +74,7 @@ const Role_1 = require("../../../../constants/Role");
 const logger_util_1 = __importDefault(require("../../../../utils/logger.util"));
 const vendor_mapper_1 = require("../../../../mappers.ts/vendor.mapper");
 const googleImageupload_util_1 = require("../../../../utils/googleImageupload.util");
+const verificationStatus_1 = require("../../../../constants/verificationStatus");
 let VendorAuthService = class VendorAuthService {
     constructor(_vendorAuthRepository) {
         this._vendorAuthRepository = _vendorAuthRepository;
@@ -139,7 +140,7 @@ let VendorAuthService = class VendorAuthService {
                 let vendorData = yield this._vendorAuthRepository.findVendorByEmail(responseData.email);
                 if (!vendorData) {
                     let { name, email, picture: profileImage } = responseData;
-                    let isVerified = false;
+                    let isVerified = verificationStatus_1.VerificationStatus.Pending;
                     name = name.toLowerCase();
                     let profileImageKey = undefined;
                     if (profileImage) {

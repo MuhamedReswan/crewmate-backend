@@ -42,4 +42,5 @@ var ResponseMessage;
     ResponseMessage["LOAD_PROFILE_SUCCESS"] = "Load profile success";
     ResponseMessage["IMAGE_URL_SUCCESS"] = "Image url fetched success";
     ResponseMessage["IMAGE_URL_FAILED"] = "wrong key for image";
+    ResponseMessage["LOAD_VERIFICATION_SUCCESS"] = "Load verification success";
 })(ResponseMessage || (exports.ResponseMessage = ResponseMessage = {}));

@@ -43,7 +43,7 @@ export default class VendorService implements IVendorService {
       const _id = data._id;
       delete data._id;
 
-      const updatedProfile = await this._vendorRepository.vendorUpdateProfile({ _id }, data);
+      const updatedProfile = await this._vendorRepository.updateVendor({ _id }, data);
 
       if (updatedProfile) {
      return updatedProfile as IVendor;

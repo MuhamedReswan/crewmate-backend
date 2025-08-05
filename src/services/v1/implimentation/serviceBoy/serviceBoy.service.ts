@@ -86,7 +86,7 @@ return serviceBoyProfile;
 
       const _id = data._id;
       delete data._id;
-      const updatedProfile = await this._serviceBoyRepository.updateProfile(
+      const updatedProfile = await this._serviceBoyRepository.updateServiceBoy(
         { _id: _id },
         data
       );
