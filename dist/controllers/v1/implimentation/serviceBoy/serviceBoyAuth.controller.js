@@ -241,7 +241,6 @@ let ServiceBoyAuthController = class ServiceBoyAuthController {
         this.logout = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             try {
-                console.log("decoded token in sevicebOy logout controller-----------------++++");
                 const refreshToken = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.refreshToken;
                 if (!refreshToken) {
                     res.status(httpStatusCode_1.HttpStatusCode.BAD_REQUEST)
@@ -249,7 +248,6 @@ let ServiceBoyAuthController = class ServiceBoyAuthController {
                 }
                 const decoded = (0, jwt_util_1.decodeRefreshToken)(refreshToken);
                 logger_util_1.default.info("decoded token in sevicebOy logout controller", { decoded });
-                console.log("decoded token in sevicebOy logout controller-----------------", { decoded });
                 if (decoded === null || decoded === void 0 ? void 0 : decoded.exp) {
                     const now = Math.floor(Date.now() / 1000);
                     const ttl = decoded.exp - now;

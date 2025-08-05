@@ -75,6 +75,7 @@ const Role_1 = require("../../../../constants/Role");
 const logger_util_1 = __importDefault(require("../../../../utils/logger.util"));
 const serviceBoy_mapper_1 = require("../../../../mappers.ts/serviceBoy.mapper");
 const googleImageupload_util_1 = require("../../../../utils/googleImageupload.util");
+const verificationStatus_1 = require("../../../../constants/verificationStatus");
 let ServiceBoyAuthService = class ServiceBoyAuthService {
     constructor(_serviceBoyAuthRepository) {
         this.forgotPassword = (email) => __awaiter(this, void 0, void 0, function* () {
@@ -124,7 +125,7 @@ let ServiceBoyAuthService = class ServiceBoyAuthService {
                 const servicerId = `A-${number}`;
                 if (!serviceBoyData) {
                     let { name, email, picture: profileImage } = responseData;
-                    let isVerified = false;
+                    let isVerified = verificationStatus_1.VerificationStatus.Pending;
                     name = name.toLowerCase();
                     let profileImageKey = undefined;
                     if (profileImage) {

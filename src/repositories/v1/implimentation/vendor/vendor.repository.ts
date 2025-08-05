@@ -1,12 +1,14 @@
 import { inject, injectable } from "tsyringe";
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { BaseRepository } from "../base/base.repository";
 import logger from "../../../../utils/logger.util";
+import { VerificationStatus } from "../../../../constants/verificationStatus";
 
 export interface IVendorRepository{
-    vendorUpdateProfile (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined>
+    updateVendor (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined>
     loadProfile(id: Partial<IVendor>): Promise<IVendor | undefined>
+    loadAllVendorendingVerification(): Promise<IVendor[] | undefined>
 }
 
 @injectable()
@@ -15,14 +17,14 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
         super(model);
     }
 
-    vendorUpdateProfile = async (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined> => {
+    updateVendor = async (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined> => {
         try {
-      logger.debug("Updating vendor profile", { id, updateData: data });
-            const updatedProfile = await this.updateOne(id, data);
-      logger.debug("Vendor profile updated", { updatedProfile });
+      logger.debug("Updating vendor", { id, updateData: data });
+            const updatedVendor = await this.updateOne(id, data);
+      logger.debug("Vendor updated", { updatedVendor });
 
-            if (updatedProfile) {
-                return updatedProfile;
+            if (updatedVendor) {
+                return updatedVendor;
             }
             return;
         } catch (error) {
@@ -40,6 +42,24 @@ async loadProfile(_id: Partial<IVendor>): Promise<IVendor | undefined> {
 
     if (vendorProfile) return vendorProfile;
     return;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+async loadAllVendorendingVerification(): Promise<IVendor[] | undefined>{
+  try {
+    const query: FilterQuery<IVendor> = {
+  isVerified: VerificationStatus.Pending,
+  mobile: { $exists: true },
+  estd: { $exists: true }
+};
+    const pendingVerifications = await this.findAll(query);
+    logger.info("pendingVerifications-- VendorRepository",{pendingVerifications});
+    if(pendingVerifications) return pendingVerifications;
+    return;
+    
   } catch (error) {
     throw error;
   }

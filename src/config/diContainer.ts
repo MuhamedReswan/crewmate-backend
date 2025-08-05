@@ -20,6 +20,10 @@ import CommonService from "../services/v1/implimentation/common/common.service";
 import AdminAuthService from "../services/v1/implimentation/admin/adminAuth.service";
 import AdminAuthRepository from "../repositories/v1/implimentation/admin/adminAuth.repository";
 import AdminAuthController from "../controllers/v1/implimentation/admin/adminAuth.controller";
+import AdminVendorController from "../controllers/v1/implimentation/admin/adminVendor.controller";
+import AdminServiceBoyController from "../controllers/v1/implimentation/admin/adminServiceBoy.controller";
+import AdminVendorService from "../services/v1/implimentation/admin/adminVendor.service";
+import AdminServiceBoyService from "../services/v1/implimentation/admin/adminServiceBoy.service";
 
 
 // Repository Registration
@@ -35,6 +39,8 @@ container.register("IVendorService",VendorService);
 container.register("IServiceBoyAuthService", ServiceBoyAuthService);
 container.register("IServiceBoyService", ServiceBoyService);
 container.register("IAdminAuthService", AdminAuthService);
+container.register("IAdminVendorService", AdminVendorService);
+container.register("IAdminServiceBoyService", AdminServiceBoyService);
 container.register("ICommonService", CommonService);
 
 
@@ -44,6 +50,8 @@ container.register("IVendorController",VendorController);
 container.register("IServiceBoyAuthController", ServiceBoyAuthController);
 container.register("IServiceBoyController", ServiceBoyController);
 container.register("IAdminAuthController",AdminAuthController);
+container.register("IAdminVendorController",AdminVendorController);
+container.register("IAdminServiceBoyController",AdminServiceBoyController);
 container.register("ICommonController",CommonController);
 
 

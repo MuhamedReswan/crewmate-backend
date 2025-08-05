@@ -51,6 +51,19 @@ let BaseRepository = class BaseRepository {
         });
     }
     ;
+    findAll(filter) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const documents = yield this._model.find(filter).exec();
+                return documents;
+            }
+            catch (error) {
+                console.error("Error finding document:", error);
+                throw error;
+            }
+        });
+    }
+    ;
     updateOne(filter, updateData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

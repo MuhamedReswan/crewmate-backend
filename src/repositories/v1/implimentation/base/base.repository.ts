@@ -27,12 +27,22 @@ async findOne(filter: Partial<T>): Promise<T | null> {
   }
 };
 
+async findAll(filter: Partial<T>): Promise<T[] | null> {
+  try {
+      const documents = await this._model.find(filter).exec();
+      return documents;
+  } catch (error) {
+      console.error("Error finding document:", error);
+      throw error;
+  }
+};
+
 
 async updateOne(filter: Partial<T>, updateData: Partial<T>): Promise<T | null> {
   try {
       const updatedDocument = await this._model.findOneAndUpdate(
           filter, 
-          updateData, 
+         { $set: updateData }, 
           { new: true } 
       ).exec();
 
