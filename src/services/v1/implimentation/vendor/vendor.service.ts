@@ -4,6 +4,8 @@ import IVendor from "../../../../entities/v1/vendorEntity";
 import { ImageFiles } from "../../../../types/type";
 import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
+import s3Util from "../../../../utils/s3.util";
+import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 
 export interface IVendorService {
   updateVendorProfile: (body: Partial<IVendor>, files: ImageFiles) => Promise<IVendor | undefined>;
@@ -18,24 +20,51 @@ export default class VendorService implements IVendorService {
     data: Partial<IVendor>,
     files: ImageFiles
   ): Promise<IVendor | undefined> => {
+
+    let uploadedNewImages: string[] = []; // Track successfully uploaded new images
+    let oldVendorProfile: Partial<IVendor> | undefined;
     try {
-      logger.debug("Updating vendor profile", { data, files });
+      logger.debug("Updating vendor profile", { data, files: formatFilesForLog(files) });
 
-      if(files.profileImage){
-        data.profileImage = await processAndUploadImage(
-          files.profileImage,
-          "profileImage",
-          data.name
-        );
-      }
+ const hasAnyFile =
+      (files.licenceImage && files.licenceImage.length > 0) ||
+      (files.profileImage && files.profileImage.length > 0);
 
-      if(files.licenceImage){
-        data.licenceImage = await processAndUploadImage(
-          files.licenceImage,
-          "licenceImage",
-          data.name
-        );
-      }
+         if (hasAnyFile) {
+            oldVendorProfile = await this._vendorRepository.loadProfile({ _id: data._id });
+            logger.debug("oldVendorProfile------------",{oldVendorProfile});
+          }
+
+const imagesToDelete: string[] = [];
+const uploadTasks: Promise<void>[] = [];
+
+  if (files.profileImage) {
+      uploadTasks.push(
+        processAndUploadImage(files.profileImage, "profileImage", data.name)
+          .then((url) => {
+            data.profileImage = url;
+            uploadedNewImages.push(url!);
+            if (oldVendorProfile?.profileImage) {
+              imagesToDelete.push(oldVendorProfile.profileImage);
+            }
+          })
+      );
+    }
+
+  if (files.licenceImage) {
+      uploadTasks.push(
+        processAndUploadImage(files.licenceImage, "licenceImage", data.name)
+          .then((url) => {
+            data.licenceImage = url;
+            uploadedNewImages.push(url!);
+            if (oldVendorProfile?.licenceImage) {
+              imagesToDelete.push(oldVendorProfile.licenceImage);
+            }
+          })
+      );
+    }
+
+     await Promise.all(uploadTasks);
 
       this.parseLocation(data);
 
@@ -45,12 +74,33 @@ export default class VendorService implements IVendorService {
 
       const updatedProfile = await this._vendorRepository.updateVendor({ _id }, data);
 
+          if (imagesToDelete.length > 0) {
+      (async () => {
+        await Promise.all(
+          imagesToDelete.map((image) =>
+            s3Util.deleteImageFromBucket(image).catch((err) => {
+              logger.error("Failed to delete old image from S3", { image, err });
+            })
+          )
+        );
+      })();
+    }
+
       if (updatedProfile) {
      return updatedProfile as IVendor;
       }
 
       return undefined;
     } catch (error) {
+         if (uploadedNewImages.length > 0) {
+      await Promise.all(
+        uploadedNewImages.map((image) =>
+          s3Util.deleteImageFromBucket(image).catch((err) =>
+            logger.error("Rollback failed to delete uploaded image", { image, err })
+          )
+        )
+      );
+    }
       throw error;
     }
   };
