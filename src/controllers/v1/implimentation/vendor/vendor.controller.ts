@@ -7,6 +7,7 @@ import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
+import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 
 export interface IVendorController{
     updateVendorProfile:RequestHandler
@@ -37,7 +38,7 @@ export default class VendorController implements IVendorController{
        try{
         logger.info("Updating vendor profile", {
         body: req.body,
-        files: req.files,
+        files: formatFilesForLog(req.files),
       });
 
     const updateVendorProfile = await this._vendorService.updateVendorProfile(

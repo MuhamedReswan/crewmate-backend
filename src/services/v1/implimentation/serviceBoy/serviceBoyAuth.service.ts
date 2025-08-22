@@ -304,13 +304,14 @@ const servicerId = `A-${number}`;
           responseData.email
         );
 
-        const number = await redisClient.incr("serviceBoy:idCounter"); // auto-increment
-const servicerId = `A-${number}`;
-
-      if (!serviceBoyData) {
-        let { name, email, picture: profileImage } = responseData;
-        let isVerified = VerificationStatus.Pending;
-        name = name.toLowerCase();
+        
+        if (!serviceBoyData) {
+          let { name, email, picture: profileImage } = responseData;
+          let isVerified = VerificationStatus.Pending;
+          name = name.toLowerCase();
+          
+          const number = await redisClient.incr("serviceBoy:idCounter"); 
+  const servicerId = `A-${number}`;
 
     let profileImageKey: string | undefined = undefined;
 if (profileImage) {
@@ -322,7 +323,6 @@ if (profileImage) {
     profileImageKey = profileImage; 
   }
 }
-
   
         serviceBoyData = await this._serviceBoyAuthRepository.createServiceBoy({
           name,
