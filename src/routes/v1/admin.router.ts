@@ -12,6 +12,9 @@ const adminServiceBoyController = container.resolve<IAdminServiceBoyController>(
 
 router.get('/service-boys/verify', adminServiceBoyController.getAllServiceBoysPendingVerification);
 router.patch('/service-boys/:id/verify', adminServiceBoyController.verifyServiceBoyByAdmin);
+router.get('/service-boys', adminServiceBoyController.getAllServiceBoys);
+router.get('/service-boys/:id', adminServiceBoyController.getServiceBoysById);
+router.patch('/service-boys/:id/:status', adminServiceBoyController.updateServiceBoyStatus);
 
 
 router.get('/vendor/verify', adminVendorController.getAllVendorPendingVerification);

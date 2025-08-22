@@ -4,12 +4,14 @@ import { BaseRepository } from "../base/base.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import logger from "../../../../utils/logger.util";
 import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { PaginatedResponse } from "../../../../types/pagination.type";
 
 
 export interface IServiceBoyRepository{
   updateServiceBoy(id:Partial<IServiceBoy>, data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined>
   loadProfile(id:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>
   loadAllSBPendingVerification(): Promise<IServiceBoy[] | undefined>
+  findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean|undefined):Promise<PaginatedResponse<IServiceBoy>|undefined>
 }
 
 @injectable()
@@ -67,5 +69,15 @@ async loadAllSBPendingVerification(): Promise<IServiceBoy[] | undefined>{
     throw error;
   }
 }
+
+
+
+  async findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean) {
+    try {
+      return this.findPaginated(page, limit,  search, isBlocked, ["name", "email", "mobile"]);
+    } catch (error) {
+      throw error;
+    }
+  }
   
 }

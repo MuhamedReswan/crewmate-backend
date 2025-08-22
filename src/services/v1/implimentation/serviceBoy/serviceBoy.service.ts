@@ -4,6 +4,8 @@ import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { ImageFiles } from "../../../../types/type";
 import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
+import s3Util from "../../../../utils/s3.util"; 
+import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 
 export interface IServiceBoyService {
   updateProfile(
@@ -34,68 +36,128 @@ return serviceBoyProfile;
 
 
 
+updateProfile = async (
+  data: Partial<IServiceBoy>,
+  files: ImageFiles
+): Promise<IServiceBoy | undefined> => {
+  let uploadedNewImages: string[] = []; // Track successfully uploaded new images
+  let oldServiceBoyProfile: Partial<IServiceBoy> | undefined;
 
-  updateProfile = async (
-    data: Partial<IServiceBoy>,
-    files: ImageFiles
-  ): Promise<IServiceBoy | undefined> => {
-    try {
-    logger.debug("Received profile update files", { files });
-      logger.debug("Initial profile update data", { data });
+  try {
+    logger.debug("Received profile update files", { files: formatFilesForLog(files) });
+    logger.debug("Initial profile update data", { data });
 
-      
+    const hasAnyFile =
+      (files.aadharImageBack && files.aadharImageBack.length > 0) ||
+      (files.aadharImageFront && files.aadharImageFront.length > 0) ||
+      (files.profileImage && files.profileImage.length > 0);
 
-      // Process and upload profile image
-      if (files.profileImage) {
-        data.profileImage = await processAndUploadImage(
-          files.profileImage,
-          "profileImage",
-          data.name
-        );
-      }
-
-      // Process and upload Aadhar front image
-      if (files.aadharImageFront) {
-        data.aadharImageFront = await processAndUploadImage(
-          files.aadharImageFront,
-          "aadharImageFront",
-          data.name
-        );
-      }
-
-      // Process and upload Aadhar back image
-      if (files.aadharImageBack) {
-        data.aadharImageBack = await processAndUploadImage(
-          files.aadharImageBack,
-          "aadharImageBack",
-          data.name
-        );
-      }
-      logger.debug("Profile update data before location parsing", { data });
-
-      if (typeof data.location === "string") {
-        try {
-          data.location = JSON.parse(data.location);
-        } catch (error) {
-          logger.warn("Invalid location JSON string", { location: data.location, error });
-          data.location = undefined; // Handle invalid location gracefully
-        }
-      }
-
-      logger.debug("Final profile update data", { data });
-
-      const _id = data._id;
-      delete data._id;
-      const updatedProfile = await this._serviceBoyRepository.updateServiceBoy(
-        { _id: _id },
-        data
-      );
-
-      logger.debug("Updated profile data", { updatedProfile });
-      return updatedProfile;
-    } catch (error) {
-      throw error;
+    if (hasAnyFile) {
+      oldServiceBoyProfile = await this._serviceBoyRepository.loadProfile({ _id: data._id });
+      logger.debug("oldServiceBoyProfile------------",{oldServiceBoyProfile});
     }
-  };
+
+    const imagesToDelete: string[] = [];
+    const uploadTasks: Promise<void>[] = [];
+
+    if (files.profileImage) {
+      uploadTasks.push(
+        processAndUploadImage(files.profileImage, "profileImage", data.name)
+          .then((url) => {
+            data.profileImage = url;
+            uploadedNewImages.push(url!);
+            if (oldServiceBoyProfile?.profileImage) {
+              imagesToDelete.push(oldServiceBoyProfile.profileImage);
+            }
+          })
+      );
+    }
+
+    if (files.aadharImageFront) {
+      uploadTasks.push(
+        processAndUploadImage(files.aadharImageFront, "aadharImageFront", data.name)
+          .then((url) => {
+            data.aadharImageFront = url;
+            uploadedNewImages.push(url!);
+            if (oldServiceBoyProfile?.aadharImageFront) {
+              imagesToDelete.push(oldServiceBoyProfile.aadharImageFront);
+            }
+          })
+      );
+    }
+
+    if (files.aadharImageBack) {
+      uploadTasks.push(
+        processAndUploadImage(files.aadharImageBack, "aadharImageBack", data.name)
+          .then((url) => {
+            data.aadharImageBack = url;
+            uploadedNewImages.push(url!);
+            if (oldServiceBoyProfile?.aadharImageBack) {
+              imagesToDelete.push(oldServiceBoyProfile.aadharImageBack);
+            }
+          })
+      );
+    }
+
+    // Run all uploads in parallel
+    await Promise.all(uploadTasks);
+
+    logger.debug("Profile update data before location parsing", { data });
+
+    // Parse location if it's a string
+    if (typeof data.location === "string") {
+      try {
+        data.location = JSON.parse(data.location);
+      } catch (error) {
+        logger.warn("Invalid location JSON string", { location: data.location, error });
+        data.location = undefined;
+      }
+    }
+
+    logger.debug("Final profile update data", { data });
+
+    // Update DB
+    const _id = data._id;
+    delete data._id;
+    const updatedProfile = await this._serviceBoyRepository.updateServiceBoy(
+      { _id },
+      data
+    );
+
+    logger.info("Images to delete after DB success", { imagesToDelete });
+    logger.debug("Updated profile data", { updatedProfile });
+
+    // Delete old images asynchronously
+    if (imagesToDelete.length > 0) {
+      (async () => {
+        await Promise.all(
+          imagesToDelete.map((image) =>
+            s3Util.deleteImageFromBucket(image).catch((err) => {
+              logger.error("Failed to delete old image from S3", { image, err });
+            })
+          )
+        );
+      })();
+    }
+
+    return updatedProfile;
+  } catch (error) {
+    logger.error("Profile update failed, rolling back uploads", { error });
+
+    // Rollback newly uploaded images if DB update/upload failed
+    if (uploadedNewImages.length > 0) {
+      await Promise.all(
+        uploadedNewImages.map((image) =>
+          s3Util.deleteImageFromBucket(image).catch((err) =>
+            logger.error("Rollback failed to delete uploaded image", { image, err })
+          )
+        )
+      );
+    }
+
+    throw error;
+  }
+};
+
   };
 
