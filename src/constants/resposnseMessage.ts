@@ -52,7 +52,12 @@ IMAGE_URL_FAILED = "wrong key for image",
 
 LOAD_VERIFICATION_SUCCESS = "Load verification success",
 NO_VERIFICATION_STATUS = "No verifaction status found to update",
-VERIFICATION_STATUS_UPDATE_SUCCESS = "Verification success "
+VERIFICATION_STATUS_UPDATE_SUCCESS = "Verification success",
+LOAD_SERVICE_BOY_SUCCESS = "ServiceBoy loading success",
+LOAD_USER_PROFILE_SUCCESS = "User profile loading success",
+
+UPDATE_STATUS_SUCCESS = "Status updated success"
+
 
 
 

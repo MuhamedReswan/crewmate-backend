@@ -7,6 +7,7 @@ import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
+import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 
 export interface IServiceBoyController{
     loadProfile:RequestHandler
@@ -43,7 +44,7 @@ updateProfile  = async(req:Request, res:Response, next:NextFunction):Promise<voi
     try {
          logger.info("ServiceBoyController: updateProfile called", {
         body: req.body,
-        files: req.files,
+        files: formatFilesForLog(req.files),
       });        
         const updatedProfile = await this._serviceBoyService.updateProfile(req.body,req.files);
         if(updatedProfile){
