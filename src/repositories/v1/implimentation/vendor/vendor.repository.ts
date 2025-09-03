@@ -4,11 +4,15 @@ import IVendor from "../../../../entities/v1/vendorEntity";
 import { BaseRepository } from "../base/base.repository";
 import logger from "../../../../utils/logger.util";
 import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { PaginatedResponse } from "../../../../types/pagination.type";
 
 export interface IVendorRepository{
     updateVendor (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined>
     loadProfile(id: Partial<IVendor>): Promise<IVendor | undefined>
     loadAllVendorendingVerification(): Promise<IVendor[] | undefined>
+    findVendorPaginated(page: number, limit: number, search: string, isBlocked:boolean|undefined)
+    :Promise<PaginatedResponse<IVendor>|undefined>
+    
 }
 
 @injectable()
@@ -34,9 +38,9 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
     };
 
 
-async loadProfile(_id: Partial<IVendor>): Promise<IVendor | undefined> {
+async loadProfile(data: Partial<IVendor>): Promise<IVendor | undefined> {
   try {
-    const vendorProfile = await this.findOne(_id);
+    const vendorProfile = await this.findOne(data);
 
     logger.debug("vendorProfile", { vendorProfile });
 
@@ -64,5 +68,14 @@ async loadAllVendorendingVerification(): Promise<IVendor[] | undefined>{
     throw error;
   }
 }
+
+  async findVendorPaginated(page: number, limit: number, search: string, isBlocked:boolean)
+  :Promise<PaginatedResponse<IVendor>|undefined> {
+    try {
+      return this.findPaginated(page, limit,  search, isBlocked, ["name", "email", "mobile"]);
+    } catch (error) {
+      throw error;
+    }
+  }
 
 }

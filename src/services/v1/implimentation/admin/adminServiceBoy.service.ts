@@ -15,7 +15,7 @@ verifyServiceBoy(id:string, status:VerificationStatusType):Promise<Partial<IServ
 getPaginatedServiceBoys(page: number, limit: number, search: string, isBlocked:boolean|undefined)
 : Promise<PaginatedResponse<IServiceBoy> | undefined>
 updateServiceBoyStatus (id:string, status:string):Promise<Partial<IServiceBoy> | undefined>
-getServiceBoyById (id:string):Promise<Partial<IServiceBoy> | undefined>
+getServiceBoyById (id:string,isVerified?: IServiceBoy["isVerified"]):Promise<Partial<IServiceBoy> | undefined>
 }
 
 @injectable()
@@ -34,7 +34,6 @@ try {
 }
 
 
-
 verifyServiceBoy = async (id:string, status:VerificationStatusType):Promise<Partial<IServiceBoy> | undefined> =>{
 try {
    const _id = new Types.ObjectId(id)
@@ -46,7 +45,6 @@ const UpdateVerification = this._serviceBoyRepository.updateServiceBoy({ _id: _i
 }
 
 
-
    getPaginatedServiceBoys = async(page: number, limit: number, search: string, isBlocked:boolean): Promise<PaginatedResponse<IServiceBoy> | undefined> => {
    try {
       return this._serviceBoyRepository.findServiceBoysPaginated(page, limit, search, isBlocked);
@@ -56,10 +54,17 @@ const UpdateVerification = this._serviceBoyRepository.updateServiceBoy({ _id: _i
   }
 
 
-   getServiceBoyById = async(id:string): Promise<Partial<IServiceBoy> | undefined> => {
+   getServiceBoyById = async(
+      id:string,
+   isVerified?:IServiceBoy["isVerified"] 
+): Promise<Partial<IServiceBoy> | undefined> => {
    try {
       const _id = new Types.ObjectId(id)
-      return this._serviceBoyRepository.loadProfile({ _id: _id });
+
+   if(isVerified){
+       return this._serviceBoyRepository.loadProfile({_id,isVerified});
+   }
+      return this._serviceBoyRepository.loadProfile({_id});
    } catch (error) {
       throw error;
    }

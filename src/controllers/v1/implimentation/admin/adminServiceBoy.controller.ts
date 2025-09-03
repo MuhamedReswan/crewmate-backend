@@ -15,6 +15,7 @@ verifyServiceBoyByAdmin:RequestHandler
 getAllServiceBoys:RequestHandler
 getServiceBoysById:RequestHandler
 updateServiceBoyStatus:RequestHandler
+getSinglePendingVerification:RequestHandler
 }
 
 @injectable()
@@ -101,6 +102,33 @@ const {id} = req.params;
 }
       } 
 
+      getSinglePendingVerification = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> => {
+try {
+const {id} = req.params;
+const {isVerified} =req.query
+    const verificationStatus = isVerified as VerificationStatusType;
+    const result = await this._adminServiceBoyService.getServiceBoyById(id,verificationStatus);
+    if(!result){
+   res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json(
+          responseHandler(
+            ResponseMessage.NO_USER_TO_VERIFY_WITH_THIS,
+            HttpStatusCode.NOT_FOUND
+          )
+        );
+        return
+    }
+    res.status(200).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+  
+} catch (error) {
+  next(error)
+}
+      } 
 
 
       updateServiceBoyStatus = async (

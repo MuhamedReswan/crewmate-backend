@@ -54,7 +54,9 @@ LOAD_VERIFICATION_SUCCESS = "Load verification success",
 NO_VERIFICATION_STATUS = "No verifaction status found to update",
 VERIFICATION_STATUS_UPDATE_SUCCESS = "Verification success",
 LOAD_SERVICE_BOY_SUCCESS = "ServiceBoy loading success",
+LOAD_VENDOR_SUCCESS = "Vendor loading success",
 LOAD_USER_PROFILE_SUCCESS = "User profile loading success",
+NO_USER_TO_VERIFY_WITH_THIS = "No user found to verify with this",
 
 UPDATE_STATUS_SUCCESS = "Status updated success"
 
