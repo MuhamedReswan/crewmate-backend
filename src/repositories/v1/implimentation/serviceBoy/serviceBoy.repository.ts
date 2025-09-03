@@ -37,9 +37,9 @@ logger.debug("Updated profile", { updatedServiceBoy });
     }
   }
 
-async loadProfile(_id:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
+async loadProfile(data:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
   try{
-const serviceBoyProfile = await  this.findOne(_id);
+const serviceBoyProfile = await  this.findOne(data);
 
 logger.debug("serviceBoyProfile", { serviceBoyProfile });
 
@@ -50,8 +50,6 @@ return;
       throw error;
     }
 }
-
-
 
 async loadAllSBPendingVerification(): Promise<IServiceBoy[] | undefined>{
   try {
@@ -70,9 +68,8 @@ async loadAllSBPendingVerification(): Promise<IServiceBoy[] | undefined>{
   }
 }
 
-
-
-  async findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean) {
+  async findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean)
+  :Promise<PaginatedResponse<IServiceBoy>|undefined> {
     try {
       return this.findPaginated(page, limit,  search, isBlocked, ["name", "email", "mobile"]);
     } catch (error) {

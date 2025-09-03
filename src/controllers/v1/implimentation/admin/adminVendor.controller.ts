@@ -12,6 +12,9 @@ import { NotFoundError } from "../../../../utils/errors/notFound.error";
 export interface IAdminVendorController{
 getAllVendorPendingVerification:RequestHandler
 verifyVendorByAdmin:RequestHandler
+getVendorById:RequestHandler
+getVendorSinglePendingVerification:RequestHandler
+getAllVendors:RequestHandler
 }
 
 @injectable()
@@ -30,6 +33,35 @@ try {
     next(error)
 }
   }
+
+
+      getVendorSinglePendingVerification = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> => {
+try {
+const {id} = req.params;
+const {isVerified} =req.query
+    const verificationStatus = isVerified as VerificationStatusType;
+    const result = await this._adminVendorService.getVendorById(id,verificationStatus);
+    if(!result){
+   res
+        .status(HttpStatusCode.NotFound)
+        .json(
+          responseHandler(
+            ResponseMessage.NO_USER_TO_VERIFY_WITH_THIS,
+            HttpStatusCode.NotFound
+          )
+        );
+        return
+    }
+    res.status(200).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.Ok, result))
+  
+} catch (error) {
+  next(error)
+}
+      } 
 
 
 
@@ -54,6 +86,41 @@ try {
       }
         }
 
+              getVendorById = async (
+                req: Request,
+                res: Response,
+                next: NextFunction
+              ): Promise<void> => {
+        try {
+        const {id} = req.params;
+            const result = await this._adminVendorService.getVendorById(id);
+            res.status(200).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.Ok, result))
+          
+        } catch (error) {
+          next(error)
+        }
+              }
 
 
+                    getAllVendors = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> => {
+try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || ""
+    logger.info("req.query.isBlocked",req.query)
+    const isBlockedRaw = req.query.isBlocked as string;
+    if(isBlockedRaw){
+    }
+    const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
+    const result = await this._adminVendorService.getPaginatedVendors(page, limit, search,isBlocked);
+    res.status(200).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.Ok, result))
+  
+} catch (error) {
+  next(error)
+}
+      }
 }
