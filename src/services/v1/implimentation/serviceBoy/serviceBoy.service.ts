@@ -6,6 +6,9 @@ import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util"; 
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
+import { VerificationStatusType } from "../../../../constants/verificationStatus";
+import { ServiceBoyLoginDTO } from "../../../../dtos/v1/serviceBoy.dto";
+import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 
 export interface IServiceBoyService {
   updateProfile(
@@ -15,6 +18,8 @@ export interface IServiceBoyService {
   
 
   LoadProfile (_id:Partial<IServiceBoy>):Promise<IServiceBoy | undefined> 
+  retryVerification (_id:Partial<IServiceBoy>,isVerified:VerificationStatusType):Promise<IServiceBoy | undefined> 
+  loadServiceBoyById (_id:Partial<IServiceBoy>):Promise<ServiceBoyLoginDTO | undefined>
 }
 
 @injectable()
@@ -158,6 +163,27 @@ updateProfile = async (
     throw error;
   }
 };
+
+  retryVerification = async(_id:Partial<IServiceBoy>,isVerified:VerificationStatusType):Promise<IServiceBoy | undefined> => {
+    try {
+const serviceBoyProfile = await this._serviceBoyRepository.updateServiceBoy(_id,{isVerified});
+return serviceBoyProfile;
+       } catch (error) {
+      throw error;
+    }
+  };
+
+
+    loadServiceBoyById = async(_id:Partial<IServiceBoy>):Promise<ServiceBoyLoginDTO | undefined> => {
+      try {
+  const serviceBoy = await this._serviceBoyRepository.loadProfile(_id);
+  if(!serviceBoy)return 
+    return mapToServiceBoyLoginDTO(serviceBoy);
+  
+         } catch (error) {
+        throw error;
+      }
+    };
 
   };
 

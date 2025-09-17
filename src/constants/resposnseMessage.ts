@@ -51,12 +51,18 @@ IMAGE_URL_SUCCESS = "Image url fetched success",
 IMAGE_URL_FAILED = "wrong key for image",
 
 LOAD_VERIFICATION_SUCCESS = "Load verification success",
+RETRY_VERIFICATION_REQUEST_SUCCESS = "Retry verification request success",
 NO_VERIFICATION_STATUS = "No verifaction status found to update",
 VERIFICATION_STATUS_UPDATE_SUCCESS = "Verification success",
+RETRY_VERIFICATION_SENT = "Request sent for verification",
+
 LOAD_SERVICE_BOY_SUCCESS = "ServiceBoy loading success",
 LOAD_VENDOR_SUCCESS = "Vendor loading success",
 LOAD_USER_PROFILE_SUCCESS = "User profile loading success",
+
 NO_USER_TO_VERIFY_WITH_THIS = "No user found to verify with this",
+NO_USER_TO_RETRY_WITH_THIS = "No user found to retry with this",
+USER_LOAD_SUCCESS = "User loaded success",
 
 UPDATE_STATUS_SUCCESS = "Status updated success"
 

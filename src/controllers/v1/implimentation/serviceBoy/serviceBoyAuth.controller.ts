@@ -331,11 +331,21 @@ logger.info("Google login token received",{})
 const refreshToken = req.cookies?.refreshToken;
 
   if (!refreshToken) {
-   res.status(HttpStatusCode.BAD_REQUEST)
-   .json(
-    responseHandler
-    (ResponseMessage.INVALID_REFRESH_TOKEN,
-      HttpStatusCode.BAD_REQUEST));
+  //  res.status(HttpStatusCode.BAD_REQUEST)
+  //  .json(
+  //   responseHandler
+  //   (ResponseMessage.INVALID_REFRESH_TOKEN,
+  //     HttpStatusCode.BAD_REQUEST));
+
+     res
+        .status(HttpStatusCode.OK)
+        .json(
+          responseHandler(
+            ResponseMessage.LOGOUT_SUCCESS,
+            HttpStatusCode.OK,
+            true
+          )
+        );
   }
 
   const decoded =decodeRefreshToken(refreshToken);

@@ -8,10 +8,13 @@ import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
+import { VerificationStatus } from "../../../../constants/verificationStatus";
 
 export interface IVendorController{
     updateVendorProfile:RequestHandler
     loadVendorProfile:RequestHandler
+    retryVendorVerfication:RequestHandler
+    loadVendorById:RequestHandler
 }
 
 @injectable()
@@ -55,4 +58,44 @@ export default class VendorController implements IVendorController{
       next(error);
        }
      };
+
+
+     retryVendorVerfication = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
+    try {
+const {id} = req.params;
+ const _id = new Types.ObjectId(id);
+const verificationStatus = VerificationStatus.Pending
+    const result = await this._vendorService.retryVerification({_id},verificationStatus);
+    if(!result){
+   res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json(
+          responseHandler(
+            ResponseMessage.NO_USER_TO_RETRY_WITH_THIS,
+            HttpStatusCode.NOT_FOUND
+          )
+        );
+        return
+    }
+    res.status(200).json(responseHandler(ResponseMessage.RETRY_VERIFICATION_SENT,HttpStatusCode.OK))
+  } catch (error) {
+              logger.error("vendorController: retry verification error", error );
+        next(error);
+    }
+};
+
+ loadVendorById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        const _id = new Types.ObjectId(id);
+        const vendor = await this._vendorService.loadVendorById({ _id });
+        logger.info("loadVendorById from controller", vendor);
+
+        res.status(200).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS, HttpStatusCode.OK, vendor));
+    } catch (error) {
+        logger.error("VendorController: loadProfile error", error);
+        next(error);
+    }
+};
     }
