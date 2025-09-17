@@ -8,10 +8,13 @@ import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
 
 export interface IServiceBoyController{
     loadProfile:RequestHandler
     updateProfile:RequestHandler
+    retryServiceBoyVerfication:RequestHandler
+    loadServiceBoyById:RequestHandler
 }
 
 @injectable()
@@ -54,6 +57,47 @@ updateProfile  = async(req:Request, res:Response, next:NextFunction):Promise<voi
         }
     } catch (error) {
               logger.error("ServiceBoyController: updateProfile error", error );
+        next(error);
+    }
+};
+
+
+retryServiceBoyVerfication = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
+    try {
+const {id} = req.params;
+ const _id = new Types.ObjectId(id);
+const verificationStatus = VerificationStatus.Pending
+    const result = await this._serviceBoyService.retryVerification({_id},verificationStatus);
+    if(!result){
+   res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json(
+          responseHandler(
+            ResponseMessage.NO_USER_TO_RETRY_WITH_THIS,
+            HttpStatusCode.NOT_FOUND
+          )
+        );
+        return
+    }
+    res.status(200).json(responseHandler(ResponseMessage.RETRY_VERIFICATION_SENT,HttpStatusCode.OK))
+  } catch (error) {
+              logger.error("serviceBoyController: retry verification error", error );
+        next(error);
+    }
+};
+
+
+ loadServiceBoyById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        const _id = new Types.ObjectId(id);
+        const serviceBoy = await this._serviceBoyService.loadServiceBoyById({ _id });
+        logger.info("loadServiceBoyId from controller", serviceBoy);
+
+        res.status(200).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS, HttpStatusCode.OK, serviceBoy));
+    } catch (error) {
+        logger.error("serviceBoy controller: loadServiceBoyById error", error);
         next(error);
     }
 };

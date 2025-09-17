@@ -6,10 +6,15 @@ import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
+import { VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VendorLoginDTO } from "../../../../dtos/v1/vendor.dto";
+import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 
 export interface IVendorService {
   updateVendorProfile: (body: Partial<IVendor>, files: ImageFiles) => Promise<IVendor | undefined>;
    loadVendorProfile (_id:Partial<IVendor>):Promise<IVendor | undefined> 
+   retryVerification (_id:Partial<IVendor>,isVerified:VerificationStatusType):Promise<IVendor | undefined> 
+   loadVendorById (_id:Partial<IVendor>):Promise<VendorLoginDTO | undefined> 
 }
 
 @injectable()
@@ -126,4 +131,24 @@ const uploadTasks: Promise<void>[] = [];
     throw error;
   }
 };
+
+  retryVerification = async(_id:Partial<IVendor>,isVerified:VerificationStatusType):Promise<IVendor | undefined> => {
+    try {
+const vendorProfile = await this._vendorRepository.updateVendor(_id,{isVerified});
+return vendorProfile;
+       } catch (error) {
+      throw error;
+    }
+  };
+
+  loadVendorById = async(_id:Partial<IVendor>):Promise<VendorLoginDTO | undefined> => {
+    try {
+const vendor = await this._vendorRepository.loadProfile(_id);
+if(!vendor)return 
+  return mapToVendorLoginDTO(vendor);
+
+       } catch (error) {
+      throw error;
+    }
+  };
 }

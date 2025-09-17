@@ -15,8 +15,12 @@ const uploadFields = upload.fields([
   ]);
 
 router.get('/profile/:id',serviceBoyController.loadProfile);
+router.get('/:id',serviceBoyController.loadServiceBoyById);
+
 
 router.put('/profile',authMiddleware,uploadFields,serviceBoyController.updateProfile);
+router.patch('/retry-verify/:id', serviceBoyController.retryServiceBoyVerfication);
+
 
 
 export default router;
