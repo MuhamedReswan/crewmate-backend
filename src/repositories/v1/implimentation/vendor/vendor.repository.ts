@@ -8,7 +8,7 @@ import { PaginatedResponse } from "../../../../types/pagination.type";
 
 export interface IVendorRepository{
     updateVendor (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined>
-    loadProfile(id: Partial<IVendor>): Promise<IVendor | undefined>
+    findVendor(id: Partial<IVendor>): Promise<IVendor | undefined>
     loadAllVendorendingVerification(): Promise<IVendor[] | undefined>
     findVendorPaginated(page: number, limit: number, search: string, isBlocked:boolean|undefined)
     :Promise<PaginatedResponse<IVendor>|undefined>
@@ -38,7 +38,7 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
     };
 
 
-async loadProfile(data: Partial<IVendor>): Promise<IVendor | undefined> {
+async findVendor(data: Partial<IVendor>): Promise<IVendor | undefined> {
   try {
     const vendorProfile = await this.findOne(data);
 

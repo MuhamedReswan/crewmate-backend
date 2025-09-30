@@ -24,6 +24,10 @@ import AdminVendorController from "../controllers/v1/implimentation/admin/adminV
 import AdminServiceBoyController from "../controllers/v1/implimentation/admin/adminServiceBoy.controller";
 import AdminVendorService from "../services/v1/implimentation/admin/adminVendor.service";
 import AdminServiceBoyService from "../services/v1/implimentation/admin/adminServiceBoy.service";
+import EventRepository from "../repositories/v1/implimentation/event/event.repository";
+import EventService from "../services/v1/implimentation/event/event.service";
+import EventController from "../controllers/v1/implimentation/event/eventController";
+import eventModel from "../models/v1/event.model";
 
 
 // Repository Registration
@@ -32,6 +36,7 @@ container.register("IVendorRepository", VendorRepository);
 container.register("IServiceBoyAuthRepository", ServiceBoyAuthRepository);
 container.register("IServiceBoyRepository", ServiceBoyRepository);
 container.register("IAdminAuthRepository",AdminAuthRepository);
+container.register("IEventRepository",EventRepository);
 
 // Service Registrations
 container.register("IVendorAuthService", VendorAuthService);
@@ -42,6 +47,7 @@ container.register("IAdminAuthService", AdminAuthService);
 container.register("IAdminVendorService", AdminVendorService);
 container.register("IAdminServiceBoyService", AdminServiceBoyService);
 container.register("ICommonService", CommonService);
+container.register("IEventService", EventService);
 
 
 // Controller Registrations
@@ -53,12 +59,14 @@ container.register("IAdminAuthController",AdminAuthController);
 container.register("IAdminVendorController",AdminVendorController);
 container.register("IAdminServiceBoyController",AdminServiceBoyController);
 container.register("ICommonController",CommonController);
+container.register("IEventController",EventController);
 
 
 // Model Registrations
 container.register("ServiceBoyModel", { useValue: serviceBoyModel });
 container.register("VendorModel", { useValue: vendorModel });
 container.register("AdminModel", { useValue: adminModel });
+container.register("EventModel", { useValue: eventModel });
 
 
 export default container;

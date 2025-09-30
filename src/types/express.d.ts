@@ -1,10 +1,10 @@
-import { JwtPayload } from "../types/type";
-console.log("JwtPayload-------------------------------",JwtPayload);
-declare global {
-  namespace Express {
-    interface Request {
-      user?:  { [key: string]: any };    }
-  }
-}
+      import { Request } from 'express';
+      import { JwtPayload } from "./type";
 
-export {};
+    declare global {
+      namespace Express {
+        interface Request {
+          user?: JwtPayload ; 
+        }
+      }
+    }
