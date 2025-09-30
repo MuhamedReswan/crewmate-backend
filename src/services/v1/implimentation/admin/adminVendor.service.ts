@@ -45,7 +45,7 @@ logger.info("vendor UpdateVerification",UpdateVerification);
 getVendorById = async (id:string, isVerified?:IVendor["isVerified"] ):Promise<Partial<IVendor> | undefined> =>{
 try {
    const _id = new Types.ObjectId(id)
-const UpdateVerification = this._vendorRepository.loadProfile({ _id, isVerified });
+const UpdateVerification = this._vendorRepository.findVendor({ _id, isVerified });
 logger.info("vendor UpdateVerification",UpdateVerification);
    return UpdateVerification;
 } catch (error) {

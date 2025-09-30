@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import "./config/diContainer";
 import express, {Application} from "express";
+import "./config/diContainer";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from 'cookie-parser';

@@ -64,7 +64,13 @@ NO_USER_TO_VERIFY_WITH_THIS = "No user found to verify with this",
 NO_USER_TO_RETRY_WITH_THIS = "No user found to retry with this",
 USER_LOAD_SUCCESS = "User loaded success",
 
-UPDATE_STATUS_SUCCESS = "Status updated success"
+UPDATE_STATUS_SUCCESS = "Status updated success",
+
+EVENT_CREATION_SUCCESS = "Event created successfully",
+EVENT_NOT_CREATED = "Eent Not created",
+EVENT_ALREADY_EXIST = "Event already exist",
+VENDOR_NOT_EXIST = "Vendor not found with this details",
+
 
 
 

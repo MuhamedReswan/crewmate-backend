@@ -12,6 +12,6 @@
         "rootDir": "./src",
         "typeRoots": ["./node_modules/@types", "./src/types"],
     },
-    "include": ["src/**/*.ts", "src/middleware/*.ts","src/types/*.ts", "src/services/v1/implimentation/admin/admin"],
+    "include": ["src/**/*.ts", "src/types/**/*.d.ts"],
     "exclude": ["node_modules"]
 }

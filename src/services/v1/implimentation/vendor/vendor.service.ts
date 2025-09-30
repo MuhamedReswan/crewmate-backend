@@ -36,7 +36,7 @@ export default class VendorService implements IVendorService {
       (files.profileImage && files.profileImage.length > 0);
 
          if (hasAnyFile) {
-            oldVendorProfile = await this._vendorRepository.loadProfile({ _id: data._id });
+            oldVendorProfile = await this._vendorRepository.findVendor({ _id: data._id });
             logger.debug("oldVendorProfile------------",{oldVendorProfile});
           }
 
@@ -125,7 +125,7 @@ const uploadTasks: Promise<void>[] = [];
 
   loadVendorProfile = async (_id: Partial<IVendor>): Promise<IVendor | undefined> => {
   try {
-    const vendorProfile = await this._vendorRepository.loadProfile(_id);
+    const vendorProfile = await this._vendorRepository.findVendor(_id);
     return vendorProfile;
   } catch (error) {
     throw error;
@@ -143,7 +143,7 @@ return vendorProfile;
 
   loadVendorById = async(_id:Partial<IVendor>):Promise<VendorLoginDTO | undefined> => {
     try {
-const vendor = await this._vendorRepository.loadProfile(_id);
+const vendor = await this._vendorRepository.findVendor(_id);
 if(!vendor)return 
   return mapToVendorLoginDTO(vendor);
 

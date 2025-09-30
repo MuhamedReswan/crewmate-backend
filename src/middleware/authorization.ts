@@ -41,9 +41,10 @@ export const authMiddleware = async (
 
     // If access token exists, try verifying it
     if (accessToken) {
-      const verfiedAccessToken = await verifyAccessToken(accessToken);
+      const verifiedAccessToken = await verifyAccessToken(accessToken);
       logger.info("Access token verified");
-      if (verfiedAccessToken) {
+      if (verifiedAccessToken) {
+        // req.user = verifiedAccessToken;
         return next();
       }         
     }
@@ -106,12 +107,11 @@ export const authMiddleware = async (
           // Set new refresh token and acesstoken in cookie
         logger.info("New token generated for refresh");
 
-      //     const verfiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
-      // console.log("verfiedAccessToken2", verfiedAccessToken )
-      // if (verfiedAccessToken) {
-      //   req.user = { ...verfiedAccessToken } 
-      //   console.log("req.user auth2", req.user);
-      // }
+          const verifiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
+      console.log("verifiedAccessToken newly created", verifiedAccessToken )
+      if (verifiedAccessToken) {
+        // req.user = verifiedAccessToken  
+      }
           res.cookie("refreshToken", tokenRecreate.refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
