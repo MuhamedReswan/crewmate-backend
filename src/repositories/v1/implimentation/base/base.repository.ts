@@ -3,6 +3,7 @@ import { injectable } from 'tsyringe';
 import { IBaseRepository } from '../../interfaces/base/IBase.repository';
 import { PaginatedResponse } from '../../../../types/pagination.type';
 import logger from '../../../../utils/logger.util';
+import { SortOption } from '../../../../types/type';
 
 @injectable()
 export  class BaseRepository <T> implements IBaseRepository<T> {
@@ -80,14 +81,15 @@ return deleted.deletedCount || 0;
 
 
 async findPaginated(
+  baseFilter: Partial<T>,
     page: number,
     limit: number,
     search?: string,
-    isBlocked?:boolean,
-    searchFields?: (keyof T)[]
-  ): Promise<PaginatedResponse<T>> {
+    searchFields?: (keyof T)[],
+sort?: SortOption<T> | { [key: string]: 1 | -1 }  ): Promise<PaginatedResponse<T>> {
       try {
-    const query: FilterQuery<T> = {} as any;
+        logger.debug("baseFilter in findpaginated ",{baseFilter});
+    const query: FilterQuery<T> = {...baseFilter} as any;
 
     if (search && searchFields?.length) {
       query.$or = searchFields.map(field => ({
@@ -95,17 +97,16 @@ async findPaginated(
       })) as any;
     }
     
-if (typeof isBlocked === "boolean") {
-  (query as Record<string, any>).isBlocked = isBlocked;
-}
     const totalItems = await this._model.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
+    
+    const sortOption = sort && Object.keys(sort).length ? sort : { date: -1 };
 
     const data = await this._model
       .find(query)
       .skip((page - 1) * limit)
-      .limit(limit);
-
+      .limit(limit)
+.sort(sortOption as any)
     return {
       data,
       pagination: {

@@ -17,10 +17,12 @@ const uploadFields = upload.fields([
 
   router.get('/profile/:id',vendorController.loadVendorProfile);
   router.get('/:id',vendorController.loadVendorById);
-
+  
   router.put('/profile',authMiddleware,uploadFields,vendorController.updateVendorProfile);
-  router.post('/event',authMiddleware,eventController.createEvent);
   router.patch('/retry-verify/:id', vendorController.retryVendorVerfication);
-
+  
+  router.get('/:vendorId/events',eventController.getEvents);
+  
+  router.post('/events',authMiddleware,eventController.createEvent);
 
 export default router;

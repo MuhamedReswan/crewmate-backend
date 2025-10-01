@@ -9,6 +9,9 @@ import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { ObjectId } from "mongodb";
+import validateObjectId from "../../../../utils/validateObjectId.util";
+
 
 export interface IVendorController{
     updateVendorProfile:RequestHandler
@@ -87,6 +90,13 @@ const verificationStatus = VerificationStatus.Pending
  loadVendorById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { id } = req.params;
+
+  if (!id || !validateObjectId(id)) {
+      res.status(HttpStatusCode.BAD_REQUEST).json(
+        responseHandler("Invalid vendor ID", HttpStatusCode.BAD_REQUEST)
+      );
+      return;
+    }
 
         const _id = new Types.ObjectId(id);
         const vendor = await this._vendorService.loadVendorById({ _id });

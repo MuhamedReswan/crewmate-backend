@@ -3,6 +3,8 @@ import IServiceBoy from "../entities/v1/serviceBoyEntity";
 import IVendor from "../entities/v1/vendorEntity";
 import IAdmin from "../entities/v1/adminEntity";
 import { Role } from "../constants/Role";
+import { ObjectId, Types } from "mongoose";
+import IEvent from "../entities/v1/eventEntity";
 
 export type RequestHandler<
   TReturn = void
@@ -72,4 +74,22 @@ export interface LocationData {
   lat: number;
   lng: number;    
   address: string;
+}
+
+export interface eventFilter {
+  vendorId:Types.ObjectId
+  search :string;
+  limit : number
+  page : number,
+  status?:string,
+  from ?:string,
+  to ?: string,
+}
+
+export type SortOption<T> = Partial<Record<keyof T, 1 | -1>>;
+
+export interface EventQueryFilter extends Partial<IEvent> {
+  search?: string;
+  page: number;
+  limit: number;
 }
