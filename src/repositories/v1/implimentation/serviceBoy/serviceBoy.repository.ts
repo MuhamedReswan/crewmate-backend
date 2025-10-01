@@ -71,7 +71,11 @@ async loadAllSBPendingVerification(): Promise<IServiceBoy[] | undefined>{
   async findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean)
   :Promise<PaginatedResponse<IServiceBoy>|undefined> {
     try {
-      return this.findPaginated(page, limit,  search, isBlocked, ["name", "email", "mobile"]);
+      const query:Partial<IServiceBoy>  = {}
+      if(typeof isBlocked === "boolean"){
+        query.isBlocked = isBlocked;
+      }
+      return this.findPaginated(query, page, limit,  search, ["name", "email", "mobile"]);
     } catch (error) {
       throw error;
     }

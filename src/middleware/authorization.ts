@@ -126,7 +126,31 @@ export const authMiddleware = async (
           });
 
         return  next();
-        }
+        } else {
+  logger.warn("Failed to recreate token - refresh token invalid or user role not found");
+  
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  });
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  });
+
+  res
+    .status(HttpStatusCode.UNAUTHORIZED)
+    .json(
+      responseHandler(
+        ResponseMessage.INVALID_REFRESH_TOKEN,
+        HttpStatusCode.UNAUTHORIZED
+      )
+    );
+    return 
+}
+
       } catch (error) {
         logger.error("Error while validating or regenerating tokens",error);
         res.clearCookie("refreshToken", {

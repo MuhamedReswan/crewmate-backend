@@ -7,11 +7,18 @@ export interface IBaseRepository<T> {
     deleteOne(filter: Partial<T>): Promise<T | null>
     deleteMany(filter:Partial<T>): Promise<Number>
 findPaginated(
+    // page: number,
+    // limit: number,
+    // search?: string,
+    // isBlocked?:boolean,
+    // searchFields?: (keyof T)[]
+
+      baseFilter: Partial<T>,
     page: number,
     limit: number,
     search?: string,
-    isBlocked?:boolean,
-    searchFields?: (keyof T)[]
+    // isBlocked?:boolean,
+    searchFields?: (keyof T)[],
   ): Promise<PaginatedResponse<T>>
     
   }

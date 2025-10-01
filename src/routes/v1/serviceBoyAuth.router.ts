@@ -28,9 +28,9 @@ router.post('/logout',serviceBoyAuthController.logout);
 
 router.patch('/reset-password', validatePassword, serviceBoyAuthController.resetPassword);
 
-router.post('/profile');
+// router.post('/profile');
 
-//testing purpose
+// testing purpose
 router.post('/token-test',authMiddleware, serviceBoyAuthController.tokenTest);
 
 export default router;
