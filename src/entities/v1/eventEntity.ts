@@ -16,8 +16,11 @@ export default interface IEvent extends Document {
   overTime: Number;
   totalBill: Number;
   ratings: Types.ObjectId[];
-  date: Date;
-  reportingTime: String;
+  // eventDate: Date;
+  // reportingTime: String;
+  reportingDateTime: Date;
   noOfPax: Number;
+  travelExpense:Number;
+  bookedBoysForFriends:Types.ObjectId[]
   bonus: Number;
 }

@@ -4,17 +4,15 @@ import IEvent from "../../../../entities/v1/eventEntity";
 import { BaseRepository } from "../base/base.repository";
 import logger from "../../../../utils/logger.util";
 import { PaginatedResponse } from "../../../../types/pagination.type";
-import { EventQueryFilter, SortOption } from "../../../../types/type";
+import { EventQueryFilter } from "../../../../types/type";
 
 export interface IEventRepository {
   createEvent(eventData: Partial<IEvent>): Promise<IEvent>;
   findEvent(data: Partial<IEvent>): Promise<IEvent | null>;
-  // findEvents(filter: any, page: number, limit: number, search:string): Promise<PaginatedResponse<IEvent> | undefined>
-//  findEvents(
-//     filter: EventQueryFilter,
-//     searchFields?: (keyof IEvent)[],
-//     sort?: SortOption<IEvent>
-//   ): Promise<PaginatedResponse<IEvent>>
+ findEventsPaginated(
+    filter: EventQueryFilter,
+    sort?: Record<string, 1 | -1> 
+  ): Promise<PaginatedResponse<IEvent>>
 }
 
 @injectable()
@@ -45,57 +43,37 @@ export default class EventRepository
     }
   }
 
-// async findEvents(filter: Partial<IEvent> & { search?: string; page: number; limit: number }, page: number, limit: number, search:string): Promise<PaginatedResponse<IEvent>| undefined> {
-//   try {
-
-//     return this.findPaginated(filter,page,limit,search, ["customerName", "typeOfWork"] );
-//   } catch (error) {
-//      throw error;
-//   }
-//   }
 
 
+  async findEventsPaginated(
+    filter: EventQueryFilter,
+    sort: Record<string, 1 | -1> = { reportingDateTime: -1 } // default descending
+  ): Promise<PaginatedResponse<IEvent>> {
+    try {
+      const baseFilter: Partial<IEvent> = {
+        vendorId: filter.vendorId,
+        ...(filter.status && { status: filter.status }),
+      };
 
+      // Date range filter
+      if (filter.from || filter.to) {
+        (baseFilter as any).reportingDateTime = {};
+        if (filter.from) (baseFilter as any).reportingDateTime.$gte = new Date(filter.from);
+        if (filter.to) (baseFilter as any).reportingDateTime.$lte = new Date(filter.to);
+      }
 
-// async findEvents(filter:EventQueryFilter, 
-//   /* page: number, limit: number, search:string*/ 
-//   searchFields: (keyof IEvent)[] = ["customerName", "typeOfWork"],
-//   sort?: { [key: string]: 1 | -1 }
-// ): Promise<PaginatedResponse<IEvent>| undefined> {
-//   try {
+      const searchFields: (keyof IEvent)[] = ["customerName", "typeOfWork"];
 
-//     return this.findPaginated(filter,page,limit,search, ["customerName", "typeOfWork"] );
-//   } catch (error) {
-//      throw error;
-//   }
-//   }
-
-
-//   async findEvents(
-//     filter: EventQueryFilter,
-//     searchFields: (keyof IEvent)[] = ["customerName", "typeOfWork"],
-//     sort?: SortOption<IEvent>
-//   ): Promise<PaginatedResponse<IEvent>> {
-//     const baseFilter: Partial<IEvent> = {
-//       vendorId: filter.vendorId,
-//       ...(filter.status && { status: filter.status })
-//     };
-
-//     // Date range filter
-//     if (filter.from || filter.to) {
-//       (baseFilter as any).date = {};
-//       if (filter.from) (baseFilter as any).date.$gte = new Date(filter.from);
-//       if (filter.to) (baseFilter as any).date.$lte = new Date(filter.to);
-//     }
-
-//     return this.findPaginated(
-//       baseFilter,
-//       filter.page,
-//       filter.limit,
-//       filter.search,
-//       searchFields,
-//       sort
-//     );
-  
-// }
+      return this.findPaginated(
+        baseFilter,
+        filter.page,
+        filter.limit,
+        filter.search,
+        searchFields,
+        sort
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
 }

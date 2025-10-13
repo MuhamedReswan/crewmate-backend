@@ -6,9 +6,15 @@
     "auditLog": "logs\\.9e56e0334b9c4b35dabd938e07ef6fead6cc52bd-audit.json",
     "files": [
         {
+<<<<<<< HEAD
             "date": 1759305707465,
             "name": "logs/error-2025-10-01.log",
             "hash": "259c9d3a37104a10055d9c3b7a0f921bced100291a512535578d1c4d0468ab4e"
+=======
+            "date": 1760330058889,
+            "name": "logs/error-2025-10-13.log",
+            "hash": "077dea201fe484129988d639c2b48d35f5b5487a316d85c002115b0f428c9991"
+>>>>>>> b875a83 (event list on vendor)
         }
     ],
     "hashType": "sha256"
