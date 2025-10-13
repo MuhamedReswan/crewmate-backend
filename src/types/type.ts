@@ -20,27 +20,6 @@ export type CreateToken =
 | { role: Role.VENDOR; data: Partial<IVendor> };
 
 
-// export type UploadedFile = {
-//   fieldname: string;
-//   originalname: string;
-//   encoding: string;
-//   mimetype: string;
-//   buffer: Buffer;
-//   size: number;
-// };
-
-
-// export interface ImageFiles {
-//   [key: string]: UploadedFile[];
-// }
-
-
-//  export type FormattedFiles = {
-//   profileImage?: UploadedFile;
-//   aadharImageFront?: UploadedFile;
-//   aadharImageBack?: UploadedFile;
-// };
-
 
 export interface FileData {
   fieldname: string;
@@ -89,7 +68,12 @@ export interface eventFilter {
 export type SortOption<T> = Partial<Record<keyof T, 1 | -1>>;
 
 export interface EventQueryFilter extends Partial<IEvent> {
+  vendorId: Types.ObjectId;
   search?: string;
+  status?: string;
+  from?: string;
+  to?: string;   
   page: number;
   limit: number;
+  
 }

@@ -99,6 +99,8 @@ sort?: SortOption<T> | { [key: string]: 1 | -1 }  ): Promise<PaginatedResponse<T
     
     const totalItems = await this._model.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
     
     const sortOption = sort && Object.keys(sort).length ? sort : { date: -1 };
 
@@ -113,7 +115,9 @@ sort?: SortOption<T> | { [key: string]: 1 | -1 }  ): Promise<PaginatedResponse<T
         page,
         limit,
         totalItems,
-        totalPages
+        totalPages,
+        hasNext,
+        hasPrev
       }
     };
       } catch (error) {

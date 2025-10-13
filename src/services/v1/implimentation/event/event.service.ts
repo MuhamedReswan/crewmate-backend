@@ -12,7 +12,9 @@ import { PaginatedResponse } from "../../../../types/pagination.type";
 
 export interface IEventService {
   createEvent(eventData: Partial<IEvent>): Promise<IEvent | undefined>;
-// getEvents(filter:eventFilter): Promise<PaginatedResponse<IEvent>| undefined>
+
+getEvents( filter: EventQueryFilter,sort: Record<string, 1 | -1>)
+: Promise<PaginatedResponse<IEvent>| undefined>
 }
 
 @injectable()
@@ -51,40 +53,16 @@ export default class EventService implements IEventService {
   }
 
 
-//   async getEvents(filter:eventFilter): Promise<PaginatedResponse<IEvent>| undefined> {
-// try {
-//       const query: any = {
-//         vendorId: filter.vendorId,
-//         ...(filter.status && { status: filter.status }),
-//       };
 
-//       Filter by date range if provided
-//       if (filter.from || filter.to) {
-//         query.date = {};
-//         if (filter.from) query.date.$gte = new Date(filter.from);
-//         if (filter.to) query.date.$lte = new Date(filter.to);
-//       }
+getEvents = async (
+  filter: EventQueryFilter,
+  sort: Record<string, 1 | -1> = { reportingDateTime: -1 }
+): Promise<PaginatedResponse<IEvent> | undefined> => {
+  try {
+    return this._eventRepository.findEventsPaginated(filter, sort);
+  } catch (error) {
+    throw error;
+  }
+};
 
-//       Search in event name or description
-//       if (filter.search) {
-//         query.$or = [
-//           { customerName: { $regex: filter.search, $options: "i" } },
-//           { typeOfWork: { $regex: filter.search, $options: "i" } },
-//         ];
-//       }
-
-//       const events = await this._eventRepository.findEvents(query, filter.page, filter.limit, filter.search);
-//       return events
-
-//           return this._eventRepository.findEvents(filter, ["customerName", "typeOfWork"], sort);
-
-// } catch (error) {
-//    throw error;}
-//   }
-
-
-
-//  getEvents(filter: EventQueryFilter, sort?: SortOption<IEvent>): Promise<PaginatedResponse<IEvent>> {
-//     return this._eventRepository.findEvents(filter, ["customerName", "typeOfWork"], sort);
-//   }
 }
