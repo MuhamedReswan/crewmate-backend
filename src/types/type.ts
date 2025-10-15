@@ -68,7 +68,7 @@ export interface eventFilter {
 export type SortOption<T> = Partial<Record<keyof T, 1 | -1>>;
 
 export interface EventQueryFilter extends Partial<IEvent> {
-  vendorId: Types.ObjectId;
+  vendorId?: Types.ObjectId;
   search?: string;
   status?: string;
   from?: string;

@@ -90,6 +90,12 @@ const verificationStatus = VerificationStatus.Pending
  loadServiceBoyById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { id } = req.params;
+        logger.debug("loadServiceBoyId-id from controller", {id});
+
+          if (!req.params.id) {
+      res.status(400).json({ message: "serviceBoy ID is required" });
+      return;
+    }
 
         const _id = new Types.ObjectId(id);
         const serviceBoy = await this._serviceBoyService.loadServiceBoyById({ _id });

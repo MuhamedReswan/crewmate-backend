@@ -65,4 +65,17 @@ getEvents = async (
   }
 };
 
+
+getWorks = async (
+  filter: EventQueryFilter,
+  sort: Record<string, 1 | -1> = { reportingDateTime: -1 }
+): Promise<PaginatedResponse<IEvent> | undefined> => {
+  try {
+    logger.debug("getWorks filter", filter);
+    return this._eventRepository.findEventsPaginated(filter, sort);
+  } catch (error) {
+    throw error;
+  }
+};
+
 }
