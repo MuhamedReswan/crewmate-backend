@@ -3,10 +3,12 @@ import { Router } from "express";
 import { IServiceBoyController } from "../../controllers/v1/implimentation/serviceBoy/serviceBoy.controller";
 import upload from "../../middleware/multer";
 import { authMiddleware } from "../../middleware/authorization";
+import { IEventController } from "../../controllers/v1/implimentation/event/eventController";
 
 
 const router = Router();
 const serviceBoyController = container.resolve<IServiceBoyController>('IServiceBoyController');
+const eventController = container.resolve<IEventController>('IEventController');
 
 const uploadFields = upload.fields([
     { name: "aadharImageFront", maxCount: 1 }, 
@@ -15,6 +17,7 @@ const uploadFields = upload.fields([
   ]);
 
 router.get('/profile/:id',serviceBoyController.loadProfile);
+router.get('/works',eventController.getWorks);
 router.get('/:id',serviceBoyController.loadServiceBoyById);
 
 

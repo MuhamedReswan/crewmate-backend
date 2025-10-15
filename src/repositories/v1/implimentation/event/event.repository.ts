@@ -9,10 +9,10 @@ import { EventQueryFilter } from "../../../../types/type";
 export interface IEventRepository {
   createEvent(eventData: Partial<IEvent>): Promise<IEvent>;
   findEvent(data: Partial<IEvent>): Promise<IEvent | null>;
- findEventsPaginated(
+  findEventsPaginated(
     filter: EventQueryFilter,
-    sort?: Record<string, 1 | -1> 
-  ): Promise<PaginatedResponse<IEvent>>
+    sort?: Record<string, 1 | -1>
+  ): Promise<PaginatedResponse<IEvent>>;
 }
 
 @injectable()
@@ -43,23 +43,30 @@ export default class EventRepository
     }
   }
 
-
-
   async findEventsPaginated(
     filter: EventQueryFilter,
     sort: Record<string, 1 | -1> = { reportingDateTime: -1 } // default descending
   ): Promise<PaginatedResponse<IEvent>> {
     try {
-      const baseFilter: Partial<IEvent> = {
-        vendorId: filter.vendorId,
-        ...(filter.status && { status: filter.status }),
-      };
+      let baseFilter: Partial<IEvent>;
+      if (filter.vendorId) {
+        baseFilter = {
+          vendorId: filter.vendorId,
+          ...(filter.status && { status: filter.status }),
+        };
+      } else {
+        baseFilter = {
+          ...(filter.status && { status: filter.status }),
+        };
+      }
 
       // Date range filter
       if (filter.from || filter.to) {
         (baseFilter as any).reportingDateTime = {};
-        if (filter.from) (baseFilter as any).reportingDateTime.$gte = new Date(filter.from);
-        if (filter.to) (baseFilter as any).reportingDateTime.$lte = new Date(filter.to);
+        if (filter.from)
+          (baseFilter as any).reportingDateTime.$gte = new Date(filter.from);
+        if (filter.to)
+          (baseFilter as any).reportingDateTime.$lte = new Date(filter.to);
       }
 
       const searchFields: (keyof IEvent)[] = ["customerName", "typeOfWork"];

@@ -15,6 +15,7 @@ import { Types } from "mongoose";
 export interface IEventController {
   createEvent: RequestHandler;
   getEvents: RequestHandler;
+  getWorks: RequestHandler;
 }
 @injectable()
 export default class EventController implements IEventController {
@@ -100,6 +101,59 @@ getEvents = async (
           "Events loaded successfully",
           HttpStatusCode.OK,
           events
+        )
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+getWorks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+        logger.debug("getWorks req.query",req.query);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+    const status = (req.query.status as string) || undefined;
+    const from = (req.query.from as string) || undefined;
+    const to = (req.query.to as string) || undefined;
+    const sortBy = (req.query.sortBy as string) || "reportingDateTime";
+    const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
+
+    // if (!req.params.vendorId) {
+    //   res.status(400).json({ message: "vendorId is required" });
+    //   return;
+    // }
+
+    // const vendorId = new Types.ObjectId(req.params.vendorId);
+    
+    const filter: EventQueryFilter = {
+      search,
+      status,
+      from,
+      to,
+      page,
+      limit
+    };
+
+    
+    const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
+
+    const works = await this._eventService.getEvents(filter,sort);
+    logger.debug("getWorks out in controller",{works})
+
+    res
+      .status(200)
+      .json(
+        responseHandler(
+          "Events loaded successfully",
+          HttpStatusCode.OK,
+          works
         )
       );
   } catch (error) {
