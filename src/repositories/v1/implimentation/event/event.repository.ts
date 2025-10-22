@@ -49,9 +49,9 @@ export default class EventRepository
   ): Promise<PaginatedResponse<IEvent>> {
     try {
       let baseFilter: Partial<IEvent>;
-      if (filter.vendorId) {
+      if (filter.vendor) {
         baseFilter = {
-          vendorId: filter.vendorId,
+          vendor: filter.vendor,
           ...(filter.status && { status: filter.status }),
         };
       } else {
@@ -71,7 +71,7 @@ export default class EventRepository
 
       const searchFields: (keyof IEvent)[] = ["customerName", "typeOfWork"];
 
-      return this.findPaginated(
+      const { data, pagination } = await this.findPaginated(
         baseFilter,
         filter.page,
         filter.limit,
@@ -79,6 +79,16 @@ export default class EventRepository
         searchFields,
         sort
       );
+
+      const populatedData = await this._model.populate(data, {
+        path: "vendor",
+        select: 'name email mobile _id'
+      });
+
+      return {
+        data: populatedData,
+        pagination,
+      };
     } catch (error) {
       throw error;
     }

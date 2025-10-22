@@ -29,6 +29,6 @@ export default interface IServiceBoy extends Document {
     offDates:UnAvailable[]
     date:Date,
     walletId:Types.ObjectId,
-    workHistoryId:Types.ObjectId   
+    workHistory:Types.ObjectId   
 }
 

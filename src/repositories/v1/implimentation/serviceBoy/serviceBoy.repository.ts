@@ -39,7 +39,7 @@ logger.debug("Updated profile", { updatedServiceBoy });
 
 async loadProfile(data:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
   try{
-const serviceBoyProfile = await  this.findOne(data);
+const serviceBoyProfile = await  this.findOne(data, { password: 0 });
 
 logger.debug("serviceBoyProfile", { serviceBoyProfile });
 

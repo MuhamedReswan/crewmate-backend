@@ -4,7 +4,7 @@ import { LocationData } from "../../types/type";
 export default interface IEvent extends Document {
   _id: Types.ObjectId;
   customerName: String;
-  vendorId: Types.ObjectId;
+  vendor: Types.ObjectId;
   typeOfWork: String;
   typeOfService: String;
   serviceBoys: Number;
@@ -16,8 +16,6 @@ export default interface IEvent extends Document {
   overTime: Number;
   totalBill: Number;
   ratings: Types.ObjectId[];
-  // eventDate: Date;
-  // reportingTime: String;
   reportingDateTime: Date;
   noOfPax: Number;
   travelExpense:Number;

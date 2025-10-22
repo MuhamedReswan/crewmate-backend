@@ -16,13 +16,13 @@ const uploadFields = upload.fields([
     { name: "profileImage", maxCount: 1 }, 
   ]);
 
-router.get('/profile/:id',serviceBoyController.loadProfile);
-router.get('/works',eventController.getWorks);
-router.get('/:id',serviceBoyController.loadServiceBoyById);
+router.get('/profile/:id',authMiddleware,serviceBoyController.loadProfile);
+router.get('/works',authMiddleware,eventController.getWorks);
+router.get('/:id',authMiddleware,serviceBoyController.loadServiceBoyById);
 
 
 router.put('/profile',authMiddleware,uploadFields,serviceBoyController.updateProfile);
-router.patch('/retry-verify/:id', serviceBoyController.retryServiceBoyVerfication);
+router.patch('/retry-verify/:id',authMiddleware, serviceBoyController.retryServiceBoyVerfication);
 
 
 

@@ -29,7 +29,7 @@ const UnAvailableSchema = new Schema({
   password: { type: String },
   servicerId: { type: String, unique: true, sparse: true },
   walletId: { type: Schema.Types.ObjectId, unique: true, sparse: true },
-  workHistoryId: { type: Schema.Types.ObjectId, unique: true,sparse: true },
+  workHistory: { type: Schema.Types.ObjectId, unique: true,sparse: true },
  location: { type: LocationSchema, required: false },
   offDates: [UnAvailableSchema],
 });

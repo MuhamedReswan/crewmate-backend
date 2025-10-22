@@ -2,6 +2,7 @@ import { Router } from "express";
 import { container } from "tsyringe";
 import { IAdminVendorController } from "../../controllers/v1/implimentation/admin/adminVendor.controller";
 import { IAdminServiceBoyController } from "../../controllers/v1/implimentation/admin/adminServiceBoy.controller";
+import { authMiddleware } from "../../middleware/authorization";
 
 const router = Router();
 
@@ -10,9 +11,9 @@ const adminServiceBoyController = container.resolve<IAdminServiceBoyController>(
 
 
 
-router.get('/service-boys/verify', adminServiceBoyController.getAllServiceBoysPendingVerification);
+router.get('/service-boys/verify',authMiddleware, adminServiceBoyController.getAllServiceBoysPendingVerification);
 router.get('/service-boys/verify/:id', adminServiceBoyController.getSinglePendingVerification);
-router.get('/service-boys', adminServiceBoyController.getAllServiceBoys);
+router.get('/service-boys',authMiddleware, adminServiceBoyController.getAllServiceBoys);
 router.get('/service-boys/:id', adminServiceBoyController.getServiceBoysById);
 router.patch('/service-boys/:id/verify', adminServiceBoyController.verifyServiceBoyByAdmin);
 router.patch('/service-boys/:id/:status', adminServiceBoyController.updateServiceBoyStatus);

@@ -72,14 +72,20 @@ getEvents = async (
     const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
 
     if (!req.params.vendorId) {
-      res.status(400).json({ message: "vendorId is required" });
+      res.status(400)
+      .json(
+       responseHandler(
+          ResponseMessage.VENDOR_ID_MISSING,
+          HttpStatusCode.BAD_REQUEST,
+        )
+      );
       return;
     }
 
-    const vendorId = new Types.ObjectId(req.params.vendorId);
+    const vendor = new Types.ObjectId(req.params.vendorId);
     
     const filter: EventQueryFilter = {
-      vendorId,
+      vendor,
       search,
       status,
       from,
@@ -98,12 +104,13 @@ getEvents = async (
       .status(200)
       .json(
         responseHandler(
-          "Events loaded successfully",
+          ResponseMessage.LOAD_EVENT_SUCCESS,
           HttpStatusCode.OK,
           events
         )
       );
   } catch (error) {
+    logger.error("getEvents on event controller", error);
     next(error);
   }
 };
@@ -151,7 +158,7 @@ getWorks = async (
       .status(200)
       .json(
         responseHandler(
-          "Events loaded successfully",
+          ResponseMessage.LOAD_WORKS_SUCCESS,
           HttpStatusCode.OK,
           works
         )

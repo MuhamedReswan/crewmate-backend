@@ -40,7 +40,7 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
 
 async findVendor(data: Partial<IVendor>): Promise<IVendor | undefined> {
   try {
-    const vendorProfile = await this.findOne(data);
+    const vendorProfile = await this.findOne(data,{ password: 0 });
 
     logger.debug("vendorProfile", { vendorProfile });
 
