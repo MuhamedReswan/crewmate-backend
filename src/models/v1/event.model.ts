@@ -51,12 +51,10 @@ import { LocationSchema } from "./location.model";
 
 const EventsSchema = new Schema<IEvents>({
   customerName: { type: String, required: true },
-  vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
+  vendor: { type: Schema.Types.ObjectId, ref: "Vendors", required: true },
   typeOfService: { type: String, required: true },
   typeOfWork: { type: String, required: true },
   noOfPax: { type: Number, required: true },
-  // eventDate: { type: Date, required: true }
-  // reportingTime: { type: String, required: true },
   reportingDateTime: { type: Date, required: true },
   serviceBoys: { type: Number, required: true },
   eventLocation: LocationSchema,
@@ -65,13 +63,9 @@ const EventsSchema = new Schema<IEvents>({
   bonus: { type: Number, default: 0 },
   travelExpense: { type: Number, default: 0 },
   totalBill: { type: Number, default: 0 },
-  bookedBoys: [{ type: Schema.Types.ObjectId, ref: "ServiceBoy" }], 
+  bookedBoys: [{ type: Schema.Types.ObjectId, ref: "ServiceBoys" }], 
   bookedBoysForFriends: [{ type: Schema.Types.ObjectId, ref: "FriendBooking" }],
 }, { timestamps: true });
-
-
-
-
 
 const eventModel = mongoose.model<IEvents>('Events', EventsSchema);
 

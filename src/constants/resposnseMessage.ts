@@ -70,7 +70,10 @@ EVENT_CREATION_SUCCESS = "Event created successfully",
 EVENT_NOT_CREATED = "Eent Not created",
 EVENT_ALREADY_EXIST = "Event already exist",
 LOAD_EVENT_SUCCESS = "Events successfully loaded",
+LOAD_WORKS_SUCCESS = "Works successfully loaded",
 VENDOR_NOT_EXIST = "Vendor not found with this details",
+
+VENDOR_ID_MISSING = "vendorId is required"
 
 
 

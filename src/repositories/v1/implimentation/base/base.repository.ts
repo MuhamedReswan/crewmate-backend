@@ -7,7 +7,7 @@ import { SortOption } from '../../../../types/type';
 
 @injectable()
 export  class BaseRepository <T> implements IBaseRepository<T> {
-  constructor(private _model: Model<T>) {} 
+  constructor(protected _model: Model<T>) {} 
 
   async create(data: Partial<T>): Promise<T> {
     try {
@@ -20,9 +20,9 @@ export  class BaseRepository <T> implements IBaseRepository<T> {
 };
 
 
-async findOne(filter: Partial<T>): Promise<T | null> {
+async findOne(filter: Partial<T>, projection?: string | object): Promise<T | null> {
   try {
-      const document = await this._model.findOne(filter).exec();
+      const document = await this._model.findOne(filter,projection).exec();
       return document;
   } catch (error) {
       logger.error("Error finding document:", error);
@@ -30,9 +30,9 @@ async findOne(filter: Partial<T>): Promise<T | null> {
   }
 };
 
-async findAll(filter: Partial<T>): Promise<T[] | null> {
+async findAll(filter: Partial<T>, projection?: string | object): Promise<T[] | null> {
   try {
-      const documents = await this._model.find(filter).exec();
+      const documents = await this._model.find(filter,projection).exec();
       return documents;
   } catch (error) {
       logger.error("Error finding document:", error);
@@ -109,6 +109,7 @@ sort?: SortOption<T> | { [key: string]: 1 | -1 }  ): Promise<PaginatedResponse<T
       .skip((page - 1) * limit)
       .limit(limit)
 .sort(sortOption as any)
+.select('-password');
     return {
       data,
       pagination: {
