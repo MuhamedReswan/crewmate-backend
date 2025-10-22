@@ -6,6 +6,7 @@ import { VerificationStatusType } from "../../../../constants/verificationStatus
 import { PaginatedResponse } from "../../../../types/pagination.type";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import logger from "../../../../utils/logger.util";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
 
 
 
@@ -74,7 +75,7 @@ const UpdateVerification = this._serviceBoyRepository.updateServiceBoy({ _id: _i
 updateServiceBoyStatus = async (id:string, status:string):Promise<Partial<IServiceBoy> | undefined> => {
    try {
       if (!Types.ObjectId.isValid(id)) {
-  throw new BadrequestError("Invalid ObjectId from serviceboy admin service");
+  throw new BadrequestError(ResponseMessage.INAVLID_SERVICE_BOY_ID);
 }
       const isBlocked = status ==="block"
       const _id = new Types.ObjectId(id);

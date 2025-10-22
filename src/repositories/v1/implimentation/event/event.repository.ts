@@ -45,7 +45,7 @@ export default class EventRepository
 
   async findEventsPaginated(
     filter: EventQueryFilter,
-    sort: Record<string, 1 | -1> = { reportingDateTime: -1 } // default descending
+    sort: Record<string, 1 | -1> = { reportingDateTime: -1 } 
   ): Promise<PaginatedResponse<IEvent>> {
     try {
       let baseFilter: Partial<IEvent>;

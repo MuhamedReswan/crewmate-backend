@@ -93,7 +93,8 @@ const verificationStatus = VerificationStatus.Pending
 
   if (!id || !validateObjectId(id)) {
       res.status(HttpStatusCode.BAD_REQUEST).json(
-        responseHandler("Invalid vendor ID", HttpStatusCode.BAD_REQUEST)
+        responseHandler(ResponseMessage.INVALID_VENDOR_ID
+          , HttpStatusCode.BAD_REQUEST)
       );
       return;
     }

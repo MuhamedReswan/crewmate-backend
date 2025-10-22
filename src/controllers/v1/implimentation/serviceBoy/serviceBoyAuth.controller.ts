@@ -393,7 +393,7 @@ const refreshToken = req.cookies?.refreshToken;
       .status(HttpStatusCode.OK)
       .json(
         responseHandler(
-          "Test token success",
+          ResponseMessage.TEST_TOKEN_SUCCESS,
           HttpStatusCode.OK,
           true
         ));

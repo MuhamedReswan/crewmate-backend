@@ -275,6 +275,7 @@ export default class VendorAuthService implements IVendorAuthService {
       const accessToken = await generateAccessToken({ data: vendor, role });
       return {
         accessToken,
+        refreshToken,
         message: ResponseMessage.ACCESS_TOKEN_SET,
         success: true,
       };

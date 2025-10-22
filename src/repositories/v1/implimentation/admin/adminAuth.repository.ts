@@ -10,9 +10,9 @@ export default class AdminAuthRepository extends BaseRepository<IAdmin> implemen
 super(model);
  }   
 
- async findByEmail (email:Partial<IAdmin>): Promise<IAdmin | null>{
+ async findByEmail (email:string): Promise<IAdmin | null>{
     try {
-      const adminDetails =  await this.findOne(email);
+      const adminDetails =  await this.findOne({email});
       return adminDetails;
     } catch (error) {
         throw error;

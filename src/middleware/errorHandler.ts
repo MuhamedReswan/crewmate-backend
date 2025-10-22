@@ -1,6 +1,7 @@
 import { ErrorRequestHandler } from 'express';
 import { CustomError } from '../utils/errors/custom.error';
 import logger from '../utils/logger.util';
+import { ResponseMessage } from '../constants/resposnseMessage';
 
 export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     logger.error("Unhandled error in request", { error: err });
@@ -8,5 +9,5 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     res.status(err.statusCode).json(err.serializeErrors());
     return; 
   }
-   res.status(500).json({ message: "Internal Server Error" });
+   res.status(500).json({ message:ResponseMessage.INTERNAL_SERVER_ERROR });
 };
