@@ -15,14 +15,16 @@ const uploadFields = upload.fields([
     { name: "profileImage", maxCount: 1 }, 
   ]);
 
+  router.use(authMiddleware);
+
   router.get('/profile/:id',vendorController.loadVendorProfile);
   router.get('/:id',vendorController.loadVendorById);
   
-  router.put('/profile',authMiddleware,uploadFields,vendorController.updateVendorProfile);
+  router.put('/profile',uploadFields,vendorController.updateVendorProfile);
   router.patch('/retry-verify/:id', vendorController.retryVendorVerfication);
   
   router.get('/:vendorId/events',eventController.getEvents);
   
-  router.post('/events',authMiddleware,eventController.createEvent);
+  router.post('/events',eventController.createEvent);
 
 export default router;

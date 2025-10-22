@@ -9,11 +9,11 @@ const router = Router();
 const adminVendorController = container.resolve<IAdminVendorController>('IAdminVendorController');
 const adminServiceBoyController = container.resolve<IAdminServiceBoyController>('IAdminServiceBoyController');
 
+router.use(authMiddleware);
 
-
-router.get('/service-boys/verify',authMiddleware, adminServiceBoyController.getAllServiceBoysPendingVerification);
+router.get('/service-boys/verify', adminServiceBoyController.getAllServiceBoysPendingVerification);
 router.get('/service-boys/verify/:id', adminServiceBoyController.getSinglePendingVerification);
-router.get('/service-boys',authMiddleware, adminServiceBoyController.getAllServiceBoys);
+router.get('/service-boys', adminServiceBoyController.getAllServiceBoys);
 router.get('/service-boys/:id', adminServiceBoyController.getServiceBoysById);
 router.patch('/service-boys/:id/verify', adminServiceBoyController.verifyServiceBoyByAdmin);
 router.patch('/service-boys/:id/:status', adminServiceBoyController.updateServiceBoyStatus);

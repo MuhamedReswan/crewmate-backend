@@ -8,6 +8,8 @@ export enum ResponseMessage {
   INVALID_CREDINTIALS = "Invalid credintials",
   INVALID_INPUT = "Invalid input",
 
+
+
   OTP_EXPIRED = "OTP expired",
   OTP_VERIFICATION_SUCCESS = "OTP verification Success",
   RESEND_OTP_SEND = "OTP resend successfully",
@@ -19,6 +21,10 @@ export enum ResponseMessage {
   INVALID_REFRESH_TOKEN = "Invalid or expired refresh token",
   INVALID_ACCESS_TOKEN = "Invalid access token",
   BLACK_LISTED_TOKEN = "Refresh token is blacklisted",
+  TEST_TOKEN_SUCCESS = "Test token success",
+
+  INAVLID_SERVICE_BOY_ID = "Invalid service boy ID",
+  INVALID_VENDOR_ID = "Invalid vendor ID",
 
   LOGOUT_SUCCESS = "logout success",
 
@@ -73,7 +79,8 @@ LOAD_EVENT_SUCCESS = "Events successfully loaded",
 LOAD_WORKS_SUCCESS = "Works successfully loaded",
 VENDOR_NOT_EXIST = "Vendor not found with this details",
 
-VENDOR_ID_MISSING = "vendorId is required"
+VENDOR_ID_MISSING = "vendorId is required",
+
 
 
 

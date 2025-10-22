@@ -45,7 +45,7 @@ updateProfile = async (
   data: Partial<IServiceBoy>,
   files: ImageFiles
 ): Promise<IServiceBoy | undefined> => {
-  let uploadedNewImages: string[] = []; // Track successfully uploaded new images
+  let uploadedNewImages: string[] = []; 
   let oldServiceBoyProfile: Partial<IServiceBoy> | undefined;
 
   try {
@@ -59,7 +59,6 @@ updateProfile = async (
 
     if (hasAnyFile) {
       oldServiceBoyProfile = await this._serviceBoyRepository.loadProfile({ _id: data._id });
-      logger.debug("oldServiceBoyProfile------------",{oldServiceBoyProfile});
     }
 
     const imagesToDelete: string[] = [];

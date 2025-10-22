@@ -9,6 +9,7 @@ import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuth
 // import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
 import logger from "../utils/logger.util";
 import { getRedisData } from "../utils/redis.util";
+import { IAdminAuthService } from "../services/v1/interfaces/admin/IAdminAuth.service";
 // import { JwtPayload } from "../types/type";
 
 
@@ -24,7 +25,7 @@ const serviceBoyAuthService = container.resolve<IServiceBoyAuthService>(
 );
 const vendorAuthService =
   container.resolve<IVendorAuthService>("IVendorAuthService");
-// const AdminService = container.resolve<IAdminService>("IAdminService");
+const adminAuthService = container.resolve<IAdminAuthService>("IAdminAuthService");
 
 export const authMiddleware = async (
   req: Request,
@@ -38,6 +39,8 @@ export const authMiddleware = async (
     const refreshToken = req.cookies?.refreshToken;
     logger.debug(`Access token present: ${!!accessToken}`);
     logger.debug(`Refresh token present: ${!!refreshToken}`);
+    logger.debug(`Access token present: ${accessToken}`);
+    logger.debug(`Refresh token present: ${refreshToken}`);
 
     // If access token exists, try verifying it
     if (accessToken) {
@@ -91,7 +94,7 @@ export const authMiddleware = async (
         logger.info("athorization middlware url",{originalUrl})
         if (originalUrl.includes("/admin")) {
              logger.info("within authorization originalUrl.includes(/admin)");
-          // tokenRecreate = await adminService.setNewToken(refreshToken)
+          tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken)
         } 
          else if (originalUrl.includes("/vendor")) {
           tokenRecreate = await vendorAuthService.setNewAccessToken(
