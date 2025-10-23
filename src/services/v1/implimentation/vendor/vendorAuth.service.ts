@@ -272,6 +272,8 @@ export default class VendorAuthService implements IVendorAuthService {
         decoded.email
       );
       if (!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
+       if (vendor.isBlocked) throw new ValidationError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
+       
       const accessToken = await generateAccessToken({ data: vendor, role });
       return {
         accessToken,

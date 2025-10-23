@@ -79,7 +79,13 @@ LOAD_EVENT_SUCCESS = "Events successfully loaded",
 LOAD_WORKS_SUCCESS = "Works successfully loaded",
 VENDOR_NOT_EXIST = "Vendor not found with this details",
 
-VENDOR_ID_MISSING = "vendorId is required",
+NO_REFRESH_TOKEN_SECRET = "Refrsesh token secret in not defined",
+NO_ACCESS_TOKEN_SECRET = "Access token secret in not defined",
+
+VENDOR_ID_MISSING = "vendorId is Missing",
+
+
+
 
 
 

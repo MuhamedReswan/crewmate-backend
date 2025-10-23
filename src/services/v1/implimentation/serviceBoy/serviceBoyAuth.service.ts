@@ -34,6 +34,7 @@ import logger from "../../../../utils/logger.util";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -209,7 +210,7 @@ const servicerId = `A-${number}`;
     }
   }
 
-  async setNewAccessToken(Token: string): Promise<any> {
+  async setNewAccessToken(Token: string): Promise<CustomTokenResponse> {
     try {
       const decoded = await verifyRefreshToken(Token);
       logger.debug("decodedrole", { decoded });
