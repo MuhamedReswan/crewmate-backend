@@ -6,7 +6,7 @@ import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util"; 
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
-import { VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
 import { ServiceBoyLoginDTO } from "../../../../dtos/v1/serviceBoy.dto";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 
@@ -165,8 +165,13 @@ updateProfile = async (
 
   retryVerification = async(_id:Partial<IServiceBoy>,isVerified:VerificationStatusType):Promise<IServiceBoy | undefined> => {
     try {
-const serviceBoyProfile = await this._serviceBoyRepository.updateServiceBoy(_id,{isVerified});
-return serviceBoyProfile;
+      const updateData: Partial<IServiceBoy> = { isVerified };
+       if (isVerified !== VerificationStatus.Rejected) {
+      updateData.rejectionReason = null;
+    }
+    
+const serviceBoyProfile = await this._serviceBoyRepository.updateServiceBoy(_id, updateData);
+    return serviceBoyProfile;
        } catch (error) {
       throw error;
     }

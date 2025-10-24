@@ -9,5 +9,7 @@ export const mapToServiceBoyLoginDTO = (entity: IServiceBoy): ServiceBoyLoginDTO
   isVerified: entity.isVerified,
   isBlocked: entity.isBlocked,
   role: entity.role,
+  rejectionReason: entity.rejectionReason
+
 });
 
