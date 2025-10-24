@@ -6,7 +6,7 @@ import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
-import { VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
 import { VendorLoginDTO } from "../../../../dtos/v1/vendor.dto";
 import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 
@@ -134,7 +134,11 @@ const uploadTasks: Promise<void>[] = [];
 
   retryVerification = async(_id:Partial<IVendor>,isVerified:VerificationStatusType):Promise<IVendor | undefined> => {
     try {
-const vendorProfile = await this._vendorRepository.updateVendor(_id,{isVerified});
+        const updateData: Partial<IVendor> = { isVerified };
+             if (isVerified !== VerificationStatus.Rejected) {
+            updateData.rejectionReason = null;
+          }
+const vendorProfile = await this._vendorRepository.updateVendor(_id,updateData);
 return vendorProfile;
        } catch (error) {
       throw error;

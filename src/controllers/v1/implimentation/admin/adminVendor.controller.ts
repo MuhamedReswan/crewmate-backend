@@ -6,7 +6,7 @@ import logger from "../../../../utils/logger.util";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "axios";
-import { VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 
 export interface IAdminVendorController{
@@ -74,13 +74,20 @@ const {isVerified} =req.query
   
     const { id } = req.params; 
     const status = req.query.status as VerificationStatusType;
+    const reason = req.query.reason as string;
+
          if (!status) {
         throw new NotFoundError(ResponseMessage.NO_VERIFICATION_STATUS)
       }
   
-          const result = await this._adminVendorService.verifyVendor(id,status);
+          const result = await this._adminVendorService.verifyVendor(id,status,reason);
      if(!result) return;
-          res.status(200).json(responseHandler(ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS,HttpStatusCode.Ok, result))
+
+         const responseMessage =
+           status === VerificationStatus.Rejected 
+             ? ResponseMessage.VERIFICATION_STATUS_REJECTED_SUCCESS
+             : ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS;
+          res.status(200).json(responseHandler(responseMessage,HttpStatusCode.Ok, result))
       } catch (error) {
           next(error)
       }
