@@ -9,6 +9,7 @@ import logger from "../../../../utils/logger.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { getVerificationEmailTemplate } from "../../../../emailTemplates/accountVerification";
 import { sendEmail } from "../../../../utils/email.util";
+import { Role } from "../../../../constants/Role";
 
 
 
@@ -59,6 +60,7 @@ try {
      const emailHtml = getVerificationEmailTemplate(
       serviceBoy.name || 'User',
       emailStatus,
+      `service-boy`,
       status === VerificationStatus.Rejected ? reason : undefined
     );
 

@@ -9,6 +9,7 @@ import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { getVerificationEmailTemplate } from "../../../../emailTemplates/accountVerification";
 import { sendEmail } from "../../../../utils/email.util";
+import { Role } from "../../../../constants/Role";
 
 export interface IAdminVendorService{
 loadAllPendingVerification():Promise<Partial<IVendor>[] | undefined>
@@ -61,7 +62,8 @@ verifyVendor = async (
     const emailSubject = `Crewmate Account Verification - ${emailStatus}`;
     const emailHtml = getVerificationEmailTemplate(
       updatedVendor.name || 'User',
-      emailStatus,
+      emailStatus,    
+      "vendor",
       status === VerificationStatus.Rejected ? reason : undefined
     );
 
