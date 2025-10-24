@@ -8,4 +8,5 @@ export const mapToVendorLoginDTO = (entity: IVendor): VendorLoginDTO => ({
   isVerified: entity.isVerified,
   isBlocked: entity.isBlocked,
   role: entity.role,
+  rejectionReason:entity.rejectionReason ? entity.rejectionReason : null
 });

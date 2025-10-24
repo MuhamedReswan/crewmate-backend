@@ -10,6 +10,7 @@ export default interface IVendor {
     mobile:string,
     password:string,
     isVerified:VerificationStatusType,
+    rejectionReason?: string | null;
     isBlocked:boolean,
     profileImage:string,
     licenceImage:string,

@@ -9,6 +9,7 @@ import { VerificationStatus } from '../../constants/verificationStatus';
   email: { type: String, required: true, unique: true },
   mobile: { type: String },
   isVerified: { type: String, default:VerificationStatus.Pending},
+  rejectionReason: { type: String, default: null },
   isBlocked: { type: Boolean, default: false },
   profileImage: { type: String },
   password: { type: String },
