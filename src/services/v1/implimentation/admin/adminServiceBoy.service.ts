@@ -2,17 +2,19 @@ import { inject, injectable } from "tsyringe";
 import { IServiceBoyRepository } from "../../../../repositories/v1/implimentation/serviceBoy/serviceBoy.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { Types } from "mongoose";
-import { VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import logger from "../../../../utils/logger.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { getVerificationEmailTemplate } from "../../../../emailTemplates/accountVerification";
+import { sendEmail } from "../../../../utils/email.util";
 
 
 
 export interface IAdminServiceBoyService{
 loadAllPendingVerification():Promise<Partial<IServiceBoy>[] | undefined>
-verifyServiceBoy(id:string, status:VerificationStatusType):Promise<Partial<IServiceBoy> | undefined>
+verifyServiceBoy(id:string, status:VerificationStatusType,reason?:string):Promise<Partial<IServiceBoy> | undefined>
 getPaginatedServiceBoys(page: number, limit: number, search: string, isBlocked:boolean|undefined)
 : Promise<PaginatedResponse<IServiceBoy> | undefined>
 updateServiceBoyStatus (id:string, status:string):Promise<Partial<IServiceBoy> | undefined>
@@ -35,11 +37,39 @@ try {
 }
 
 
-verifyServiceBoy = async (id:string, status:VerificationStatusType):Promise<Partial<IServiceBoy> | undefined> =>{
+verifyServiceBoy = async (id:string, status:VerificationStatusType, reason?:string):Promise<Partial<IServiceBoy> | undefined> =>{
 try {
-   const _id = new Types.ObjectId(id)
-const UpdateVerification = this._serviceBoyRepository.updateServiceBoy({ _id: _id }, { isVerified: status });
-   return UpdateVerification;
+   const _id = new Types.ObjectId(id);
+
+   const serviceBoy = await this._serviceBoyRepository.loadProfile({_id});
+    
+    if (!serviceBoy) {
+      throw new BadrequestError(ResponseMessage.SERVICE_BOY_NOT_EXIST);
+    }
+
+    const updateData: Partial<IServiceBoy> = {
+      isVerified: status,
+      rejectionReason: status === VerificationStatus.Rejected ? reason : null, 
+    };
+
+  const updatedServiceBoy = await this._serviceBoyRepository.updateServiceBoy({ _id }, updateData);
+   const emailStatus = status === VerificationStatus.Verified ? 'APPROVED' : 'REJECTED';
+    const emailSubject = `Crewmate Account Verification - ${emailStatus}`;
+
+     const emailHtml = getVerificationEmailTemplate(
+      serviceBoy.name || 'User',
+      emailStatus,
+      status === VerificationStatus.Rejected ? reason : undefined
+    );
+
+    await sendEmail({
+      to: serviceBoy.email,
+      subject: emailSubject,
+      html: emailHtml,
+    });
+
+    return updatedServiceBoy;
+
 } catch (error) {
    throw error;
 }

@@ -75,5 +75,11 @@ export interface EventQueryFilter extends Partial<IEvent> {
   to?: string;   
   page: number;
   limit: number;
-  
+}
+
+export interface SendEmailOptions {
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
 }

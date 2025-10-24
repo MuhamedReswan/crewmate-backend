@@ -80,7 +80,7 @@ const {isVerified} =req.query
   
           const result = await this._adminVendorService.verifyVendor(id,status);
      if(!result) return;
-          res.status(200).json(responseHandler(ResponseMessage.VERIFICATION_STATUS_UPDATE_SUCCESS,HttpStatusCode.Ok, result))
+          res.status(200).json(responseHandler(ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS,HttpStatusCode.Ok, result))
       } catch (error) {
           next(error)
       }

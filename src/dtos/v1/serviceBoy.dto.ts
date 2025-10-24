@@ -7,5 +7,6 @@ export interface ServiceBoyLoginDTO {
   isVerified:VerificationStatusType;
   isBlocked:boolean;
   role:string;
+  rejectionReason?: string | null 
 }
 

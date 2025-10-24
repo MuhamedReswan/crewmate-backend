@@ -14,6 +14,7 @@ export default interface IServiceBoy extends Document {
     mobile:string,
     password:string,
     isVerified:VerificationStatusType,
+    rejectionReason:string | null,
     profileImage:string,
     isBlocked:boolean,
     aadharNumber:string,
