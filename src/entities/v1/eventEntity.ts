@@ -7,18 +7,19 @@ export default interface IEvent extends Document {
   vendor: Types.ObjectId;
   typeOfWork: String;
   typeOfService: String;
-  serviceBoys: Number;
+  serviceBoys: number;
   eventLocation: LocationData;
-  bookedBoys: Number;
+  bookedBoys: number;
   status: String;
+  wagePerBoy:number;
   paymentStatus: String;
   bookings: Types.ObjectId[];
-  overTime: Number;
-  totalBill: Number;
+  overTime: number;
+  totalBill: number;
   ratings: Types.ObjectId[];
   reportingDateTime: Date;
-  noOfPax: Number;
-  travelExpense:Number;
+  noOfPax: number;
+  travelExpense:number;
   bookedBoysForFriends:Types.ObjectId[]
-  bonus: Number;
+  bonus: number;
 }
