@@ -86,6 +86,12 @@ NO_ACCESS_TOKEN_SECRET = "Access token secret in not defined",
 
 VENDOR_ID_MISSING = "vendorId is Missing",
 
+SYSTEM_SETTINGS_LOAD_SUCCESS = "System settings loaded successfully",
+SYSTEM_SETTINGS_UPDATE_SUCCESS = "System settings updated successfully",
+SYSTEM_SETTINGS_NOT_FOUND = "System settings not found",
+SYSTEM_SETTINGS_UPDATE_FAILED = "Failed to update system settings",
+
+
 
 
 

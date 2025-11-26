@@ -20,6 +20,7 @@ import { LocationSchema } from "./location.model";
 //   ReportingTime: { type: String },
 //   NoOfPax: { type: Number },
 //   Bonus: { type: Number },
+
 // });
 
 
@@ -57,6 +58,7 @@ const EventsSchema = new Schema<IEvents>({
   noOfPax: { type: Number, required: true },
   reportingDateTime: { type: Date, required: true },
   serviceBoys: { type: Number, required: true },
+  wagePerBoy: {type:Number, default:500},
   eventLocation: LocationSchema,
   status: { type: String, enum: ["created", "booking_open", "booking_closed", "completed"], default: "created" },
   overTime: { type: Number, default: 0 },
