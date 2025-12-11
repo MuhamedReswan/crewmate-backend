@@ -30,6 +30,17 @@ async findOne(filter: Partial<T>, projection?: string | object): Promise<T | nul
   }
 };
 
+async findById(id: string, projection?: string | object): Promise<T | null> {
+  try {
+    const document = await this._model.findById(id, projection).exec();
+    return document;
+  } catch (error) {
+    logger.error("Error finding document by ID:", error);
+    throw error;
+  }
+}
+
+
 async findAll(filter: Partial<T>, projection?: string | object): Promise<T[] | null> {
   try {
       const documents = await this._model.find(filter,projection).exec();
@@ -55,6 +66,25 @@ async updateOne(filter: Partial<T>, updateData: Partial<T>): Promise<T | null> {
       throw error;
   }
 };
+
+
+async updateById(
+  id: string,
+  updateData: Partial<T>
+): Promise<T | null> {
+  try {
+    const updatedDocument = await this._model.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true }
+    ).exec();
+
+    return updatedDocument;
+  } catch (error) {
+    logger.error("Error updating document by ID:", error);
+    throw error;
+  }
+}
 
 
 async deleteOne(filter: Partial<T>): Promise<T | null> {

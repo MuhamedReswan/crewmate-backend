@@ -34,7 +34,7 @@ import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
-import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { VerificationStatus } from "../../../../constants/status";
 
 @injectable()
 export default class VendorAuthService implements IVendorAuthService {

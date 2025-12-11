@@ -2,7 +2,7 @@ import  { Document, Schema, model } from 'mongoose';
 import IVendor from '../../entities/v1/vendorEntity';
 import { LocationSchema } from './location.model';
 import { Role } from '../../constants/Role';
-import { VerificationStatus } from '../../constants/verificationStatus';
+import { VerificationStatus } from '../../constants/status';
 
  const vendorSchema: Schema = new Schema<IVendor>({
   name: { type: String },

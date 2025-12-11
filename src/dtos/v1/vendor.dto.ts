@@ -1,4 +1,4 @@
-import { VerificationStatusType } from "../../constants/verificationStatus";
+import { VerificationStatusType } from "../../constants/status";
 
 export interface VendorLoginDTO {
   _id: string;

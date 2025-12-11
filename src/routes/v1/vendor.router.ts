@@ -26,5 +26,11 @@ const uploadFields = upload.fields([
   router.get('/:vendorId/events',eventController.getEvents);
   
   router.post('/events',eventController.createEvent);
+  router.patch('/events/:eventId',eventController.updateEvent);
+
+
+  router.patch('/events/:eventId/booking-status',eventController.changeBookingStatus);
+
+  
 
 export default router;

@@ -3,7 +3,7 @@ import { FilterQuery, Model } from "mongoose";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { BaseRepository } from "../base/base.repository";
 import logger from "../../../../utils/logger.util";
-import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { VerificationStatus } from "../../../../constants/status";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 
 export interface IVendorRepository{

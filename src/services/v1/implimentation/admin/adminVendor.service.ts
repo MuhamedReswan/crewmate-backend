@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IVendorRepository } from "../../../../repositories/v1/implimentation/vendor/vendor.repository";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import logger from "../../../../utils/logger.util";
-import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
 import { Types } from "mongoose";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";

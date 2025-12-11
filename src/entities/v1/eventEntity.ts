@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { LocationData } from "../../types/type";
+import { BookingStatusType, EventStatusType } from "../../constants/status";
 
 export default interface IEvent extends Document {
   _id: Types.ObjectId;
@@ -9,17 +10,18 @@ export default interface IEvent extends Document {
   typeOfService: String;
   serviceBoys: number;
   eventLocation: LocationData;
-  bookedBoys: number;
-  status: String;
+  status: EventStatusType;
   wagePerBoy:number;
   paymentStatus: String;
-  bookings: Types.ObjectId[];
   overTime: number;
   totalBill: number;
   ratings: Types.ObjectId[];
   reportingDateTime: Date;
   noOfPax: number;
-  travelExpense:number;
-  bookedBoysForFriends:Types.ObjectId[]
   bonus: number;
+  travelExpense:number;
+  bookedBoys: number;
+  bookings: Types.ObjectId[];
+  bookingStatus: BookingStatusType;
+  bookedBoysForFriends:Types.ObjectId[]
 }

@@ -6,7 +6,7 @@ import logger from "../../../../utils/logger.util";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "axios";
-import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 
 export interface IAdminVendorController{

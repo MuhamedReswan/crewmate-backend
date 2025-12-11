@@ -20,5 +20,12 @@ findPaginated(
     // isBlocked?:boolean,
     searchFields?: (keyof T)[],
   ): Promise<PaginatedResponse<T>>
+
+  updateById(
+  id: string,
+  updateData: Partial<T>
+): Promise<T | null>
+
+findById(id: string, projection?: string | object): Promise<T | null>
     
   }

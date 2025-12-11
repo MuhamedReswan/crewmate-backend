@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import IEvents from "../../entities/v1/eventEntity";
 import { LocationSchema } from "./location.model";
+import { BookingStatus, EventStatus } from "../../constants/status";
 
 // const EventsSchema: Schema = new Schema({
 //   CustomerName: { type: String },
@@ -60,7 +61,8 @@ const EventsSchema = new Schema<IEvents>({
   serviceBoys: { type: Number, required: true },
   wagePerBoy: {type:Number, default:500},
   eventLocation: LocationSchema,
-  status: { type: String, enum: ["created", "booking_open", "booking_closed", "completed"], default: "created" },
+  status: { type: String, enum: Object.values(EventStatus), default: EventStatus.Upcoming, required: true, },
+  bookingStatus: {type: String, enum: Object.values(BookingStatus), default: BookingStatus.Active, required: true,},
   overTime: { type: Number, default: 0 },
   bonus: { type: Number, default: 0 },
   travelExpense: { type: Number, default: 0 },

@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IServiceBoyRepository } from "../../../../repositories/v1/implimentation/serviceBoy/serviceBoy.repository";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { Types } from "mongoose";
-import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import logger from "../../../../utils/logger.util";

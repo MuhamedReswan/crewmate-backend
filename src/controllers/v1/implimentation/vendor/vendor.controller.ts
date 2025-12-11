@@ -8,7 +8,7 @@ import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
-import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { VerificationStatus } from "../../../../constants/status";
 import { ObjectId } from "mongodb";
 import validateObjectId from "../../../../utils/validateObjectId.util";
 

@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 import { LocationData } from "../../types/type";
-import { VerificationStatusType } from "../../constants/verificationStatus";
+import { VerificationStatusType } from "../../constants/status";
 
 export interface UnAvailable {
     date:Date,

@@ -5,6 +5,7 @@ import IAdmin from "../entities/v1/adminEntity";
 import { Role } from "../constants/Role";
 import { ObjectId, Types } from "mongoose";
 import IEvent from "../entities/v1/eventEntity";
+import { EventStatusType } from "../constants/status";
 
 export type RequestHandler<
   TReturn = void
@@ -60,7 +61,7 @@ export interface eventFilter {
   search :string;
   limit : number
   page : number,
-  status?:string,
+  status?:EventStatusType,
   from ?:string,
   to ?: string,
 }
@@ -70,7 +71,7 @@ export type SortOption<T> = Partial<Record<keyof T, 1 | -1>>;
 export interface EventQueryFilter extends Partial<IEvent> {
   vendorId?: Types.ObjectId;
   search?: string;
-  status?: string;
+  status?: EventStatusType;
   from?: string;
   to?: string;   
   page: number;
