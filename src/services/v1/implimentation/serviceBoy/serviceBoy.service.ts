@@ -6,7 +6,7 @@ import logger from "../../../../utils/logger.util";
 import { processAndUploadImage } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util"; 
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
-import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
 import { ServiceBoyLoginDTO } from "../../../../dtos/v1/serviceBoy.dto";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 

@@ -14,6 +14,8 @@ import {
 } from "../../../../types/type";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 import { IAdminSystemSettingsService } from "../admin/adminSystemSettings.service";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import { calculateTotalEventBill } from "../../../../utils/billCalculation.util";
 
 export interface IEventService {
   createEvent(eventData: Partial<IEvent>): Promise<IEvent | undefined>;
@@ -22,6 +24,11 @@ export interface IEventService {
     filter: EventQueryFilter,
     sort: Record<string, 1 | -1>
   ): Promise<PaginatedResponse<IEvent> | undefined>;
+
+   updateEvent (
+    eventId: string,
+    data:  Partial<IEvent>
+  ): Promise <IEvent | undefined>
 }
 
 @injectable()
@@ -94,7 +101,7 @@ const bonus = Number(eventData.bonus ?? 0);
 const overtime = Number(eventData.overTime ?? 0);
 const travel = Number(eventData.travelExpense ?? 0);
 
-eventData.totalBill = boys * wage + bonus + overtime + travel;
+eventData.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel );
 
 
       // Create event
@@ -132,4 +139,34 @@ eventData.totalBill = boys * wage + bonus + overtime + travel;
       throw error;
     }
   };
+
+  updateEvent = async (
+    eventId: string,
+    data:  Partial<IEvent>
+  ): Promise <IEvent | undefined> => {
+    try {
+      logger.debug("getWorks filter", eventId);
+
+      if(data.bonus || data.overTime|| data.travelExpense || data.serviceBoys  ){
+        const event = await this._eventRepository.findEventById(eventId);
+        if(!event) throw new NotFoundError(ResponseMessage.EVENT_NOT_FOUND);
+
+const boys = Number(data.serviceBoys ?? event.serviceBoys);
+const bonus = Number(data.bonus ?? event.bonus);
+const overtime = Number(data.overTime ?? event.overTime);
+const travel = Number(data.travelExpense ?? event.travelExpense);
+const wage = Number(event.wagePerBoy);
+
+        data.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel );
+      }
+
+  const updatedEvent = await this._eventRepository.updateEventById(eventId, data);
+
+    return updatedEvent ?? undefined;  
+    } catch (error) {
+      throw error;
+    }
+  };
+
+
 }

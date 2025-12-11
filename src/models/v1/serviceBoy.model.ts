@@ -2,7 +2,7 @@ import mongoose, {  Schema } from 'mongoose';
 import IServiceBoy from '../../entities/v1/serviceBoyEntity';
 import { Role } from '../../constants/Role';
 import { LocationSchema } from './location.model';
-import { VerificationStatus } from '../../constants/verificationStatus';
+import { VerificationStatus } from '../../constants/status';
 
 
 const UnAvailableSchema = new Schema({

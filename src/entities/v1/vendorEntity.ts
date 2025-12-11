@@ -1,7 +1,7 @@
 ;
 import { Types } from "mongoose";
 import { LocationData } from "../../types/type";
-import { VerificationStatusType } from "../../constants/verificationStatus";
+import { VerificationStatusType } from "../../constants/status";
 
 export default interface IVendor {
     _id:Types.ObjectId;

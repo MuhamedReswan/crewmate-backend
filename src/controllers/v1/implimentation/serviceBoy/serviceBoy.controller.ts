@@ -8,7 +8,7 @@ import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import logger from "../../../../utils/logger.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
-import { VerificationStatus, VerificationStatusType } from "../../../../constants/verificationStatus";
+import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
 
 export interface IServiceBoyController{
     loadProfile:RequestHandler

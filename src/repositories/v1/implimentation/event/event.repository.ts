@@ -13,6 +13,8 @@ export interface IEventRepository {
     filter: EventQueryFilter,
     sort?: Record<string, 1 | -1>
   ): Promise<PaginatedResponse<IEvent>>;
+  updateEventById(  eventId: string, data: Partial<IEvent>): Promise<IEvent | undefined>
+  findEventById(id: string): Promise<IEvent | null>
 }
 
 @injectable()
@@ -42,6 +44,11 @@ export default class EventRepository
       throw error;
     }
   }
+
+async findEventById(id: string): Promise<IEvent | null> {
+  return this.findById(id);
+}
+
 
   async findEventsPaginated(
     filter: EventQueryFilter,
@@ -89,6 +96,16 @@ export default class EventRepository
         data: populatedData,
         pagination,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+    async updateEventById(  eventId: string, data: Partial<IEvent>): Promise<IEvent | undefined> {
+    try {
+      let event = await this.updateById(eventId, data);
+      return event ?? undefined;
     } catch (error) {
       throw error;
     }

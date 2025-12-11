@@ -72,10 +72,11 @@ NO_USER_TO_RETRY_WITH_THIS = "No user found to retry with this",
 USER_LOAD_SUCCESS = "User loaded success",
 
 UPDATE_STATUS_SUCCESS = "Status updated success",
-
+EVENT_UPDATION_SUCCESS = "Event updated successfully",
 EVENT_CREATION_SUCCESS = "Event created successfully",
 EVENT_NOT_CREATED = "Eent Not created",
 EVENT_ALREADY_EXIST = "Event already exist",
+EVENT_NOT_FOUND = "Event Not Found",
 LOAD_EVENT_SUCCESS = "Events successfully loaded",
 LOAD_WORKS_SUCCESS = "Works successfully loaded",
 VENDOR_NOT_EXIST = "Vendor not found with this details",
@@ -90,6 +91,11 @@ SYSTEM_SETTINGS_LOAD_SUCCESS = "System settings loaded successfully",
 SYSTEM_SETTINGS_UPDATE_SUCCESS = "System settings updated successfully",
 SYSTEM_SETTINGS_NOT_FOUND = "System settings not found",
 SYSTEM_SETTINGS_UPDATE_FAILED = "Failed to update system settings",
+
+
+BOOKING_STATUS_UPDATED = "Booking status successfuyll updated",
+
+
 
 
 

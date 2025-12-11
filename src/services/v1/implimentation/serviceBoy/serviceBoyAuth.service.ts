@@ -33,7 +33,7 @@ import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
-import { VerificationStatus } from "../../../../constants/verificationStatus";
+import { VerificationStatus } from "../../../../constants/status";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 
 @injectable()

@@ -10,12 +10,15 @@ import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { Types } from "mongoose";
+import { EventStatusType } from "../../../../constants/status";
 
 
 export interface IEventController {
   createEvent: RequestHandler;
   getEvents: RequestHandler;
   getWorks: RequestHandler;
+  updateEvent: RequestHandler;
+  changeBookingStatus: RequestHandler;
 }
 @injectable()
 export default class EventController implements IEventController {
@@ -65,7 +68,7 @@ getEvents = async (
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
-    const status = (req.query.status as string) || undefined;
+    const status = (req.query.status as EventStatusType) || undefined;
     const from = (req.query.from as string) || undefined;
     const to = (req.query.to as string) || undefined;
     const sortBy = (req.query.sortBy as string) || "reportingDateTime";
@@ -126,7 +129,7 @@ getWorks = async (
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
-    const status = (req.query.status as string) || undefined;
+    const status = (req.query.status as EventStatusType) || undefined;
     const from = (req.query.from as string) || undefined;
     const to = (req.query.to as string) || undefined;
     const sortBy = (req.query.sortBy as string) || "reportingDateTime";
@@ -163,6 +166,59 @@ getWorks = async (
           works
         )
       );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+updateEvent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { eventId } = req.params;
+     const updateData = req.body;
+     const updatedEvent = await this._eventService.updateEvent(eventId, updateData);
+        
+      if (!updatedEvent) {
+       res.status(404).json({
+        message: ResponseMessage.EVENT_NOT_FOUND,
+      });
+    }
+
+     res.status(200).json({
+      message:ResponseMessage.EVENT_UPDATION_SUCCESS,
+      data: updatedEvent,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+changeBookingStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { eventId } = req.params;
+     const bookingStatus = req.body;
+     logger.debug("changeBookingStatus out in controller",{bookingStatus})
+     const bookingUpdatedEvent = await this._eventService.updateEvent(eventId, bookingStatus);
+        
+      if (!bookingUpdatedEvent) {
+       res.status(404).json({
+        message: ResponseMessage.EVENT_NOT_FOUND,
+      });
+    }
+
+     res.status(200).json({
+      message: ResponseMessage.BOOKING_STATUS_UPDATED ,
+      data: bookingUpdatedEvent,
+    });
   } catch (error) {
     next(error);
   }
