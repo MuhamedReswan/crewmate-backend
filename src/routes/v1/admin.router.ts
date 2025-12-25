@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { IAdminVendorController } from "../../controllers/v1/implimentation/admin/adminVendor.controller";
-import { IAdminServiceBoyController } from "../../controllers/v1/implimentation/admin/adminServiceBoy.controller";
 import { authMiddleware } from "../../middleware/authorization";
+import { IAdminVendorController } from "../../controllers/v1/interfaces/admin/IAdminVendor.controller";
+import { IAdminServiceBoyController } from "../../controllers/v1/interfaces/admin/IAdminServiceBoy.controller";
 
 const router = Router();
 

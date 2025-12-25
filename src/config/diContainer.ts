@@ -12,41 +12,41 @@ import { SystemSettingsModel } from "../models/v1/systemSettings.model";
 // =========================
 // Controllers
 // =========================
-import ServiceBoyAuthController from "../controllers/v1/implimentation/serviceBoy/serviceBoyAuth.controller"; 
-import VendorAuthController from "../controllers/v1/implimentation/vendor/vendorAuth.controller";
-import ServiceBoyController from "../controllers/v1/implimentation/serviceBoy/serviceBoy.controller";
-import VendorController from "../controllers/v1/implimentation/vendor/vendor.controller";
-import CommonController from "../controllers/v1/implimentation/common/common.controller";
-import AdminAuthController from "../controllers/v1/implimentation/admin/adminAuth.controller";
-import AdminVendorController from "../controllers/v1/implimentation/admin/adminVendor.controller";
-import AdminServiceBoyController from "../controllers/v1/implimentation/admin/adminServiceBoy.controller";
-import EventController from "../controllers/v1/implimentation/event/eventController";
-import { AdminSystemSettingsController } from "../controllers/v1/implimentation/admin/adminSystemSettings.controller";
+import ServiceBoyAuthController from "../controllers/v1/implementation/serviceBoy/serviceBoyAuth.controller"; 
+import VendorAuthController from "../controllers/v1/implementation/vendor/vendorAuth.controller";
+import ServiceBoyController from "../controllers/v1/implementation/serviceBoy/serviceBoy.controller";
+import VendorController from "../controllers/v1/implementation/vendor/vendor.controller";
+import CommonController from "../controllers/v1/implementation/common/common.controller";
+import AdminAuthController from "../controllers/v1/implementation/admin/adminAuth.controller";
+import AdminVendorController from "../controllers/v1/implementation/admin/adminVendor.controller";
+import AdminServiceBoyController from "../controllers/v1/implementation/admin/adminServiceBoy.controller";
+import EventController from "../controllers/v1/implementation/event/eventController";
+import { AdminSystemSettingsController } from "../controllers/v1/implementation/admin/adminSystemSettings.controller";
 
 // =========================
 // Services
 // =========================
-import ServiceBoyAuthService from "../services/v1/implimentation/serviceBoy/serviceBoyAuth.service"; 
-import VendorAuthService from "../services/v1/implimentation/vendor/vendorAuth.service";
-import ServiceBoyService from "../services/v1/implimentation/serviceBoy/serviceBoy.service";
-import VendorService from "../services/v1/implimentation/vendor/vendor.service";
-import CommonService from "../services/v1/implimentation/common/common.service";
-import AdminAuthService from "../services/v1/implimentation/admin/adminAuth.service";
-import AdminVendorService from "../services/v1/implimentation/admin/adminVendor.service";
-import AdminServiceBoyService from "../services/v1/implimentation/admin/adminServiceBoy.service";
-import EventService from "../services/v1/implimentation/event/event.service";
-import { AdminSystemSettingsService } from "../services/v1/implimentation/admin/adminSystemSettings.service";
+import ServiceBoyAuthService from "../services/v1/implementation/serviceBoy/serviceBoyAuth.service"; 
+import VendorAuthService from "../services/v1/implementation/vendor/vendorAuth.service";
+import ServiceBoyService from "../services/v1/implementation/serviceBoy/serviceBoy.service";
+import VendorService from "../services/v1/implementation/vendor/vendor.service";
+import CommonService from "../services/v1/implementation/common/common.service";
+import AdminAuthService from "../services/v1/implementation/admin/adminAuth.service";
+import AdminVendorService from "../services/v1/implementation/admin/adminVendor.service";
+import AdminServiceBoyService from "../services/v1/implementation/admin/adminServiceBoy.service";
+import EventService from "../services/v1/implementation/event/event.service";
+import { AdminSystemSettingsService } from "../services/v1/implementation/admin/adminSystemSettings.service";
 
 // =========================
 // Repositories
 // =========================
-import ServiceBoyAuthRepository from "../repositories/v1/implimentation/serviceBoy/serviceBoyAuth.repository"; 
-import VendorAuthRepository from "../repositories/v1/implimentation/vendor/vendorAuth.repository";
-import ServiceBoyRepository from "../repositories/v1/implimentation/serviceBoy/serviceBoy.repository";
-import VendorRepository from "../repositories/v1/implimentation/vendor/vendor.repository";
-import AdminAuthRepository from "../repositories/v1/implimentation/admin/adminAuth.repository";
-import EventRepository from "../repositories/v1/implimentation/event/event.repository";
-import { AdminSystemSettingsRepository } from "../repositories/v1/implimentation/admin/adminSystemSettings.repository";
+import ServiceBoyAuthRepository from "../repositories/v1/implementation/serviceBoy/serviceBoyAuth.repository"; 
+import VendorAuthRepository from "../repositories/v1/implementation/vendor/vendorAuth.repository";
+import ServiceBoyRepository from "../repositories/v1/implementation/serviceBoy/serviceBoy.repository";
+import VendorRepository from "../repositories/v1/implementation/vendor/vendor.repository";
+import AdminAuthRepository from "../repositories/v1/implementation/admin/adminAuth.repository";
+import EventRepository from "../repositories/v1/implementation/event/event.repository";
+import { AdminSystemSettingsRepository } from "../repositories/v1/implementation/admin/adminSystemSettings.repository";
 
 // =========================
 // Register Models (useValue)

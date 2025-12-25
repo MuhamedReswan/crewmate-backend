@@ -1,0 +1,38 @@
+import { inject, injectable } from "tsyringe";
+import { NextFunction, Request, Response } from "express";
+import { HttpStatusCode } from "../../../../constants/httpStatusCode";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { responseHandler } from "../../../../utils/responseHandler.util";
+import logger from "../../../../utils/logger.util";
+import { ICommonController } from "../../interfaces/common/ICommon.controller";
+import { ICommonService } from "../../../../services/v1/interfaces/common/ICommon.service";
+
+
+
+@injectable()
+export default class CommonController implements ICommonController {
+  constructor(
+    @inject("ICommonService") private commonService: ICommonService
+  ) {}
+
+
+  streamImageByKey = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
+    try{
+      logger.info("req.params streamImageByKey", req.params);
+        let {key} = req.params;
+       let imageUrl = await this.commonService.streamImageByKey(key);
+
+       if(imageUrl){
+           res.status(200).json(responseHandler(ResponseMessage.IMAGE_URL_SUCCESS, HttpStatusCode.OK, imageUrl ));
+       }else{
+           res.status(400).json(responseHandler( ResponseMessage.IMAGE_URL_FAILED,HttpStatusCode.BAD_REQUEST));
+       }
+
+    }catch(error){
+        next(error);
+    }
+
+  };
+
+  }
+

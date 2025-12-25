@@ -15,12 +15,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const env_1 = require("./env");
+// setting wage by admin
+const systemSettings_model_1 = require("../models/v1/systemSettings.model");
+function initializeSystemSettings() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const settings = yield systemSettings_model_1.SystemSettingsModel.findOne({});
+        if (!settings) {
+            yield systemSettings_model_1.SystemSettingsModel.create({
+                wagePerBoy: 500,
+                updatedAt: new Date()
+            });
+            console.log("Default system settings created");
+        }
+    });
+}
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield mongoose_1.default.connect(env_1.MONGODBURL !== null && env_1.MONGODBURL !== void 0 ? env_1.MONGODBURL : "", {
             autoIndex: false
         });
         console.log("Database connected");
+        yield initializeSystemSettings();
     }
     catch (error) {
         console.log("Database connection failed", error);

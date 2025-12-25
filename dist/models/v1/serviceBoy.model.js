@@ -37,7 +37,7 @@ exports.serviceBoyModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const Role_1 = require("../../constants/Role");
 const location_model_1 = require("./location.model");
-const verificationStatus_1 = require("../../constants/verificationStatus");
+const status_1 = require("../../constants/status");
 const UnAvailableSchema = new mongoose_1.Schema({
     date: { type: Date, required: true },
     reason: { type: String, required: true },
@@ -46,7 +46,8 @@ const ServiceBoysSchema = new mongoose_1.Schema({
     name: { type: String },
     email: { type: String, required: true, unique: true },
     mobile: { type: String },
-    isVerified: { type: String, default: verificationStatus_1.VerificationStatus.Pending },
+    isVerified: { type: String, default: status_1.VerificationStatus.Pending },
+    rejectionReason: { type: String, default: null },
     isBlocked: { type: Boolean, default: false },
     profileImage: { type: String },
     aadharNumber: { type: String, unique: true, sparse: true },
@@ -60,7 +61,7 @@ const ServiceBoysSchema = new mongoose_1.Schema({
     password: { type: String },
     servicerId: { type: String, unique: true, sparse: true },
     walletId: { type: mongoose_1.Schema.Types.ObjectId, unique: true, sparse: true },
-    workHistoryId: { type: mongoose_1.Schema.Types.ObjectId, unique: true, sparse: true },
+    workHistory: { type: mongoose_1.Schema.Types.ObjectId, unique: true, sparse: true },
     location: { type: location_model_1.LocationSchema, required: false },
     offDates: [UnAvailableSchema],
 });
