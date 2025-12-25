@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { IVendorController } from "../../controllers/v1/implimentation/vendor/vendor.controller";
 import upload from "../../middleware/multer";
 import { authMiddleware } from "../../middleware/authorization";
-import { IEventController } from "../../controllers/v1/implimentation/event/eventController";
+import { IVendorController } from "../../controllers/v1/interfaces/vendor/IVendor.controller";
+import { IEventController } from "../../controllers/v1/interfaces/event/IEventController";
 
 const vendorController = container.resolve<IVendorController>('IVendorController');
 const eventController = container.resolve<IEventController>('IEventController');

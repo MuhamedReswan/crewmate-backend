@@ -7,6 +7,7 @@ const express_1 = require("express");
 const serviceBoyAuth_router_1 = __importDefault(require("./v1/serviceBoyAuth.router"));
 const serviceBoy_router_1 = __importDefault(require("./v1/serviceBoy.router"));
 const vendorAuth_router_1 = __importDefault(require("./v1/vendorAuth.router"));
+const adminAuth_router_1 = __importDefault(require("./v1/adminAuth.router"));
 const admin_router_1 = __importDefault(require("./v1/admin.router"));
 const vendor_router_1 = __importDefault(require("./v1/vendor.router"));
 const common_router_1 = __importDefault(require("./v1/common.router"));
@@ -17,7 +18,8 @@ router.use((req, res, next) => {
 });
 router.use('/api/v1/auth/service-boy', serviceBoyAuth_router_1.default);
 router.use('/api/v1/auth/vendor', vendorAuth_router_1.default);
-router.use('/api/v1/auth/admin', admin_router_1.default);
+router.use('/api/v1/auth/admin', adminAuth_router_1.default);
+router.use('/api/v1/admin', admin_router_1.default);
 router.use('/api/v1/service-boy', serviceBoy_router_1.default);
 router.use('/api/v1/vendor', vendor_router_1.default);
 router.use('/api/v1', common_router_1.default);

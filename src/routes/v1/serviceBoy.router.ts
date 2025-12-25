@@ -1,9 +1,9 @@
 import { container } from "tsyringe";
 import { Router } from "express";
-import { IServiceBoyController } from "../../controllers/v1/implimentation/serviceBoy/serviceBoy.controller";
 import upload from "../../middleware/multer";
 import { authMiddleware } from "../../middleware/authorization";
-import { IEventController } from "../../controllers/v1/implimentation/event/eventController";
+import { IServiceBoyController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoy.controller";
+import { IEventController } from "../../controllers/v1/interfaces/event/IEventController";
 
 
 const router = Router();
