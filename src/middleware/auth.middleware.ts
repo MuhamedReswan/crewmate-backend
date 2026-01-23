@@ -3,13 +3,15 @@ import { container } from "tsyringe";
 import { HttpStatusCode } from "../constants/httpStatusCode";
 import { responseHandler } from "../utils/responseHandler.util";
 import { ResponseMessage } from "../constants/resposnseMessage";
-import { verifyAccessToken } from "../utils/jwt.util";
+import { verifyAccessToken, verifyRefreshToken } from "../utils/jwt.util";
 import { IServiceBoyAuthService } from "../services/v1/interfaces/serviceBoy/IServiceBoyAuth.service";
 import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuth.service";
 // import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
 import logger from "../utils/logger.util";
 import { getRedisData } from "../utils/redis.util";
 import { IAdminAuthService } from "../services/v1/interfaces/admin/IAdminAuth.service";
+import { UnAuthorizedError } from "../utils/errors/unAuthorized.error";
+import { Role } from "../constants/Role";
 // import { JwtPayload } from "../types/type";
 
 
@@ -47,7 +49,11 @@ export const authMiddleware = async (
       const verifiedAccessToken = await verifyAccessToken(accessToken);
       logger.info("Access token verified");
       if (verifiedAccessToken) {
-        // req.user = verifiedAccessToken;
+        req.user = verifiedAccessToken;
+
+        logger.info("Authenticated user role", {
+    role: verifiedAccessToken.role,
+  });
         return next();
       }         
     }
@@ -67,7 +73,6 @@ export const authMiddleware = async (
     } else {
 
       try {
-        const originalUrl = req?.originalUrl;
 
    const isBlacklisted = await getRedisData(refreshToken);
    logger.warn("isBlacklisted Refresh token--------------------------------",{isBlacklisted});
@@ -90,30 +95,76 @@ export const authMiddleware = async (
     }
 
         let tokenRecreate;
-        // Create to new access token and refresh token based on the role
-        logger.info("athorization middlware url",{originalUrl})
-        if (originalUrl.includes("/admin")) {
-             logger.info("within authorization originalUrl.includes(/admin)");
-          tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken)
-        } 
-         else if (originalUrl.includes("/vendor")) {
-          tokenRecreate = await vendorAuthService.setNewAccessToken(
-            refreshToken
-          );
-        } else if (originalUrl.includes("/service-boy")) {
-          tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
-        } else {
-        logger.warn("Unknown role in URL path:", { url: originalUrl });
-        }
+      //   // Create to new access token and refresh token based on the role
+      //   logger.info("athorization middlware url",{originalUrl})
+      //   if (originalUrl.includes("/admin")) {
+      //        logger.info("within authorization originalUrl.includes(/admin)");
+      //     tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken)
+      //   } 
+      //    else if (originalUrl.includes("/vendor")) {
+      //     tokenRecreate = await vendorAuthService.setNewAccessToken(
+      //       refreshToken
+      //     );
+      //   } else if (originalUrl.includes("/service-boy")) {
+      //     tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
+      //   } else {
+      //   logger.warn("Unknown role in URL path:", { url: originalUrl });
+      //   }
 
-        if (tokenRecreate) {
+      //   if (tokenRecreate) {
+      //     // Set new refresh token and acesstoken in cookie
+      //   logger.info("New token generated for refresh");
+
+      //     const verifiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
+      // console.log("verifiedAccessToken newly created", verifiedAccessToken )
+      // if (verifiedAccessToken) {
+      //   // req.user = verifiedAccessToken  
+      // }
+      //     res.cookie("refreshToken", tokenRecreate.refreshToken, {
+      //       httpOnly: true,
+      //       secure: process.env.NODE_ENV === "production",
+      //       maxAge: 30 * 24 * 60 * 60 * 1000,
+      //       sameSite: "lax",
+      //     });
+      //     res.cookie("accessToken", tokenRecreate.accessToken, {
+      //       httpOnly: true,
+      //       secure: process.env.NODE_ENV === "production",
+      //       maxAge: 15 * 60 * 1000,
+      //       sameSite: "lax",
+      //     });
+
+      //   return  next();
+
+
+      const refreshPayload = await verifyRefreshToken(refreshToken);
+
+if (!refreshPayload) throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
+
+switch (refreshPayload.role) {
+  case Role.ADMIN:
+    tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken);
+    break;
+
+  case Role.VENDOR:
+    tokenRecreate = await vendorAuthService.setNewAccessToken(refreshToken);
+    break;
+
+  case Role.SERVICE_BOY:
+    tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
+    break;
+
+  default:
+    throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN)
+}
+
+  if (tokenRecreate) {
           // Set new refresh token and acesstoken in cookie
         logger.info("New token generated for refresh");
 
           const verifiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
       console.log("verifiedAccessToken newly created", verifiedAccessToken )
       if (verifiedAccessToken) {
-        // req.user = verifiedAccessToken  
+        req.user = verifiedAccessToken  
       }
           res.cookie("refreshToken", tokenRecreate.refreshToken, {
             httpOnly: true,
@@ -129,6 +180,7 @@ export const authMiddleware = async (
           });
 
         return  next();
+
         } else {
   logger.warn("Failed to recreate token - refresh token invalid or user role not found");
   

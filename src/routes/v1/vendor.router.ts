@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import upload from "../../middleware/multer";
-import { authMiddleware } from "../../middleware/authorization";
+import upload from "../../middleware/multer.middleware";
+import { authMiddleware } from "../../middleware/auth.middleware";
 import { IVendorController } from "../../controllers/v1/interfaces/vendor/IVendor.controller";
 import { IEventController } from "../../controllers/v1/interfaces/event/IEventController";
 

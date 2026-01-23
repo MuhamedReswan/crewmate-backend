@@ -18,7 +18,6 @@ import {
 import { ExpiredError } from "../../../../utils/errors/expired.error";
 import { hashPassword } from "../../../../utils/password.util";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import { ValidationError } from "../../../../utils/errors/validation.error";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -35,6 +34,7 @@ import logger from "../../../../utils/logger.util";
 import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 import { VerificationStatus } from "../../../../constants/status";
+import { ForbiddenError } from "../../../../utils/errors/forbidden.error";
 
 @injectable()
 export default class VendorAuthService implements IVendorAuthService {
@@ -85,7 +85,10 @@ export default class VendorAuthService implements IVendorAuthService {
     }
   }
 
-  async verifyOTP(email: string, otp: string): Promise<VendorLoginResponse | void> {
+  async verifyOTP(
+    email: string,
+    otp: string
+  ): Promise<VendorLoginResponse | void> {
     try {
       logger.debug("Verifying OTP in service", { email, otp });
       const savedOtp = await getRedisData(`otpV:${email}`);
@@ -105,8 +108,10 @@ export default class VendorAuthService implements IVendorAuthService {
           vendorDataObject.password
         );
 
-       let createdVendor =  await this._vendorAuthRepository.createVendor(vendorDataObject);
-          if (!createdVendor) {
+        let createdVendor = await this._vendorAuthRepository.createVendor(
+          vendorDataObject
+        );
+        if (!createdVendor) {
           throw new BadrequestError(ResponseMessage.USER_NOT_CREATED);
         }
 
@@ -114,27 +119,23 @@ export default class VendorAuthService implements IVendorAuthService {
         await deleteRedisData(`vendor:${email}`);
 
         const vendor = mapToVendorLoginDTO(createdVendor);
-      const role = Role.VENDOR;
+        const role = Role.VENDOR;
 
-      const accessToken = generateAccessToken({
-        data: {
-          _id: createdVendor._id,
+        const accessToken = generateAccessToken({
+          id: createdVendor._id.toString(),
           email: createdVendor.email,
           name: createdVendor.name,
-        },
-        role,
-      });
+          role,
+        });
 
-      const refreshToken = generateRefreshToken({
-        data: {
-          _id: createdVendor._id,
+        const refreshToken = generateRefreshToken({
+          id: createdVendor._id.toString(),
           email: createdVendor.email,
           name: createdVendor.name,
-        },
-        role,
-      });
+          role,
+        });
 
-      return { vendor, accessToken, refreshToken };
+        return { vendor, accessToken, refreshToken };
       }
     } catch (error) {
       throw error;
@@ -170,30 +171,26 @@ export default class VendorAuthService implements IVendorAuthService {
         throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
       }
       if (!vendorData.password)
-        throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
+        throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
 
       const validPassword = await bcrypt.compare(password, vendorData.password);
       if (!validPassword)
-        throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
+        throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
 
       const vendor = mapToVendorLoginDTO(vendorData);
       const role = Role.VENDOR;
 
       const accessToken = generateAccessToken({
-        data: {
-          _id: vendorData._id,
-          email: vendorData.email,
-          name: vendorData.name,
-        },
+        id: vendorData._id.toString(),
+        email: vendorData.email,
+        name: vendorData.name,
         role,
       });
 
       const refreshToken = generateRefreshToken({
-        data: {
-          _id: vendorData._id,
-          email: vendorData.email,
-          name: vendorData.name,
-        },
+        id: vendorData._id.toString(),
+        email: vendorData.email,
+        name: vendorData.name,
         role,
       });
 
@@ -225,7 +222,7 @@ export default class VendorAuthService implements IVendorAuthService {
         throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
       }
       if (forgotTokenData != token) {
-        throw new ValidationError(
+        throw new UnAuthorizedError(
           ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN
         );
       }
@@ -272,9 +269,16 @@ export default class VendorAuthService implements IVendorAuthService {
         decoded.email
       );
       if (!vendor) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
-       if (vendor.isBlocked) throw new ValidationError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
-       
-      const accessToken = await generateAccessToken({ data: vendor, role });
+      if (vendor.isBlocked)
+        throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
+
+      const accessToken = await generateAccessToken({
+        id: vendor._id.toString(),
+        email: vendor.email,
+        name: vendor.name,
+        role,
+      });
+
       return {
         accessToken,
         refreshToken,
@@ -286,9 +290,7 @@ export default class VendorAuthService implements IVendorAuthService {
     }
   }
 
-  googleAuth = async (
-    data: GoogleLogin
-  ): Promise<VendorLoginResponse> => {
+  googleAuth = async (data: GoogleLogin): Promise<VendorLoginResponse> => {
     try {
       const { googleToken } = data;
       logger.info("Google auth started");
@@ -302,62 +304,63 @@ export default class VendorAuthService implements IVendorAuthService {
       );
 
       if (!response.ok) {
-        throw new ValidationError(ResponseMessage.GOOGLE_AUTH_FAILED);
+        throw new UnAuthorizedError(ResponseMessage.GOOGLE_AUTH_FAILED);
       }
 
       const responseData = await response.json();
       logger.info("google Auth vendor details", responseData);
-      
-      let vendorData  = await this._vendorAuthRepository.findVendorByEmail(
+
+      let vendorData = await this._vendorAuthRepository.findVendorByEmail(
         responseData.email
       );
 
-      if (!vendorData ) {
+      if (!vendorData) {
         let { name, email, picture: profileImage } = responseData;
         let isVerified = VerificationStatus.Pending;
         name = name.toLowerCase();
 
-            let profileImageKey: string | undefined = undefined;
+        let profileImageKey: string | undefined = undefined;
         if (profileImage) {
           try {
-            profileImageKey = await storeGoogleImageToS3(profileImage,name);
-            logger.info("Uploaded Google profile image to S3", { profileImageKey });
+            profileImageKey = await storeGoogleImageToS3(profileImage, name);
+            logger.info("Uploaded Google profile image to S3", {
+              profileImageKey,
+            });
           } catch (uploadError) {
-            logger.warn("Failed to upload Google image to S3, using original URL instead", uploadError);
-            profileImageKey = profileImage; 
+            logger.warn(
+              "Failed to upload Google image to S3, using original URL instead",
+              uploadError
+            );
+            profileImageKey = profileImage;
           }
         }
 
-        vendorData  = await this._vendorAuthRepository.createVendor({
+        vendorData = await this._vendorAuthRepository.createVendor({
           name,
           email,
           isVerified,
-          profileImage:profileImageKey,
+          profileImage: profileImageKey,
         });
       }
 
- const vendor = mapToVendorLoginDTO(vendorData); 
-    const role = Role.VENDOR;
+      const vendor = mapToVendorLoginDTO(vendorData);
+      const role = Role.VENDOR;
 
-    const accessToken = generateAccessToken({
-      data: {
-        _id: vendorData._id,
+      const accessToken = generateAccessToken({
+        id: vendorData._id.toString(),
         email: vendorData.email,
         name: vendorData.name,
-      },
-      role,
-    });
+        role,
+      });
 
-    const refreshToken = generateRefreshToken({
-      data: {
-        _id: vendorData._id,
+      const refreshToken = generateRefreshToken({
+        id: vendorData._id.toString(),
         email: vendorData.email,
         name: vendorData.name,
-      },
-      role,
-    });
+        role,
+      });
 
-    return { vendor, accessToken, refreshToken };
+      return { vendor, accessToken, refreshToken };
     } catch (error) {
       throw error;
     }

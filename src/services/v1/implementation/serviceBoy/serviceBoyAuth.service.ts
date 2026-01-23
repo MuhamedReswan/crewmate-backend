@@ -18,7 +18,6 @@ import { ExpiredError } from "../../../../utils/errors/expired.error";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import { ValidationError } from "../../../../utils/errors/validation.error";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -35,6 +34,7 @@ import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mappe
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 import { VerificationStatus } from "../../../../constants/status";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
+import { ForbiddenError } from "../../../../utils/errors/forbidden.error";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -60,7 +60,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         logger.warn(`Email already used: ${email}`);
         throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
       }
-         await setRedisData(
+      await setRedisData(
         `serviceBoy:${email}`,
         JSON.stringify({ name, email, password, mobile }),
         3600
@@ -88,7 +88,10 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     }
   }
 
-  async verifyOTP(email: string, otp: string): Promise< ServiceBoyLoginResponse| void> {
+  async verifyOTP(
+    email: string,
+    otp: string
+  ): Promise<ServiceBoyLoginResponse | void> {
     try {
       logger.info(`Verifying OTP for: ${email}`);
       logger.debug(`Incoming OTP data`, { email, otp });
@@ -98,7 +101,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
       const { otp: savedOtpValue } = JSON.parse(savedOtp);
       logger.debug(`Parsed savedOtpValue`, { savedOtpValue });
-      if (otp !== savedOtpValue) throw new ValidationError("Invalid OTP");
+      if (otp !== savedOtpValue) throw new UnAuthorizedError("Invalid OTP");
 
       await deleteRedisData(`otpB:${email}`);
 
@@ -109,8 +112,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           serviceBoyDataObject,
         });
 
-const number = await redisClient.incr("serviceBoy:idCounter"); // auto-increment
-const servicerId = `A-${number}`;
+        const number = await redisClient.incr("serviceBoy:idCounter"); // auto-increment
+        const servicerId = `A-${number}`;
 
         serviceBoyDataObject.password = await hashPassword(
           serviceBoyDataObject.password
@@ -126,27 +129,22 @@ const servicerId = `A-${number}`;
         }
         await deleteRedisData(`serviceBoy:${email}`);
 
+        const serviceBoy = mapToServiceBoyLoginDTO(createdBoy);
 
-         const serviceBoy = mapToServiceBoyLoginDTO(createdBoy);
-
-      const role = Role.SERVICE_BOY;
-      const accessToken = generateAccessToken({
-        data: {
-          _id: createdBoy._id,
+        const role = Role.SERVICE_BOY;
+        const accessToken = generateAccessToken({
+          id: createdBoy._id.toString(),
           email: createdBoy.email,
           name: createdBoy.name,
-        },
-        role: role,
-      });
-      const refreshToken = generateRefreshToken({
-        data: {
-          _id: createdBoy._id,
+          role: role,
+        });
+        const refreshToken = generateRefreshToken({
+          id: createdBoy._id.toString(),
           email: createdBoy.email,
           name: createdBoy.name,
-        },
-        role: role,
-      });
-      return { serviceBoy, accessToken, refreshToken };
+          role: role,
+        });
+        return { serviceBoy, accessToken, refreshToken };
       }
     } catch (error) {
       throw error;
@@ -167,26 +165,22 @@ const servicerId = `A-${number}`;
 
       if (!serviceBoyData || !isValidPassword) {
         logger.warn(`Invalid credentials for email: ${email}`);
-        throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
+        throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
       }
 
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
 
       const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({
-        data: {
-          _id: serviceBoyData._id,
-          email: serviceBoyData.email,
-          name: serviceBoyData.name,
-        },
+        id: serviceBoyData._id.toString(),
+        email: serviceBoyData.email,
+        name: serviceBoyData.name,
         role: role,
       });
       const refreshToken = generateRefreshToken({
-        data: {
-          _id: serviceBoyData._id,
-          email: serviceBoyData.email,
-          name: serviceBoyData.name,
-        },
+        id: serviceBoyData._id.toString(),
+        email: serviceBoyData.email,
+        name: serviceBoyData.name,
         role: role,
       });
       return { serviceBoy, accessToken, refreshToken };
@@ -201,7 +195,7 @@ const servicerId = `A-${number}`;
       await getRedisData(`otpB${email}`);
       await deleteRedisData(`otpB${email}`);
       const otp = createOtp();
-      logger.info("resend otp------------",{otp});
+      logger.info("resend otp------------", { otp });
       await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 60);
       await getRedisData(`otpB:${email}`);
       await sendOtpEmail(email, otp);
@@ -214,7 +208,7 @@ const servicerId = `A-${number}`;
     try {
       const decoded = await verifyRefreshToken(Token);
       logger.debug("decodedrole", { decoded });
-   
+
       if (!decoded || !decoded.email) {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
       }
@@ -225,14 +219,19 @@ const servicerId = `A-${number}`;
       if (!serviceBoy)
         throw new UnAuthorizedError(ResponseMessage.USER_NOT_FOUND);
       if (serviceBoy.isBlocked)
-        throw new ValidationError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
+        throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
 
       const accessToken = await generateAccessToken({
-        data: serviceBoy,
+        id: serviceBoy._id.toString(),
+        email: serviceBoy.email,
+        name: serviceBoy.name,
         role: Role.SERVICE_BOY,
       });
+
       const refreshToken = await generateRefreshToken({
-        data: serviceBoy,
+        id: serviceBoy._id.toString(),
+        email: serviceBoy.email,
+        name: serviceBoy.name,
         role: Role.SERVICE_BOY,
       });
       logger.info(`New tokens generated for: ${decoded.email}`);
@@ -270,7 +269,7 @@ const servicerId = `A-${number}`;
         throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
       }
       if (forgotTokenData != token) {
-        throw new ValidationError(
+        throw new UnAuthorizedError(
           ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN
         );
       }
@@ -295,7 +294,7 @@ const servicerId = `A-${number}`;
       );
 
       if (!response.ok) {
-        throw new ValidationError("google login falied");
+        throw new UnAuthorizedError("google login falied");
       }
 
       const responseData = await response.json();
@@ -305,55 +304,54 @@ const servicerId = `A-${number}`;
           responseData.email
         );
 
-        
-        if (!serviceBoyData) {
-          let { name, email, picture: profileImage } = responseData;
-          let isVerified = VerificationStatus.Pending;
-          name = name.toLowerCase();
-          
-          const number = await redisClient.incr("serviceBoy:idCounter"); 
-  const servicerId = `A-${number}`;
+      if (!serviceBoyData) {
+        let { name, email, picture: profileImage } = responseData;
+        let isVerified = VerificationStatus.Pending;
+        name = name.toLowerCase();
 
-    let profileImageKey: string | undefined = undefined;
-if (profileImage) {
-  try {
-    profileImageKey = await storeGoogleImageToS3(profileImage,name);
-    logger.info("Uploaded Google profile image to S3", { profileImageKey });
-  } catch (uploadError) {
-    logger.warn("Failed to upload Google image to S3, using original URL instead", uploadError);
-    profileImageKey = profileImage; 
-  }
-}
-  
+        const number = await redisClient.incr("serviceBoy:idCounter");
+        const servicerId = `A-${number}`;
+
+        let profileImageKey: string | undefined = undefined;
+        if (profileImage) {
+          try {
+            profileImageKey = await storeGoogleImageToS3(profileImage, name);
+            logger.info("Uploaded Google profile image to S3", {
+              profileImageKey,
+            });
+          } catch (uploadError) {
+            logger.warn(
+              "Failed to upload Google image to S3, using original URL instead",
+              uploadError
+            );
+            profileImageKey = profileImage;
+          }
+        }
+
         serviceBoyData = await this._serviceBoyAuthRepository.createServiceBoy({
           name,
           email,
           isVerified,
-          servicerId:servicerId,
-          profileImage:profileImageKey,
+          servicerId: servicerId,
+          profileImage: profileImageKey,
         });
       }
 
-
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
-    const role = Role.SERVICE_BOY;
+      const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({
-        data: {
-          _id: serviceBoyData._id,
-          email: serviceBoyData.email,
-          name: serviceBoyData.name,
-        },
-        role: role,
+        id: serviceBoyData._id.toString(),
+        email: serviceBoyData.email,
+        name: serviceBoyData.name,
+        role: Role.SERVICE_BOY,
       });
       const refreshToken = generateRefreshToken({
-        data: {
-          _id: serviceBoyData._id,
-          email: serviceBoyData.email,
-          name: serviceBoyData.name,
-        },
+        id: serviceBoyData._id.toString(),
+        email: serviceBoyData.email,
+        name: serviceBoyData.name,
         role: role,
       });
-      
+
       return { serviceBoy, accessToken, refreshToken };
     } catch (error) {
       throw error;

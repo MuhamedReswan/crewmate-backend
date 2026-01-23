@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { authMiddleware } from "../../middleware/authorization";
+import { authMiddleware } from "../../middleware/auth.middleware";
 import { IAdminVendorController } from "../../controllers/v1/interfaces/admin/IAdminVendor.controller";
 import { IAdminServiceBoyController } from "../../controllers/v1/interfaces/admin/IAdminServiceBoy.controller";
 

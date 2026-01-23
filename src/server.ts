@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import router from "./routes/router";
 import { PORT,CLIENTURL } from "./config/env";
 import { connectDB } from "./config/connectDB";
-import { errorHandler } from "./middleware/errorHandler";
+import { errorHandler } from "./middleware/errorHandler.middleware";
 import logger from "./utils/logger.util";
 
 
@@ -30,7 +30,7 @@ app.get("/", (req,res)=>{
     res.send("server started");
 });
 
-app.use("/", router);
+app.use("/api", router);
 
 app.use(errorHandler);
 

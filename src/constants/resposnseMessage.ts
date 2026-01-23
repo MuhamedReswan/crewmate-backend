@@ -95,6 +95,8 @@ SYSTEM_SETTINGS_UPDATE_FAILED = "Failed to update system settings",
 
 BOOKING_STATUS_UPDATED = "Booking status successfuyll updated",
 
+FORBIDDEN = "Access denied",
+
 
 
 

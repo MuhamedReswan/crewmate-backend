@@ -1,6 +1,5 @@
 import { inject, injectable } from "tsyringe";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { ValidationError } from "../../../../utils/errors/validation.error";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -30,22 +29,26 @@ export default class AdminAuthService implements IAdminAuthService {
   ): Promise<LoginResponse<IAdmin, Role.ADMIN>> {
     try {
       logger.info("Admin login attempt", { email });
-      let adminData = await this._adminAuthReposritory.findByEmail(email );
+      let adminData = await this._adminAuthReposritory.findByEmail(email);
       const isValidPassword =
         adminData?.password &&
         (await bcrypt.compare(password, adminData.password));
 
       if (!adminData || !isValidPassword) {
         logger.warn(`Invalid credentials for email: ${email}`);
-        throw new ValidationError(ResponseMessage.INVALID_CREDINTIALS);
+        throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
       } else {
         const role = Role.ADMIN;
         const accessToken = generateAccessToken({
-          data: adminData,
+          id: adminData._id.toString(),
+          email: adminData.email,
+          name: adminData.name,
           role: role,
         });
         const refreshToken = generateRefreshToken({
-          data: adminData,
+          id: adminData._id.toString(),
+          email: adminData.email,
+          name: adminData.name,
           role: role,
         });
         logger.info("Admin login successful", { adminData });
@@ -56,20 +59,26 @@ export default class AdminAuthService implements IAdminAuthService {
     }
   }
 
-    async setNewAccessToken(refreshToken: string): Promise<CustomTokenResponse> {
+  async setNewAccessToken(refreshToken: string): Promise<CustomTokenResponse> {
     try {
       const decoded = await verifyRefreshToken(refreshToken);
       const role = decoded?.role === Role.ADMIN ? Role.ADMIN : Role.ADMIN;
-      logger.debug("decoded data in setNewAccessToken in admin auth service",{decoded})
+      logger.debug("decoded data in setNewAccessToken in admin auth service", {
+        decoded,
+      });
 
       if (!decoded || !decoded.email) {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
       }
-      const admin = await this._adminAuthReposritory.findByEmail(
-        decoded.email
-      );
+      const admin = await this._adminAuthReposritory.findByEmail(decoded.email);
       if (!admin) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
-      const accessToken = await generateAccessToken({ data: admin, role });
+      const accessToken = await generateAccessToken({
+        id: admin._id.toString(),
+        email: admin.email,
+        name: admin.name,
+        role,
+      });
+
       return {
         accessToken,
         refreshToken,

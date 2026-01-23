@@ -15,11 +15,13 @@ export type RequestHandler<
   next: NextFunction
 ) => Promise<TReturn>;
 
-export type CreateToken = 
-| { role: Role.SERVICE_BOY; data: Partial<IServiceBoy> }
-| { role: Role.ADMIN; data: Partial<IAdmin> }
-| { role: Role.VENDOR; data: Partial<IVendor> };
+// export type CreateToken = 
+// | { role: Role.SERVICE_BOY; data: Partial<IServiceBoy> }
+// | { role: Role.ADMIN; data: Partial<IAdmin> }
+// | { role: Role.VENDOR; data: Partial<IVendor> };
 
+export type TokenPayload  = 
+{ role: Role; id:string, email:string, name:string}
 
 
 export interface FileData {
@@ -45,6 +47,7 @@ export interface JwtPayload {
   id: string;
   email: string;
   role: Role;
+  name: string,
   iat: number;
   exp: number;
 }

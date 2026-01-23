@@ -2,7 +2,7 @@ import { CustomError } from "./custom.error";
 
 export class ExpiredError extends CustomError{
     statusCode = 410;
-    constructor(message:string){
+    constructor(message:string = "Resource is no longer available"){
 super(message);
 this.name = "ExpiredError";
     }

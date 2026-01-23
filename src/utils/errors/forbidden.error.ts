@@ -1,10 +1,10 @@
 import { CustomError } from "./custom.error";
 
-export class ValidationError extends CustomError{
+export class ForbiddenError extends CustomError{
     statusCode: number = 403;
-    constructor(message: string){
+    constructor(message: string = "Access denied"){
         super(message);
-        this.name = 'validationError';
+        this.name = 'ForbiddenError';
     }
 
 serializeErrors(){

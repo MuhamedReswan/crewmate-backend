@@ -1,69 +1,78 @@
-import jwt from 'jsonwebtoken';
-import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from '../config/env';
-import { UnAuthorizedError } from './errors/unAuthorized.error';
-import { CreateToken, JwtPayload } from '../types/type';
-import logger from './logger.util';
-import { ResponseMessage } from '../constants/resposnseMessage';
+import jwt from "jsonwebtoken";
+import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from "../config/env";
+import { UnAuthorizedError } from "./errors/unAuthorized.error";
+import { TokenPayload, JwtPayload } from "../types/type";
+import logger from "./logger.util";
+import { ResponseMessage } from "../constants/resposnseMessage";
 
+const accessTokenSecret = ACCESSTOKENSECRET;
+const refreshTokenSecret = REFRESHTOKENSECRET;
+console.log("accessTokenSecret", accessTokenSecret);
+console.log("refreshTokenSecret", refreshTokenSecret);
 
-const accessTokenSecret = ACCESSTOKENSECRET; 
-const refreshTokenSecret = REFRESHTOKENSECRET; 
-console.log("accessTokenSecret",accessTokenSecret);
-console.log("refreshTokenSecret",refreshTokenSecret);
-
-
-export const generateAccessToken = (details:CreateToken ) => {
-    if(!accessTokenSecret){
-        throw new Error(ResponseMessage.NO_ACCESS_TOKEN_SECRET);
-    } 
-    return jwt.sign({id:details.data?._id, email:details.data?.email,
- name: details.data?.name, role:details.role}, accessTokenSecret, {expiresIn: '50m'} );
+export const generateAccessToken = (details: TokenPayload) => {
+  if (!accessTokenSecret) {
+    throw new Error(ResponseMessage.NO_ACCESS_TOKEN_SECRET);
+  }
+  return jwt.sign(
+    {
+      id: details?.id,
+      email: details?.email,
+      name: details?.name,
+      role: details.role,
+    },
+    accessTokenSecret,
+    { expiresIn: "50m" }
+  );
 };
 
-
-export const generateRefreshToken = (details:CreateToken ) => {
-    try {
-        if(!refreshTokenSecret){
-            throw new Error(ResponseMessage.NO_REFRESH_TOKEN_SECRET);
-        }
-        console.log(" generateRefreshToken",refreshTokenSecret);
-
-        return jwt.sign({id:details.data?._id, email:details.data?.email,
-            name: details.data?.name, role:details.role }, refreshTokenSecret, {expiresIn: '7d'} );
-    } catch (error) {
-        throw error;
+export const generateRefreshToken = (details: TokenPayload) => {
+  try {
+    if (!refreshTokenSecret) {
+      throw new Error(ResponseMessage.NO_REFRESH_TOKEN_SECRET);
     }
+    console.log(" generateRefreshToken", refreshTokenSecret);
 
+    return jwt.sign(
+      {
+        id: details?.id,
+        email: details?.email,
+        name: details?.name,
+        role: details.role,
+      },
+      refreshTokenSecret,
+      { expiresIn: "7d" }
+    );
+  } catch (error) {
+    throw error;
+  }
 };
 
-
-export const verifyAccessToken = (token: string): JwtPayload |undefined => {
-    try {
-        if(!accessTokenSecret){
-            throw new Error(ResponseMessage.NO_ACCESS_TOKEN_SECRET);
-        } 
-        return jwt.verify(token, accessTokenSecret) as JwtPayload;
-    } catch (error) {
-        logger.error("Failed to verify access token", error );
-        return undefined;
+export const verifyAccessToken = (token: string): JwtPayload | undefined => {
+  try {
+    if (!accessTokenSecret) {
+      throw new Error(ResponseMessage.NO_ACCESS_TOKEN_SECRET);
     }
+    return jwt.verify(token, accessTokenSecret) as JwtPayload;
+  } catch (error) {
+    logger.error("Failed to verify access token", error);
+    return undefined;
+  }
 };
-
 
 export const verifyRefreshToken = (token: string): JwtPayload => {
-try {
-    if(!refreshTokenSecret){
-        throw new Error(ResponseMessage.NO_REFRESH_TOKEN_SECRET);
+  try {
+    if (!refreshTokenSecret) {
+      throw new Error(ResponseMessage.NO_REFRESH_TOKEN_SECRET);
     }
 
     const decoded = jwt.verify(token, refreshTokenSecret) as JwtPayload;
     return decoded;
-} catch (error) {
-    console.log("verify refresh token error",error);
+  } catch (error) {
+    console.log("verify refresh token error", error);
     throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
-}
+  }
 };
-
 
 export const decodeRefreshToken = (token: string): JwtPayload | null => {
   try {

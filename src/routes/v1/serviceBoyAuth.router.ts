@@ -3,7 +3,7 @@ import { Router } from "express";
 import { IServiceBoyAuthController } from "../../controllers/v1/interfaces/serviceBoy/IServiceBoyAuth.controller"; 
 import { requestBodyValidator } from "../../middleware/requestValidation";
 import { forgotPasswordSchema, loginSchema, resetpasswordSchema, signupSchema } from "../../utils/validationSchema/auth.schema";
-import { authMiddleware } from "../../middleware/authorization";
+import { authMiddleware } from "../../middleware/auth.middleware";
 
 
 const router = Router();

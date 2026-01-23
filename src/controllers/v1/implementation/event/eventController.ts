@@ -13,7 +13,6 @@ import { IEventController } from "../../interfaces/event/IEventController";
 import { IEventService } from "../../../../services/v1/interfaces/event/IEvent.service";
 
 
-
 @injectable()
 export default class EventController implements IEventController {
   constructor(@inject("IEventService") private _eventService: IEventService) {}
