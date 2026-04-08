@@ -7,6 +7,7 @@ export interface IEventRepository {
   findEvent(data: Partial<IEvent>): Promise<IEvent | null>;
   findEventsPaginated(
     filter: EventQueryFilter,
+    mongoFilter: Partial<IEvent>,
     sort?: Record<string, 1 | -1>
   ): Promise<PaginatedResponse<IEvent>>;
   updateEventById(  eventId: string, data: Partial<IEvent>): Promise<IEvent | undefined>

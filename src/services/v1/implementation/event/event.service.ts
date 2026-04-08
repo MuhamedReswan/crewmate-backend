@@ -1,11 +1,11 @@
 import { inject, injectable } from "tsyringe";
 import IEvent from "../../../../entities/v1/eventEntity";
-import { Types } from "mongoose";
+import { SchemaTypes, Types } from "mongoose";
 import logger from "../../../../utils/logger.util";
 import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { ConflictError } from "../../../../utils/errors/conflict.error";
-import {  EventQueryFilter,} from "../../../../types/type";
+import {  eventFilter, EventQueryFilter, JwtPayload,} from "../../../../types/type";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { calculateTotalEventBill } from "../../../../utils/billCalculation.util";
@@ -13,6 +13,9 @@ import { IEventRepository } from "../../../../repositories/v1/interfaces/event/I
 import { IVendorRepository } from "../../../../repositories/v1/interfaces/vendor/IVendor.repository";
 import { IAdminSystemSettingsService } from "../../interfaces/admin/IAdminSystemSettings.service";
 import { IEventService } from "../../interfaces/event/IEvent.service";
+import { Role } from "../../../../constants/Role";
+import { eventQuerySchema } from "../../../../validators";
+const mongoose = require('mongoose');
 
 
 @injectable()
@@ -102,15 +105,41 @@ eventData.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel
   }
 
   getEvents = async (
-    filter: EventQueryFilter,
-    sort: Record<string, 1 | -1> = { reportingDateTime: -1 }
+    user: JwtPayload,
+    query: eventFilter
   ): Promise<PaginatedResponse<IEvent> | undefined> => {
     try {
-      return this._eventRepository.findEventsPaginated(filter, sort);
+
+     const filter = eventQuerySchema.parse(query);
+
+    const mongoFilter: Partial<IEvent> = {
+      ...(filter.status && { status: filter.status }),
+    };
+
+    // 👇 ROLE-BASED FILTERING (CORRECT PLACE)
+    if (user.role === Role.VENDOR) {
+      mongoFilter.vendor = new mongoose.Types.ObjectId(user.id);
+    }
+
+    return this._eventRepository.findEventsPaginated(
+      filter,
+      mongoFilter
+    );
     } catch (error) {
       throw error;
     }
   };
+
+  // getEvents = async (
+  //   filter: EventQueryFilter,
+  //   sort: Record<string, 1 | -1> = { reportingDateTime: -1 }
+  // ): Promise<PaginatedResponse<IEvent> | undefined> => {
+  //   try {
+  //     return this._eventRepository.findEventsPaginated(filter, sort);
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // };
 
   getWorks = async (
     filter: EventQueryFilter,

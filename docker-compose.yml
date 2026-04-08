@@ -11,8 +11,13 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    env_file:
+      - .env   
     depends_on:
       - redis
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
   redis:
     image: redis:7-alpine

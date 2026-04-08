@@ -1,6 +1,7 @@
 import s3Util from "../../../../utils/s3.util";
 import logger from "../../../../utils/logger.util";
 import { ICommonService } from "../../interfaces/common/ICommon.service";
+import { generateSignedUrl } from "../../../../utils/cloudinary.util";
 
 
 export default class CommonService implements ICommonService {
@@ -17,5 +18,16 @@ if(imageUrl){
         throw error;
     }
   };
+
+   getSecureDocumentUrl = async (publicId: string) => {
+  if (!publicId) {
+    throw new Error("publicId is required");
+  }
+
+  // 🔑 generate signed URL
+  const url = generateSignedUrl(publicId);
+
+  return url;
+};
   
 }

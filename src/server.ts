@@ -11,6 +11,8 @@ import { errorHandler } from "./middleware/errorHandler.middleware";
 import logger from "./utils/logger.util";
 
 
+
+
 const app : Application = express();
 
 app.use(cookieParser());

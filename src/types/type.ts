@@ -60,10 +60,9 @@ export interface LocationData {
 }
 
 export interface eventFilter {
-  vendorId:Types.ObjectId
-  search :string;
-  limit : number
-  page : number,
+  search? :string;
+  limit? : number
+  page? : number,
   status?:EventStatusType,
   from ?:string,
   to ?: string,
@@ -87,3 +86,28 @@ export interface SendEmailOptions {
   html?: string;
   text?: string;
 }
+
+
+export interface IImage {
+  publicId: string;
+  url: string;
+}
+
+export interface ISecureImage {
+  publicId: string;
+  uploadedAt?: Date;
+}
+
+export type ImageConfig<T> = {
+  file?: { buffer: Buffer; mimetype: string }[];
+  field: keyof T;
+  type: string;
+  folder?: string;
+  isSecure?: boolean;
+};
+
+export type UploadOptions = {
+  folderName: string;
+  publicId: string;
+  isSecure?: boolean;
+};

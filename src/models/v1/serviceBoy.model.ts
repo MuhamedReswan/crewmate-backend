@@ -3,6 +3,7 @@ import IServiceBoy from '../../entities/v1/serviceBoyEntity';
 import { Role } from '../../constants/Role';
 import { LocationSchema } from './location.model';
 import { VerificationStatus } from '../../constants/status';
+import { ImageSchema, SecureImageSchema } from './common/image.schema';
 
 
 const UnAvailableSchema = new Schema({
@@ -18,10 +19,10 @@ const UnAvailableSchema = new Schema({
   isVerified: { type: String, default:VerificationStatus.Pending},
   rejectionReason: { type: String, default: null },
   isBlocked: {type: Boolean, default: false},
-  profileImage: { type: String },
+  profileImage: { type: ImageSchema  },
   aadharNumber: { type: String, unique:true, sparse: true},
-  aadharImageFront: { type: String},
-  aadharImageBack: { type: String},
+  aadharImageFront: { type: SecureImageSchema },
+  aadharImageBack: { type: SecureImageSchema },
   age: { type: Number },
   qualification: { type: String },
   points: { type: Number, default:0 },

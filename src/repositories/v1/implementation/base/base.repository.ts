@@ -110,50 +110,103 @@ return deleted.deletedCount || 0;
 
 
 
-async findPaginated(
-  baseFilter: Partial<T>,
-    page: number,
-    limit: number,
+// async findPaginated(
+//   baseFilter: Partial<T>,
+//     page: number,
+//     limit: number,
+//     search?: string,
+//     searchFields?: (keyof T)[],
+// sort?: SortOption<T> | { [key: string]: 1 | -1 }  ): Promise<PaginatedResponse<T>> {
+//       try {
+//         logger.debug("baseFilter in findpaginated ",{baseFilter});
+//     const query: FilterQuery<T> = {...baseFilter} as any;
+
+//     if (search && searchFields?.length) {
+//       query.$or = searchFields.map(field => ({
+//         [field]: { $regex: search, $options: "i" }
+//       })) as any;
+//     }
+    
+//     const totalItems = await this._model.countDocuments(query);
+//     const totalPages = Math.ceil(totalItems / limit);
+//     const hasNext = page < totalPages;
+//     const hasPrev = page > 1;
+    
+//     const sortOption = sort && Object.keys(sort).length ? sort : { date: -1 };
+
+//     const data = await this._model
+//       .find(query)
+//       .skip((page - 1) * limit)
+//       .limit(limit)
+// .sort(sortOption as any)
+// .select('-password');
+//     return {
+//       data,
+//       pagination: {
+//         page,
+//         limit,
+//         totalItems,
+//         totalPages,
+//         hasNext,
+//         hasPrev
+//       }
+//     };
+//       } catch (error) {
+//     logger.error(`Error in findPaginated data: ${error}`);
+//     throw error;
+//   }
+//   }
+
+ async findPaginated(
+    baseFilter: FilterQuery<T>,
+    page = 1,
+    limit = 10,
     search?: string,
     searchFields?: (keyof T)[],
-sort?: SortOption<T> | { [key: string]: 1 | -1 }  ): Promise<PaginatedResponse<T>> {
-      try {
-        logger.debug("baseFilter in findpaginated ",{baseFilter});
-    const query: FilterQuery<T> = {...baseFilter} as any;
+    sort?: SortOption<T>
+  ): Promise<PaginatedResponse<T>> {
+    try {
+      const query: FilterQuery<T> = { ...baseFilter };
 
-    if (search && searchFields?.length) {
-      query.$or = searchFields.map(field => ({
-        [field]: { $regex: search, $options: "i" }
-      })) as any;
-    }
-    
-    const totalItems = await this._model.countDocuments(query);
-    const totalPages = Math.ceil(totalItems / limit);
-    const hasNext = page < totalPages;
-    const hasPrev = page > 1;
-    
-    const sortOption = sort && Object.keys(sort).length ? sort : { date: -1 };
-
-    const data = await this._model
-      .find(query)
-      .skip((page - 1) * limit)
-      .limit(limit)
-.sort(sortOption as any)
-.select('-password');
-    return {
-      data,
-      pagination: {
-        page,
-        limit,
-        totalItems,
-        totalPages,
-        hasNext,
-        hasPrev
+      /* ----------------------------- SEARCH LOGIC ---------------------------- */
+      if (search && searchFields?.length) {
+        query.$or = searchFields.map((field) => ({
+          [field]: { $regex: search, $options: "i" },
+        })) as any;
       }
-    };
-      } catch (error) {
-    logger.error(`Error in findPaginated data: ${error}`);
-    throw error;
+
+      /* ---------------------------- PAGINATION DATA --------------------------- */
+      const safePage = Math.max(page, 1);
+      const safeLimit = Math.max(limit, 1);
+      const skip = (safePage - 1) * safeLimit;
+
+      const [data, totalItems] = await Promise.all([
+        this._model
+          .find(query)
+          .sort(sort as any)
+          .skip(skip)
+          .limit(safeLimit)
+          .exec(),
+
+        this._model.countDocuments(query),
+      ]);
+
+      const totalPages = Math.ceil(totalItems / safeLimit);
+
+      return {
+        data,
+        pagination: {
+          page: safePage,
+          limit: safeLimit,
+          totalItems,
+          totalPages,
+          hasNext: safePage < totalPages,
+          hasPrev: safePage > 1,
+        },
+      };
+    } catch (error) {
+      logger.error("BaseRepository.findPaginated error", error);
+      throw error;
+    }
   }
-  }
-}
+}                                                                      

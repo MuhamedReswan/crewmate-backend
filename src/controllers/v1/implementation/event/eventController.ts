@@ -11,6 +11,7 @@ import { Types } from "mongoose";
 import { EventStatusType } from "../../../../constants/status";
 import { IEventController } from "../../interfaces/event/IEventController";
 import { IEventService } from "../../../../services/v1/interfaces/event/IEvent.service";
+import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 
 
 @injectable()
@@ -58,44 +59,12 @@ getEvents = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = (req.query.search as string) || "";
-    const status = (req.query.status as EventStatusType) || undefined;
-    const from = (req.query.from as string) || undefined;
-    const to = (req.query.to as string) || undefined;
-    const sortBy = (req.query.sortBy as string) || "reportingDateTime";
-    const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
+    logger.info("req.query from getEvents",req.query);
 
-    if (!req.params.vendorId) {
-      res.status(400)
-      .json(
-       responseHandler(
-          ResponseMessage.VENDOR_ID_MISSING,
-          HttpStatusCode.BAD_REQUEST,
-        )
-      );
-      return;
-    }
-
-    const vendor = new Types.ObjectId(req.params.vendorId);
-    
-    const filter: EventQueryFilter = {
-      vendor,
-      search,
-      status,
-      from,
-      to,
-      page,
-      limit
-    };
-
-    
-    const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
-
-    const events = await this._eventService.getEvents(filter,sort);
-    logger.debug("getEvents out in controller",{events})
-
+    if (!req.user) {
+  throw new UnAuthorizedError(ResponseMessage.NO_USER_IN_REQUEST);
+}
+   const events = await this._eventService.getEvents(req.user,req.query);
     res
       .status(200)
       .json(
@@ -110,6 +79,65 @@ getEvents = async (
     next(error);
   }
 };
+
+// getEvents = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<void> => {
+//   try {
+//     const page = parseInt(req.query.page as string) || 1;
+//     const limit = parseInt(req.query.limit as string) || 10;
+//     const search = (req.query.search as string) || "";
+//     const status = (req.query.status as EventStatusType) || undefined;
+//     const from = (req.query.from as string) || undefined;
+//     const to = (req.query.to as string) || undefined;
+//     const sortBy = (req.query.sortBy as string) || "reportingDateTime";
+//     const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
+
+//     if (!req.params.vendorId) {
+//       res.status(400)
+//       .json(
+//        responseHandler(
+//           ResponseMessage.VENDOR_ID_MISSING,
+//           HttpStatusCode.BAD_REQUEST,
+//         )
+//       );
+//       return;
+//     }
+
+//     const vendor = new Types.ObjectId(req.params.vendorId);
+    
+//     const filter: EventQueryFilter = {
+//       vendor,
+//       search,
+//       status,
+//       from,
+//       to,
+//       page,
+//       limit
+//     };
+
+    
+//     const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
+
+//     const events = await this._eventService.getEvents(filter,sort);
+//     logger.debug("getEvents out in controller",{events})
+
+//     res
+//       .status(200)
+//       .json(
+//         responseHandler(
+//           ResponseMessage.LOAD_EVENT_SUCCESS,
+//           HttpStatusCode.OK,
+//           events
+//         )
+//       );
+//   } catch (error) {
+//     logger.error("getEvents on event controller", error);
+//     next(error);
+//   }
+// };
 
 
 getWorks = async (

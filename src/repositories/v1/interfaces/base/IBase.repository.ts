@@ -1,3 +1,5 @@
+import { FilterQuery } from "mongoose";
+import { SortOption } from "../../../../types";
 import { PaginatedResponse } from "../../../../types/pagination.type";
 
 export interface IBaseRepository<T> {
@@ -6,25 +8,14 @@ export interface IBaseRepository<T> {
     updateOne(filter: Partial<T>, updateData: Partial<T>): Promise<T | null>
     deleteOne(filter: Partial<T>): Promise<T | null>
     deleteMany(filter:Partial<T>): Promise<Number>
-findPaginated(
-    // page: number,
-    // limit: number,
-    // search?: string,
-    // isBlocked?:boolean,
-    // searchFields?: (keyof T)[]
-
-      baseFilter: Partial<T>,
-    page: number,
-    limit: number,
-    search?: string,
-    // isBlocked?:boolean,
-    searchFields?: (keyof T)[],
-  ): Promise<PaginatedResponse<T>>
-
-  updateById(
-  id: string,
-  updateData: Partial<T>
-): Promise<T | null>
+    findPaginated(
+      baseFilter: FilterQuery<T>,
+      page: number,
+      limit: number,
+      search?: string,
+      searchFields?: (keyof T)[],
+      sort?: SortOption<T>
+    ): Promise<PaginatedResponse<T>>
 
 findById(id: string, projection?: string | object): Promise<T | null>
     

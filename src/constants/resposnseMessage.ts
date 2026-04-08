@@ -97,6 +97,8 @@ BOOKING_STATUS_UPDATED = "Booking status successfuyll updated",
 
 FORBIDDEN = "Access denied",
 
+NO_USER_IN_REQUEST = "User not found in request",
+
 
 
 

@@ -1,13 +1,14 @@
+import { JwtPayload } from "jsonwebtoken";
 import IEvent from "../../../../entities/v1/eventEntity";
 import { PaginatedResponse } from "../../../../types/pagination.type";
-import { EventQueryFilter } from "../../../../types/type";
+import { eventFilter } from "../../../../types/type";
 
 export interface IEventService {
   createEvent(eventData: Partial<IEvent>): Promise<IEvent | undefined>;
 
   getEvents(
-    filter: EventQueryFilter,
-    sort: Record<string, 1 | -1>
+  user: JwtPayload,
+  query: eventFilter
   ): Promise<PaginatedResponse<IEvent> | undefined>;
 
    updateEvent (

@@ -19,7 +19,8 @@ const uploadFields = upload.fields([
   router.use(authMiddleware);
 
 router.get('/profile/:id',serviceBoyController.loadProfile);
-router.get('/works',eventController.getWorks);
+// router.get('/events',eventController
+//   .getWorks);
 router.get('/:id',serviceBoyController.loadServiceBoyById);
 
 

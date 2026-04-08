@@ -34,5 +34,23 @@ export default class CommonController implements ICommonController {
 
   };
 
+  getSecureDocumentUrl = async(req:Request, res:Response, next:NextFunction):Promise<void> => {
+    try{
+      logger.info("req.params publicId", req.params);
+        let publicId = decodeURIComponent(req.params.publicId)
+       let imageUrl = await this.commonService.getSecureDocumentUrl(publicId);
+
+       if(imageUrl){
+           res.status(200).json(responseHandler(ResponseMessage.IMAGE_URL_SUCCESS, HttpStatusCode.OK, imageUrl ));
+       }else{
+           res.status(400).json(responseHandler( ResponseMessage.IMAGE_URL_FAILED,HttpStatusCode.BAD_REQUEST));
+       }
+
+    }catch(error){
+        next(error);
+    }
+
+  };
+
   }
 

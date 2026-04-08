@@ -7,8 +7,3 @@ import { Role } from "../../constants/Role";
 
 const router = Router()
 
-const eventController = container.resolve<IEventController>('IEventController');
-
-
-router.get("/events" ,authMiddleware, authorize(Role.SERVICE_BOY), eventController.getEvents)
-router.post("/events", eventController.createEvent)

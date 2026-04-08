@@ -1,5 +1,5 @@
 import { Document, Types } from "mongoose";
-import { LocationData } from "../../types/type";
+import { IImage, LocationData } from "../../types/type";
 import { VerificationStatusType } from "../../constants/status";
 
 export interface UnAvailable {
@@ -15,11 +15,11 @@ export default interface IServiceBoy extends Document {
     password:string,
     isVerified:VerificationStatusType,
     rejectionReason:string | null,
-    profileImage:string,
+    profileImage:IImage,
     isBlocked:boolean,
     aadharNumber:string,
-    aadharImageBack:string,
-    aadharImageFront:string,
+    aadharImageBack:IImage,
+    aadharImageFront:IImage,
     servicerId:string,
     role:string; 
     location:LocationData,

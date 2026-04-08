@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
 import { ImageFiles } from "../../../../types/type";
 import logger from "../../../../utils/logger.util";
-import { processAndUploadImage } from "../../../../utils/imageUpload.util";
+import { handleImagesUpload,  } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util"; 
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
@@ -10,6 +10,7 @@ import { ServiceBoyLoginDTO } from "../../../../dtos/v1/serviceBoy.dto";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 import { IServiceBoyService } from "../../interfaces/serviceBoy/IServiceBoy.service";
 import { IServiceBoyRepository } from "../../../../repositories/v1/interfaces/serviceBoy/IServiceBoy.repository";
+import { deleteImageFromCloudinary } from "../../../../utils/cloudinary.util";
 
 
 @injectable()
@@ -43,58 +44,59 @@ updateProfile = async (
     logger.debug("Initial profile update data", { data });
 
     const hasAnyFile =
-      (files.aadharImageBack && files.aadharImageBack.length > 0) ||
-      (files.aadharImageFront && files.aadharImageFront.length > 0) ||
-      (files.profileImage && files.profileImage.length > 0);
+      files.profileImage?.length ||
+      files.aadharImageFront?.length ||
+      files.aadharImageBack?.length;
 
     if (hasAnyFile) {
       oldServiceBoyProfile = await this._serviceBoyRepository.loadProfile({ _id: data._id });
     }
 
     const imagesToDelete: string[] = [];
-    const uploadTasks: Promise<void>[] = [];
+    // const uploadTasks: Promise<void>[] = [];
 
-    if (files.profileImage) {
-      uploadTasks.push(
-        processAndUploadImage(files.profileImage, "profileImage", data.name)
-          .then((url) => {
-            data.profileImage = url;
-            uploadedNewImages.push(url!);
-            if (oldServiceBoyProfile?.profileImage) {
-              imagesToDelete.push(oldServiceBoyProfile.profileImage);
-            }
-          })
-      );
+    await handleImagesUpload<IServiceBoy>(
+  [
+    {
+      file: files.profileImage,
+      field: "profileImage",
+      type: "profileImage",
+      folder: "profileImages",
+      isSecure: false,
+    },
+    {
+      file: files.aadharImageFront,
+      field: "aadharImageFront",
+      type: "aadharImageFront",
+      folder: "aadharImages",
+      isSecure: true,
+    },
+    {
+      file: files.aadharImageBack,
+      field: "aadharImageBack",
+      type: "aadharImageBack",
+      folder: "aadharImages",
+      isSecure: true,
+    },
+  ],
+  data,
+  oldServiceBoyProfile,
+  uploadedNewImages,
+  imagesToDelete
+);
+
+    if (!files.profileImage?.length) {
+      delete data.profileImage;
     }
 
-    if (files.aadharImageFront) {
-      uploadTasks.push(
-        processAndUploadImage(files.aadharImageFront, "aadharImageFront", data.name)
-          .then((url) => {
-            data.aadharImageFront = url;
-            uploadedNewImages.push(url!);
-            if (oldServiceBoyProfile?.aadharImageFront) {
-              imagesToDelete.push(oldServiceBoyProfile.aadharImageFront);
-            }
-          })
-      );
+    if (!files.aadharImageFront?.length) {
+      delete data.aadharImageFront;
     }
 
-    if (files.aadharImageBack) {
-      uploadTasks.push(
-        processAndUploadImage(files.aadharImageBack, "aadharImageBack", data.name)
-          .then((url) => {
-            data.aadharImageBack = url;
-            uploadedNewImages.push(url!);
-            if (oldServiceBoyProfile?.aadharImageBack) {
-              imagesToDelete.push(oldServiceBoyProfile.aadharImageBack);
-            }
-          })
-      );
+    if (!files.aadharImageBack?.length) {
+      delete data.aadharImageBack;
     }
 
-    // Run all uploads in parallel
-    await Promise.all(uploadTasks);
 
     logger.debug("Profile update data before location parsing", { data });
 
@@ -121,14 +123,25 @@ updateProfile = async (
     logger.info("Images to delete after DB success", { imagesToDelete });
     logger.debug("Updated profile data", { updatedProfile });
 
-    // Delete old images asynchronously
+    // // Delete old images asynchronously
+    // if (imagesToDelete.length > 0) {
+    //   (async () => {
+    //     await Promise.all(
+    //       imagesToDelete.map((image) =>
+    //         s3Util.deleteImageFromBucket(image).catch((err) => {
+    //           logger.error("Failed to delete old image from S3", { image, err });
+    //         })
+    //       )
+    //     );
+    //   })();
+    // }
+
+        // 🔥 Delete old images
     if (imagesToDelete.length > 0) {
       (async () => {
         await Promise.all(
-          imagesToDelete.map((image) =>
-            s3Util.deleteImageFromBucket(image).catch((err) => {
-              logger.error("Failed to delete old image from S3", { image, err });
-            })
+          imagesToDelete.map((publicId) =>
+            deleteImageFromCloudinary(publicId).catch(() => {})
           )
         );
       })();
@@ -139,12 +152,20 @@ updateProfile = async (
     logger.error("Profile update failed, rolling back uploads", { error });
 
     // Rollback newly uploaded images if DB update/upload failed
-    if (uploadedNewImages.length > 0) {
+    // if (uploadedNewImages.length > 0) {
+    //   await Promise.all(
+    //     uploadedNewImages.map((image) =>
+    //       s3Util.deleteImageFromBucket(image).catch((err) =>
+    //         logger.error("Rollback failed to delete uploaded image", { image, err })
+    //       )
+    //     )
+    //   );
+    // }
+
+     if (uploadedNewImages.length > 0) {
       await Promise.all(
-        uploadedNewImages.map((image) =>
-          s3Util.deleteImageFromBucket(image).catch((err) =>
-            logger.error("Rollback failed to delete uploaded image", { image, err })
-          )
+        uploadedNewImages.map((publicId) =>
+          deleteImageFromCloudinary(publicId).catch(() => {})
         )
       );
     }
