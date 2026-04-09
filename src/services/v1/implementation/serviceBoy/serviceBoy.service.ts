@@ -53,7 +53,6 @@ updateProfile = async (
     }
 
     const imagesToDelete: string[] = [];
-    // const uploadTasks: Promise<void>[] = [];
 
     await handleImagesUpload<IServiceBoy>(
   [
@@ -123,18 +122,6 @@ updateProfile = async (
     logger.info("Images to delete after DB success", { imagesToDelete });
     logger.debug("Updated profile data", { updatedProfile });
 
-    // // Delete old images asynchronously
-    // if (imagesToDelete.length > 0) {
-    //   (async () => {
-    //     await Promise.all(
-    //       imagesToDelete.map((image) =>
-    //         s3Util.deleteImageFromBucket(image).catch((err) => {
-    //           logger.error("Failed to delete old image from S3", { image, err });
-    //         })
-    //       )
-    //     );
-    //   })();
-    // }
 
         // 🔥 Delete old images
     if (imagesToDelete.length > 0) {
@@ -151,16 +138,6 @@ updateProfile = async (
   } catch (error) {
     logger.error("Profile update failed, rolling back uploads", { error });
 
-    // Rollback newly uploaded images if DB update/upload failed
-    // if (uploadedNewImages.length > 0) {
-    //   await Promise.all(
-    //     uploadedNewImages.map((image) =>
-    //       s3Util.deleteImageFromBucket(image).catch((err) =>
-    //         logger.error("Rollback failed to delete uploaded image", { image, err })
-    //       )
-    //     )
-    //   );
-    // }
 
      if (uploadedNewImages.length > 0) {
       await Promise.all(

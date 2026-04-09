@@ -3,6 +3,7 @@ import IVendor from '../../entities/v1/vendorEntity';
 import { LocationSchema } from './location.model';
 import { Role } from '../../constants/Role';
 import { VerificationStatus } from '../../constants/status';
+import { ImageSchema, SecureImageSchema } from './common/image.schema';
 
  const vendorSchema: Schema = new Schema<IVendor>({
   name: { type: String },
@@ -11,13 +12,13 @@ import { VerificationStatus } from '../../constants/status';
   isVerified: { type: String, default:VerificationStatus.Pending},
   rejectionReason: { type: String, default: null },
   isBlocked: { type: Boolean, default: false },
-  profileImage: { type: String },
+  profileImage: { type: ImageSchema },
   password: { type: String },
   role:{type:String, default:Role.VENDOR},
   estd:{ type: String },
   instaId:{ type: String },
   licenceNumber:{ type: String },
-  licenceImage:{ type: String },
+  licenceImage:{ type: SecureImageSchema },
  location: {
     type: LocationSchema,
     required: false

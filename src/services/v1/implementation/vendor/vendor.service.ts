@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import IVendor from "../../../../entities/v1/vendorEntity";
 import { ImageFiles } from "../../../../types/type";
 import logger from "../../../../utils/logger.util";
-import { processAndUploadImage } from "../../../../utils/imageUpload.util";
+import { handleImagesUpload, processAndUploadImage } from "../../../../utils/imageUpload.util";
 import s3Util from "../../../../utils/s3.util";
 import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
 import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
@@ -10,6 +10,7 @@ import { VendorLoginDTO } from "../../../../dtos/v1/vendor.dto";
 import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 import { IVendorService } from "../../interfaces/vendor/IVendor.service";
 import { IVendorRepository } from "../../../../repositories/v1/interfaces/vendor/IVendor.repository";
+import { deleteImageFromCloudinary } from "../../../../utils/cloudinary.util";
 
 
 @injectable()
@@ -36,36 +37,68 @@ export default class VendorService implements IVendorService {
           }
 
 const imagesToDelete: string[] = [];
-const uploadTasks: Promise<void>[] = [];
+// const uploadTasks: Promise<void>[] = [];
 
-  if (files.profileImage) {
-      uploadTasks.push(
-        processAndUploadImage(files.profileImage, "profileImage", data.name)
-          .then((url) => {
-            data.profileImage = url;
-            uploadedNewImages.push(url!);
-            if (oldVendorProfile?.profileImage) {
-              imagesToDelete.push(oldVendorProfile.profileImage);
-            }
-          })
-      );
+//   if (files.profileImage) {
+//       uploadTasks.push(
+//         processAndUploadImage(files.profileImage, "profileImage", data.name)
+//           .then((url) => {
+//             data.profileImage = url;
+//             uploadedNewImages.push(url!);
+//             if (oldVendorProfile?.profileImage) {
+//               imagesToDelete.push(oldVendorProfile.profileImage);
+//             }
+//           })
+//       );
+//     }
+
+//   if (files.licenceImage) {
+//       uploadTasks.push(
+//         processAndUploadImage(files.licenceImage, "licenceImage", data.name)
+//           .then((url) => {
+//             data.licenceImage = url;
+//             uploadedNewImages.push(url!);
+//             if (oldVendorProfile?.licenceImage) {
+//               imagesToDelete.push(oldVendorProfile.licenceImage);
+//             }
+//           })
+//       );
+//     }
+
+//      await Promise.all(uploadTasks);
+
+
+    await handleImagesUpload<IVendor>(
+  [
+    {
+      file: files.profileImage,
+      field: "profileImage",
+      type: "profileImage",
+      folder: "profileImages",
+      isSecure: false,
+    },
+
+    {
+      file: files.licenceImage,
+      field: "licenceImage",
+      type: "licenceImage",
+      folder: "licenceImages",
+      isSecure: true,
+    },
+  ],
+  data,
+  oldVendorProfile,
+  uploadedNewImages,
+  imagesToDelete
+);
+
+    if (!files.profileImage?.length) {
+      delete data.profileImage;
     }
 
-  if (files.licenceImage) {
-      uploadTasks.push(
-        processAndUploadImage(files.licenceImage, "licenceImage", data.name)
-          .then((url) => {
-            data.licenceImage = url;
-            uploadedNewImages.push(url!);
-            if (oldVendorProfile?.licenceImage) {
-              imagesToDelete.push(oldVendorProfile.licenceImage);
-            }
-          })
-      );
-    }
-
-     await Promise.all(uploadTasks);
-
+    if (!files.licenceImage?.length) {
+      delete data.licenceImage;
+    } 
       this.parseLocation(data);
 
       // Remove _id before update and keep it for filter
@@ -74,17 +107,27 @@ const uploadTasks: Promise<void>[] = [];
 
       const updatedProfile = await this._vendorRepository.updateVendor({ _id }, data);
 
-          if (imagesToDelete.length > 0) {
-      (async () => {
-        await Promise.all(
-          imagesToDelete.map((image) =>
-            s3Util.deleteImageFromBucket(image).catch((err) => {
-              logger.error("Failed to delete old image from S3", { image, err });
-            })
-          )
-        );
-      })();
-    }
+    //       if (imagesToDelete.length > 0) {
+    //   (async () => {
+    //     await Promise.all(
+    //       imagesToDelete.map((image) =>
+    //         s3Util.deleteImageFromBucket(image).catch((err) => {
+    //           logger.error("Failed to delete old image from S3", { image, err });
+    //         })
+    //       )
+    //     );
+    //   })();
+    // }
+
+      if (imagesToDelete.length > 0) {
+          (async () => {
+            await Promise.all(
+              imagesToDelete.map((publicId) =>
+                deleteImageFromCloudinary(publicId).catch(() => {})
+              )
+            );
+          })();
+        }
 
       if (updatedProfile) {
      return updatedProfile as IVendor;
@@ -92,15 +135,24 @@ const uploadTasks: Promise<void>[] = [];
 
       return undefined;
     } catch (error) {
-         if (uploadedNewImages.length > 0) {
+      
+    if (uploadedNewImages.length > 0) {
       await Promise.all(
-        uploadedNewImages.map((image) =>
-          s3Util.deleteImageFromBucket(image).catch((err) =>
-            logger.error("Rollback failed to delete uploaded image", { image, err })
-          )
+        uploadedNewImages.map((publicId) =>
+          deleteImageFromCloudinary(publicId).catch(() => {})
         )
       );
     }
+
+    //      if (uploadedNewImages.length > 0) {
+    //   await Promise.all(
+    //     uploadedNewImages.map((image) =>
+    //       s3Util.deleteImageFromBucket(image).catch((err) =>
+    //         logger.error("Rollback failed to delete uploaded image", { image, err })
+    //       )
+    //     )
+    //   );
+    // }
       throw error;
     }
   };

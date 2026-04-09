@@ -35,6 +35,7 @@ import { mapToVendorLoginDTO } from "../../../../mappers.ts/vendor.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 import { VerificationStatus } from "../../../../constants/status";
 import { ForbiddenError } from "../../../../utils/errors/forbidden.error";
+import { uploadImageFromUrlToCloudinary } from "../../../../utils/cloudinary.util";
 
 @injectable()
 export default class VendorAuthService implements IVendorAuthService {
@@ -319,27 +320,55 @@ export default class VendorAuthService implements IVendorAuthService {
         let isVerified = VerificationStatus.Pending;
         name = name.toLowerCase();
 
-        let profileImageKey: string | undefined = undefined;
-        if (profileImage) {
-          try {
-            profileImageKey = await storeGoogleImageToS3(profileImage, name);
-            logger.info("Uploaded Google profile image to S3", {
-              profileImageKey,
-            });
-          } catch (uploadError) {
-            logger.warn(
-              "Failed to upload Google image to S3, using original URL instead",
-              uploadError
-            );
-            profileImageKey = profileImage;
-          }
-        }
+        // let profileImageKey: string | undefined = undefined;
+        // if (profileImage) {
+        //   try {
+        //     profileImageKey = await storeGoogleImageToS3(profileImage, name);
+        //     logger.info("Uploaded Google profile image to S3", {
+        //       profileImageKey,
+        //     });
+        //   } catch (uploadError) {
+        //     logger.warn(
+        //       "Failed to upload Google image to S3, using original URL instead",
+        //       uploadError
+        //     );
+        //     profileImageKey = profileImage;
+        //   }
+        // }
+let profileImageData: { publicId: string; url: string } | undefined;
+
+if (profileImage) {
+  try {
+    const imageName = `${name}-google-${Date.now()}`;
+
+    profileImageData = await uploadImageFromUrlToCloudinary(
+      profileImage,
+      imageName,
+      "vendor/profile"
+    );
+
+    logger.info("Uploaded Google profile image to Cloudinary", {
+      publicId: profileImageData.publicId,
+    });
+  } catch (error) {
+    logger.warn(
+      "Failed to upload Google image, using original URL",
+      error
+    );
+
+    // fallback (optional)
+    profileImageData = {
+      publicId: profileImage, // not ideal but fallback
+      url: profileImage,
+    };
+  }
+}
 
         vendorData = await this._vendorAuthRepository.createVendor({
           name,
           email,
           isVerified,
-          profileImage: profileImageKey,
+          profileImage: profileImageData,
         });
       }
 
