@@ -21,7 +21,6 @@ import { BookingStatus, EventStatus } from "../../constants/status";
 //   ReportingTime: { type: String },
 //   NoOfPax: { type: Number },
 //   Bonus: { type: Number },
-
 // });
 
 

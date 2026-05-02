@@ -54,6 +54,34 @@ export const deleteRedisData = async (key: string) => {
   }
 };
 
+// SESSION MANAGEMENT
+export const setUserSession = async (
+  userId: string,
+  refreshToken: string,
+  ttl: number
+) => {
+  return await setRedisData(`session:${userId}`, refreshToken, ttl);
+};
+
+export const getUserSession = async (userId: string) => {
+  return await getRedisData(`session:${userId}`);
+};
+
+export const deleteUserSession = async (userId: string) => {
+  return await deleteRedisData(`session:${userId}`);
+};
+
+// BLACKLIST: refreshToken → "1"
+export const blacklistToken = async (
+  token: string,
+  ttl: number
+) => {
+  return await setRedisData(`blacklist:${token}`, "1", ttl);
+};
+
+export const isTokenBlacklisted = async (token: string) => {
+  return await getRedisData(`blacklist:${token}`);
+};
 
 (async () => {
   try {
@@ -68,5 +96,6 @@ export const deleteRedisData = async (key: string) => {
     console.error("Error initializing serviceBoy:idCounter:", error);
   }
 })();
+
 
 export default redisClient;

@@ -9,13 +9,13 @@ import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { sendForgotPasswordLink } from "../../../../utils/otp.util";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
-import { getRedisData, setRedisData } from "../../../../utils/redis.util";
+import { setRedisData } from "../../../../utils/redis.util";
 import { decodeRefreshToken } from "../../../../utils/jwt.util";
-import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import {
   ACCESS_TOKEN_MAX_AGE,
   REFRESH_TOKEN_MAX_AGE,
 } from "../../../../config/env";
+import { validateRefreshSession } from "../../../../utils/authSession.utils";
 
 @injectable()
 export default class VendorAuthController implements IVendorAuthController {
@@ -55,7 +55,12 @@ export default class VendorAuthController implements IVendorAuthController {
     try {
       const { email, otp } = req.body;
       logger.info("Verifying OTP for vendor", { email });
-      let vendorData = await this._vendorAuthService.verifyOTP(email, otp);
+      const oldRefreshToken = req.cookies?.refreshToken;
+      let vendorData = await this._vendorAuthService.verifyOTP(
+        email,
+        otp,
+        oldRefreshToken
+      );
       logger.debug("OTP verified result", { vendorData });
       if (vendorData) {
         // set access token and refresh token in coockies
@@ -123,9 +128,12 @@ export default class VendorAuthController implements IVendorAuthController {
   ): Promise<void> => {
     try {
       const { email, password } = req.body;
+      const oldRefreshToken = req.cookies?.refreshToken;
+
       const vendorData = await this._vendorAuthService.vendorLogin(
         email,
-        password
+        password,
+        oldRefreshToken
       );
 
       if (!vendorData) {
@@ -246,22 +254,24 @@ export default class VendorAuthController implements IVendorAuthController {
               HttpStatusCode.UNAUTHORIZED
             )
           );
+        return;
       }
 
-      const isBlacklisted = await getRedisData(refreshToken);
-      if (isBlacklisted) {
-        throw new UnAuthorizedError(ResponseMessage.BLACK_LISTED_TOKEN);
-      }
+      await validateRefreshSession(refreshToken);
 
       const result = await this._vendorAuthService.setNewAccessToken(
         refreshToken
       );
+
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: ACCESS_TOKEN_MAX_AGE,
-        sameSite: "strict",
+        sameSite: "lax",
       });
+
+      logger.info("Vendor new access token generated successfully");
+
       res
         .status(HttpStatusCode.OK)
         .json(
@@ -280,10 +290,14 @@ export default class VendorAuthController implements IVendorAuthController {
   ): Promise<void> => {
     try {
       const { googleToken } = req.body;
+      const refreshToken = req.cookies?.refreshToken;
       logger.info("Google auth started for vendor");
-      const vendorData = await this._vendorAuthService.googleAuth({
-        googleToken,
-      });
+      const vendorData = await this._vendorAuthService.googleAuth(
+        {
+          googleToken,
+        },
+        refreshToken
+      );
       if (!vendorData)
         throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
@@ -332,6 +346,7 @@ export default class VendorAuthController implements IVendorAuthController {
               HttpStatusCode.BAD_REQUEST
             )
           );
+        return;
       }
 
       const decoded = decodeRefreshToken(refreshToken);
@@ -340,7 +355,7 @@ export default class VendorAuthController implements IVendorAuthController {
         const now = Math.floor(Date.now() / 1000);
         const ttl = decoded.exp - now;
 
-        await setRedisData(refreshToken, "blacklisted", ttl);
+        await setRedisData(`blacklist:${refreshToken}`, "1", ttl);
       }
 
       res.clearCookie("refreshToken", {

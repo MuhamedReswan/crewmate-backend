@@ -36,6 +36,7 @@ import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 import { VerificationStatus } from "../../../../constants/status";
 import { ForbiddenError } from "../../../../utils/errors/forbidden.error";
 import { uploadImageFromUrlToCloudinary } from "../../../../utils/cloudinary.util";
+import { handleSessionOnLogin } from "../../../../utils/authSession.utils";
 
 @injectable()
 export default class VendorAuthService implements IVendorAuthService {
@@ -88,7 +89,8 @@ export default class VendorAuthService implements IVendorAuthService {
 
   async verifyOTP(
     email: string,
-    otp: string
+    otp: string,
+    oldRefreshToken?: string
   ): Promise<VendorLoginResponse | void> {
     try {
       logger.debug("Verifying OTP in service", { email, otp });
@@ -136,6 +138,12 @@ export default class VendorAuthService implements IVendorAuthService {
           role,
         });
 
+    await handleSessionOnLogin(
+      createdVendor._id.toString(),
+      refreshToken,
+      oldRefreshToken
+    );
+
         return { vendor, accessToken, refreshToken };
       }
     } catch (error) {
@@ -145,7 +153,7 @@ export default class VendorAuthService implements IVendorAuthService {
 
   async resendOtp(email: string): Promise<void> {
     try {
-      await deleteRedisData(`otpV${email}`);
+      await deleteRedisData(`otpV:${email}`);
       const otp = createOtp();
       await setRedisData(`otpV:${email}`, JSON.stringify({ otp }), 60);
       logger.debug("OTP resent and saved in Redis", {
@@ -162,7 +170,8 @@ export default class VendorAuthService implements IVendorAuthService {
 
   async vendorLogin(
     email: string,
-    password: string
+    password: string,
+    oldRefreshToken?: string
   ): Promise<VendorLoginResponse> {
     try {
       const vendorData = await this._vendorAuthRepository.findVendorByEmail(
@@ -194,6 +203,12 @@ export default class VendorAuthService implements IVendorAuthService {
         name: vendorData.name,
         role,
       });
+
+ await handleSessionOnLogin(
+    vendorData._id.toString(),
+    refreshToken,
+    oldRefreshToken
+  );
 
       return { vendor, accessToken, refreshToken };
     } catch (error) {
@@ -291,7 +306,7 @@ export default class VendorAuthService implements IVendorAuthService {
     }
   }
 
-  googleAuth = async (data: GoogleLogin): Promise<VendorLoginResponse> => {
+  googleAuth = async (data: GoogleLogin, oldRefreshToken?: string): Promise<VendorLoginResponse> => {
     try {
       const { googleToken } = data;
       logger.info("Google auth started");
@@ -388,6 +403,12 @@ if (profileImage) {
         name: vendorData.name,
         role,
       });
+
+      await handleSessionOnLogin(
+  vendorData._id.toString(),
+  refreshToken,
+  oldRefreshToken
+);
 
       return { vendor, accessToken, refreshToken };
     } catch (error) {

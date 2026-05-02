@@ -36,6 +36,7 @@ import { VerificationStatus } from "../../../../constants/status";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import { ForbiddenError } from "../../../../utils/errors/forbidden.error";
 import { uploadImageFromUrlToCloudinary } from "../../../../utils/cloudinary.util";
+import { handleSessionOnLogin } from "../../../../utils/authSession.utils";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -91,7 +92,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   async verifyOTP(
     email: string,
-    otp: string
+    otp: string,
+    oldRefreshToken?: string
   ): Promise<ServiceBoyLoginResponse | void> {
     try {
       logger.info(`Verifying OTP for: ${email}`);
@@ -145,6 +147,13 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           name: createdBoy.name,
           role: role,
         });
+
+    await handleSessionOnLogin(
+      createdBoy._id.toString(),
+      refreshToken,
+      oldRefreshToken
+    );
+
         return { serviceBoy, accessToken, refreshToken };
       }
     } catch (error) {
@@ -154,7 +163,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   async serviceBoyLogin(
     email: string,
-    password: string
+    password: string,
+    oldRefreshToken?: string
   ): Promise<ServiceBoyLoginResponse> {
     try {
 
@@ -171,7 +181,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
       }
 
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
-
+      
       const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({
         id: serviceBoyData._id.toString(),
@@ -185,6 +195,14 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         name: serviceBoyData.name,
         role: role,
       });
+
+    // SINGLE LINE (replaces all Redis + blacklist logic)
+    await handleSessionOnLogin(
+      serviceBoyData._id.toString(),
+      refreshToken,
+      oldRefreshToken
+    );
+
       return { serviceBoy, accessToken, refreshToken };
     } catch (error) {
       throw error;
@@ -194,8 +212,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
   async resendOtp(email: string): Promise<void> {
     try {
       logger.info(`Resend OTP for email service layer: ${email}`);
-      await getRedisData(`otpB${email}`);
-      await deleteRedisData(`otpB${email}`);
+      await getRedisData(`otpB:${email}`);
+      await deleteRedisData(`otpB:${email}`);
       const otp = createOtp();
       logger.info("resend otp------------", { otp });
       await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 60);
@@ -230,16 +248,10 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         role: Role.SERVICE_BOY,
       });
 
-      const refreshToken = await generateRefreshToken({
-        id: serviceBoy._id.toString(),
-        email: serviceBoy.email,
-        name: serviceBoy.name,
-        role: Role.SERVICE_BOY,
-      });
       logger.info(`New tokens generated for: ${decoded.email}`);
       return {
         accessToken,
-        refreshToken,
+        refreshToken : Token,
         message: ResponseMessage.TOKEN_SET_SUCCESS,
         success: true,
       };
@@ -282,7 +294,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
   };
 
   googleAuth = async (
-    data: GoogleLogin
+    data: GoogleLogin,
+     oldRefreshToken?: string
   ): Promise<ServiceBoyLoginResponse | undefined> => {
     try {
       logger.info("Google auth initiated");
@@ -382,6 +395,13 @@ if (profileImage) {
         name: serviceBoyData.name,
         role: role,
       });
+
+  await handleSessionOnLogin(
+      serviceBoyData._id.toString(),
+      refreshToken,
+      oldRefreshToken
+    );
+
 
       return { serviceBoy, accessToken, refreshToken };
     } catch (error) {

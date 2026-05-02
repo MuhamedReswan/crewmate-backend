@@ -15,6 +15,7 @@ import bcrypt from "bcrypt";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import { handleSessionOnLogin } from "../../../../utils/authSession.utils";
 
 @injectable()
 export default class AdminAuthService implements IAdminAuthService {
@@ -25,7 +26,8 @@ export default class AdminAuthService implements IAdminAuthService {
 
   async verifyLogin(
     email: string,
-    password: string
+    password: string,
+    oldRefreshToken?: string
   ): Promise<LoginResponse<IAdmin, Role.ADMIN>> {
     try {
       logger.info("Admin login attempt", { email });
@@ -38,7 +40,9 @@ export default class AdminAuthService implements IAdminAuthService {
         logger.warn(`Invalid credentials for email: ${email}`);
         throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
       } else {
+
         const role = Role.ADMIN;
+
         const accessToken = generateAccessToken({
           id: adminData._id.toString(),
           email: adminData.email,
@@ -51,6 +55,12 @@ export default class AdminAuthService implements IAdminAuthService {
           name: adminData.name,
           role: role,
         });
+
+            await handleSessionOnLogin(
+      adminData._id.toString(),
+      refreshToken,
+      oldRefreshToken
+    );
         logger.info("Admin login successful", { adminData });
         return { [role]: adminData, accessToken, refreshToken };
       }
@@ -62,7 +72,6 @@ export default class AdminAuthService implements IAdminAuthService {
   async setNewAccessToken(refreshToken: string): Promise<CustomTokenResponse> {
     try {
       const decoded = await verifyRefreshToken(refreshToken);
-      const role = decoded?.role === Role.ADMIN ? Role.ADMIN : Role.ADMIN;
       logger.debug("decoded data in setNewAccessToken in admin auth service", {
         decoded,
       });
@@ -76,7 +85,7 @@ export default class AdminAuthService implements IAdminAuthService {
         id: admin._id.toString(),
         email: admin.email,
         name: admin.name,
-        role,
+        role: Role.ADMIN,
       });
 
       return {

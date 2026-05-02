@@ -22,7 +22,7 @@ export const generateAccessToken = (details: TokenPayload) => {
       role: details.role,
     },
     accessTokenSecret,
-    { expiresIn: "50m" }
+    { expiresIn: "3m" }
   );
 };
 

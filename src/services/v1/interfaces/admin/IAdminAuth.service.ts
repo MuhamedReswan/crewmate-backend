@@ -4,6 +4,10 @@ import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
 
 export interface IAdminAuthService {
-    verifyLogin(email: string, password: string): Promise<LoginResponse<IAdmin,Role.ADMIN>>  
-    setNewAccessToken(refreshToken: string): Promise<CustomTokenResponse>     
+  verifyLogin(
+    email: string,
+    password: string,
+    oldRefreshToken?: string
+  ): Promise<LoginResponse<IAdmin, Role.ADMIN>>;
+  setNewAccessToken(refreshToken: string): Promise<CustomTokenResponse>;
 }

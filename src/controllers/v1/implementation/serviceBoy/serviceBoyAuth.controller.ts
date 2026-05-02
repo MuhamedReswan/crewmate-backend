@@ -9,18 +9,20 @@ import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { decodeRefreshToken } from "../../../../utils/jwt.util";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
-import { getRedisData, setRedisData } from "../../../../utils/redis.util";
-import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
-import { ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_MAX_AGE } from "../../../../config/env";
+import { setRedisData } from "../../../../utils/redis.util";
+import {
+  ACCESS_TOKEN_MAX_AGE,
+  REFRESH_TOKEN_MAX_AGE,
+} from "../../../../config/env";
+import { validateRefreshSession } from "../../../../utils/authSession.utils";
 
 @injectable()
 export default class ServiceBoyAuthController
   implements IServiceBoyAuthController
 {
-
   constructor(
     @inject("IServiceBoyAuthService")
-   private _serviceBoyAuthService: IServiceBoyAuthService
+    private _serviceBoyAuthService: IServiceBoyAuthService
   ) {}
 
   register = async (
@@ -30,10 +32,10 @@ export default class ServiceBoyAuthController
   ): Promise<void> => {
     try {
       const { name, email, password, mobile } = req.body;
-logger.debug("Register controller received: " + JSON.stringify(req.body));
+      logger.debug("Register controller received: " + JSON.stringify(req.body));
       await this._serviceBoyAuthService.register(name, email, password, mobile);
       await this._serviceBoyAuthService.generateOTP(email);
-           logger.info(`OTP generated and sent to email: ${email}`);
+      logger.info(`OTP generated and sent to email: ${email}`);
       res
         .status(HttpStatusCode.CREATED)
         .json(
@@ -56,33 +58,39 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
   ): Promise<void> => {
     try {
       const { email, otp } = req.body;
-            logger.info(`Verifying OTP for email: ${email}`);
-      let serviceBoyData = await this._serviceBoyAuthService.verifyOTP(email, otp);
+      logger.info(`Verifying OTP for email: ${email}`);
+      const oldRefreshToken = req.cookies?.refreshToken;
+      let serviceBoyData = await this._serviceBoyAuthService.verifyOTP(
+        email,
+        otp,
+        oldRefreshToken
+      );
       logger.debug("verifyOTP result: " + JSON.stringify(serviceBoyData));
       if (serviceBoyData) {
+        // set access token and refresh token in coockies
+        res.cookie("refreshToken", serviceBoyData.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          maxAge: REFRESH_TOKEN_MAX_AGE,
+          sameSite: "lax",
+        });
+        res.cookie("accessToken", serviceBoyData.accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          maxAge: ACCESS_TOKEN_MAX_AGE,
+          sameSite: "lax",
+        });
 
-         // set access token and refresh token in coockies
-      res.cookie("refreshToken", serviceBoyData.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: REFRESH_TOKEN_MAX_AGE,
-        sameSite: "lax",
-      });
-      res.cookie("accessToken", serviceBoyData.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: ACCESS_TOKEN_MAX_AGE,
-        sameSite: "lax",
-      });
-       
-         logger.info(`OTP verified. Access and Refresh tokens generated for: ${email}`);
+        logger.info(
+          `OTP verified. Access and Refresh tokens generated for: ${email}`
+        );
         res
           .status(HttpStatusCode.OK)
           .json(
             responseHandler(
               ResponseMessage.OTP_VERIFICATION_SUCCESS,
               HttpStatusCode.OK,
-               serviceBoyData.serviceBoy 
+              serviceBoyData.serviceBoy
             )
           );
       } else {
@@ -110,14 +118,12 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       const { email } = req.body;
       logger.info(`Resending OTP to email: ${email}`);
       await this._serviceBoyAuthService.resendOtp(email);
-      res
-        .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(ResponseMessage.RESEND_OTP_SEND, HttpStatusCode.OK, {
-            email,
-            success: true,
-          })
-        );
+      res.status(HttpStatusCode.OK).json(
+        responseHandler(ResponseMessage.RESEND_OTP_SEND, HttpStatusCode.OK, {
+          email,
+          success: true,
+        })
+      );
     } catch (error) {
       logger.error("Service Boy Resend OTP error", error);
       next(error);
@@ -133,12 +139,13 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       const { email, password } = req.body;
       const serviceBoyData = await this._serviceBoyAuthService.serviceBoyLogin(
         email,
-        password
+        password,
+        req.cookies?.refreshToken
       );
 
-    if (!serviceBoyData) {
+      if (!serviceBoyData) {
         throw new NotFoundError(ResponseMessage.LOGIN_VERIFICATION_FAILED);
-        }
+      }
 
       // set access token and refresh token in coockies
       res.cookie("refreshToken", serviceBoyData.refreshToken, {
@@ -177,7 +184,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const refreshToken = req.cookies?.refreshToken;
       if (!refreshToken) {
-         logger.warn("No refresh token found in cookies");
+        logger.warn("No refresh token found in cookies");
         res
           .status(HttpStatusCode.UNAUTHORIZED)
           .json(
@@ -186,14 +193,13 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
               HttpStatusCode.UNAUTHORIZED
             )
           );
+        return;
       }
 
+      const decoded = await validateRefreshSession(refreshToken);
 
-          const isBlacklisted = await getRedisData(refreshToken);
-      if (isBlacklisted) {
-        throw new UnAuthorizedError(ResponseMessage.BLACK_LISTED_TOKEN);
-      }
-
+      // (optional) you can log decoded user
+      logger.debug("Refresh token valid for user:", decoded.id);
 
       const result = await this._serviceBoyAuthService.setNewAccessToken(
         refreshToken
@@ -202,7 +208,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: ACCESS_TOKEN_MAX_AGE,
-        sameSite: "strict",
+        sameSite: "lax",
       });
       logger.info("New access token set successfully");
       res
@@ -211,7 +217,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
           responseHandler(ResponseMessage.ACCESS_TOKEN_SET, HttpStatusCode.OK)
         );
     } catch (error) {
-       logger.error("Set New Access Token error", error);
+      logger.error("Set New Access Token error", error);
       next(error);
     }
   };
@@ -229,7 +235,11 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
       );
       if (!forgotToken)
         throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
-      await this._serviceBoyAuthService.resetPasswordLink(email, forgotToken,Role.SERVICE_BOY);
+      await this._serviceBoyAuthService.resetPasswordLink(
+        email,
+        forgotToken,
+        Role.SERVICE_BOY
+      );
       res
         .status(HttpStatusCode.OK)
         .json(
@@ -251,7 +261,7 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
   ): Promise<void> => {
     try {
       const { email, password, token } = req.body;
-        logger.info(`Resetting password for email: ${email}`);
+      logger.info(`Resetting password for email: ${email}`);
       if (token) {
         await this._serviceBoyAuthService.resetPasswordTokenVerify(
           email,
@@ -270,11 +280,10 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
           )
         );
     } catch (error) {
-            logger.error("Reset password error", error);
+      logger.error("Reset password error", error);
       next(error);
     }
   };
-
 
   googleAuth = async (
     req: Request,
@@ -284,15 +293,23 @@ logger.debug("Register controller received: " + JSON.stringify(req.body));
     try {
       const { googleToken } = req.body;
       logger.info("Google login token received");
-        const serviceBoyData = await this._serviceBoyAuthService.googleAuth({googleToken});
+      const oldRefreshToken = req.cookies?.refreshToken;
+      const serviceBoyData = await this._serviceBoyAuthService.googleAuth(
+        { googleToken },
+        oldRefreshToken
+      );
       console.log("Google auth result: " + JSON.stringify(serviceBoyData));
-if(!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
+      if (!serviceBoyData)
+        throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
-console.log("google auth controller serviceBoyData",serviceBoyData);
+      console.log("google auth controller serviceBoyData", serviceBoyData);
 
-console.log("google auth controller serviceBoyData.serviceBoy",serviceBoyData.serviceBoy);
+      console.log(
+        "google auth controller serviceBoyData.serviceBoy",
+        serviceBoyData.serviceBoy
+      );
 
-logger.info("Google login token received",{})
+      logger.info("Google login token received", {});
       // set access token and refresh token in coockies
       res.cookie("refreshToken", serviceBoyData.refreshToken, {
         httpOnly: true,
@@ -327,37 +344,38 @@ logger.info("Google login token received",{})
     next: NextFunction
   ): Promise<void> => {
     try {
+      const refreshToken = req.cookies?.refreshToken;
 
-const refreshToken = req.cookies?.refreshToken;
+      if (!refreshToken) {
+        //  res.status(HttpStatusCode.BAD_REQUEST)
+        //  .json(
+        //   responseHandler
+        //   (ResponseMessage.INVALID_REFRESH_TOKEN,
+        //     HttpStatusCode.BAD_REQUEST));
 
-  if (!refreshToken) {
-  //  res.status(HttpStatusCode.BAD_REQUEST)
-  //  .json(
-  //   responseHandler
-  //   (ResponseMessage.INVALID_REFRESH_TOKEN,
-  //     HttpStatusCode.BAD_REQUEST));
+        res
+          .status(HttpStatusCode.OK)
+          .json(
+            responseHandler(
+              ResponseMessage.LOGOUT_SUCCESS,
+              HttpStatusCode.OK,
+              true
+            )
+          );
+        return;
+      }
 
-     res
-        .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.LOGOUT_SUCCESS,
-            HttpStatusCode.OK,
-            true
-          )
-        );
-  }
+      const decoded = decodeRefreshToken(refreshToken);
+      logger.info("decoded token in sevicebOy logout controller", { decoded });
 
-  const decoded =decodeRefreshToken(refreshToken);
-  logger.info("decoded token in sevicebOy logout controller",{decoded});
+      if (decoded?.exp) {
+        const now = Math.floor(Date.now() / 1000);
+        const ttl = decoded.exp - now;
 
-    if (decoded?.exp) {
-      const now = Math.floor(Date.now() / 1000);
-      const ttl = decoded.exp - now;
+        // await setRedisData(refreshToken, "blacklisted", ttl);
+        await setRedisData(`blacklist:${refreshToken}`, "1", ttl);
+      }
 
-      await setRedisData(refreshToken, "blacklisted", ttl);
-    }
-      
       res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -369,7 +387,7 @@ const refreshToken = req.cookies?.refreshToken;
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       });
-      
+
       res
         .status(HttpStatusCode.OK)
         .json(
@@ -380,25 +398,24 @@ const refreshToken = req.cookies?.refreshToken;
           )
         );
     } catch (error) {
-        logger.error("Logout error", error);
+      logger.error("Logout error", error);
       next(error);
     }
   };
 
-
-
-   tokenTest = (req:Request, res:Response, next:NextFunction): void => {
+  tokenTest = (req: Request, res: Response, next: NextFunction): void => {
     try {
       res
-      .status(HttpStatusCode.OK)
-      .json(
-        responseHandler(
-          ResponseMessage.TEST_TOKEN_SUCCESS,
-          HttpStatusCode.OK,
-          true
-        ));
+        .status(HttpStatusCode.OK)
+        .json(
+          responseHandler(
+            ResponseMessage.TEST_TOKEN_SUCCESS,
+            HttpStatusCode.OK,
+            true
+          )
+        );
     } catch (error) {
-       logger.error("Token test error", error);
+      logger.error("Token test error", error);
       next(error);
     }
   };
