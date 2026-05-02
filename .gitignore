@@ -5,4 +5,5 @@ logs/
 *.audit.json
 tsconfig.tsbuildinfo
 coverage/
+.env
 
