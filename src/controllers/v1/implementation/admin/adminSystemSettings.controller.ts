@@ -19,7 +19,7 @@ export class AdminSystemSettingsController implements IAdminSystemSettingsContro
     try {
       const settings = await this._systemSettingsService.getSettings();
       res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json(
           responseHandler(
             ResponseMessage.SYSTEM_SETTINGS_LOAD_SUCCESS,
@@ -36,7 +36,7 @@ export class AdminSystemSettingsController implements IAdminSystemSettingsContro
     try {
       const updated = await this._systemSettingsService.updateSettings(req.body);
       res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json(
           responseHandler(
             ResponseMessage.SYSTEM_SETTINGS_UPDATE_SUCCESS,

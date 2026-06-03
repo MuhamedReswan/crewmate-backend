@@ -24,7 +24,7 @@ export default class AdminServiceBoyController implements IAdminServiceBoyContro
         try {
             const seviceBoysForVerification  = await this._adminServiceBoyService.loadAllPendingVerification()
             logger.info("seviceBoysForVerification",{seviceBoysForVerification});
-            res.status(200).json(responseHandler(ResponseMessage.LOAD_VERIFICATION_SUCCESS, HttpStatusCode.OK, seviceBoysForVerification ));
+            res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VERIFICATION_SUCCESS, HttpStatusCode.OK, seviceBoysForVerification ));
         } catch (error) {
             logger.error("getAllServiceBoysPendingVerification error", error );
             next(error)
@@ -58,7 +58,7 @@ logger.debug("verification rejection reason ",{reason});
         ? ResponseMessage.VERIFICATION_STATUS_REJECTED_SUCCESS
         : ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS;
 
-        res.status(200).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
+        res.status(HttpStatusCode.OK).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
     } catch (error) {
         next(error)
     }
@@ -80,7 +80,7 @@ try {
     }
     const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
     const result = await this._adminServiceBoyService.getPaginatedServiceBoys(page, limit, search,isBlocked);
-    res.status(200).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
 } catch (error) {
   next(error)
@@ -95,7 +95,7 @@ try {
 try {
 const {id} = req.params;
     const result = await this._adminServiceBoyService.getServiceBoyById(id);
-    res.status(200).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
 } catch (error) {
   next(error)
@@ -123,7 +123,7 @@ const {isVerified} =req.query
         );
         return
     }
-    res.status(200).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
 } catch (error) {
   next(error)
@@ -140,7 +140,7 @@ const {isVerified} =req.query
 const { id, status } = req.params;
 const updateServiceBoy = await this._adminServiceBoyService.updateServiceBoyStatus(id, status); 
 logger.info("updateServiceBoy",{updateServiceBoy});
-  res.status(200).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS,HttpStatusCode.OK));
+  res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS,HttpStatusCode.OK));
 
         } catch (error) {
          next(error);

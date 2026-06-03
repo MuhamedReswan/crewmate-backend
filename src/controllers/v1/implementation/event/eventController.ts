@@ -37,7 +37,7 @@ export default class EventController implements IEventController {
 
       if (event) {
         res
-          .status(200)
+          .status(HttpStatusCode.OK)
           .json(
             responseHandler(
               ResponseMessage.EVENT_CREATION_SUCCESS,
@@ -66,7 +66,7 @@ getEvents = async (
 }
    const events = await this._eventService.getEvents(req.user,req.query);
     res
-      .status(200)
+      .status(HttpStatusCode.OK)
       .json(
         responseHandler(
           ResponseMessage.LOAD_EVENT_SUCCESS,
@@ -96,7 +96,7 @@ getEvents = async (
 //     const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
 
 //     if (!req.params.vendorId) {
-//       res.status(400)
+//       res.status(HttpStatusCode.BAD_REQUEST)
 //       .json(
 //        responseHandler(
 //           ResponseMessage.VENDOR_ID_MISSING,
@@ -125,7 +125,7 @@ getEvents = async (
 //     logger.debug("getEvents out in controller",{events})
 
 //     res
-//       .status(200)
+//       .status(HttpStatusCode.OK)
 //       .json(
 //         responseHandler(
 //           ResponseMessage.LOAD_EVENT_SUCCESS,
@@ -157,7 +157,7 @@ getWorks = async (
     const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
 
     // if (!req.params.vendorId) {
-    //   res.status(400).json({ message: "vendorId is required" });
+    //   res.status(HttpStatusCode.BAD_REQUEST).json({ message: "vendorId is required" });
     //   return;
     // }
 
@@ -179,7 +179,7 @@ getWorks = async (
     logger.debug("getWorks out in controller",{works})
 
     res
-      .status(200)
+      .status(HttpStatusCode.OK)
       .json(
         responseHandler(
           ResponseMessage.LOAD_WORKS_SUCCESS,
@@ -205,12 +205,12 @@ updateEvent = async (
      const updatedEvent = await this._eventService.updateEvent(eventId, updateData);
         
       if (!updatedEvent) {
-       res.status(404).json({
+       res.status(HttpStatusCode.NOT_FOUND).json({
         message: ResponseMessage.EVENT_NOT_FOUND,
       });
     }
 
-     res.status(200).json({
+     res.status(HttpStatusCode.OK).json({
       message:ResponseMessage.EVENT_UPDATION_SUCCESS,
       data: updatedEvent,
     });
@@ -231,12 +231,12 @@ changeBookingStatus = async (
      const bookingUpdatedEvent = await this._eventService.updateEvent(eventId, bookingStatus);
         
       if (!bookingUpdatedEvent) {
-       res.status(404).json({
+       res.status(HttpStatusCode.NOT_FOUND).json({
         message: ResponseMessage.EVENT_NOT_FOUND,
       });
     }
 
-     res.status(200).json({
+     res.status(HttpStatusCode.OK).json({
       message: ResponseMessage.BOOKING_STATUS_UPDATED ,
       data: bookingUpdatedEvent,
     });

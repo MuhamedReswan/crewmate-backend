@@ -37,7 +37,7 @@ export default class ServiceBoyController implements IServiceBoyController {
       logger.info("serviceBoyProfile from controleer", serviceBoyProfile);
 
       res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json(
           responseHandler(
             ResponseMessage.LOAD_PROFILE_SUCCESS,
@@ -67,7 +67,7 @@ export default class ServiceBoyController implements IServiceBoyController {
       );
       if (updatedProfile) {
         res
-          .status(200)
+          .status(HttpStatusCode.OK)
           .json(
             responseHandler(
               ResponseMessage.PROFILE_UPDATED,
@@ -77,7 +77,7 @@ export default class ServiceBoyController implements IServiceBoyController {
           );
       } else {
         res
-          .status(400)
+          .status(HttpStatusCode.BAD_REQUEST)
           .json(
             responseHandler(
               ResponseMessage.PROFILE_UPDATION_FAILED,
@@ -116,7 +116,7 @@ export default class ServiceBoyController implements IServiceBoyController {
         return;
       }
       res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json(
           responseHandler(
             ResponseMessage.RETRY_VERIFICATION_SENT,
@@ -139,7 +139,7 @@ export default class ServiceBoyController implements IServiceBoyController {
       logger.debug("loadServiceBoyId-id from controller", { id });
 
       if (!req.params.id) {
-        res.status(400).json({ message: "serviceBoy ID is required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "serviceBoy ID is required" });
         return;
       }
 
@@ -150,7 +150,7 @@ export default class ServiceBoyController implements IServiceBoyController {
       logger.info("loadServiceBoyId from controller", serviceBoy);
 
       res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json(
           responseHandler(
             ResponseMessage.UPDATE_STATUS_SUCCESS,
