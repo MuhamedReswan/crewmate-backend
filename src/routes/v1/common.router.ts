@@ -5,6 +5,7 @@ import { authMiddleware } from "../../middleware/auth.middleware";
 import { authorize } from "../../middleware/authorize.middleware";
 import { Role } from "../../constants/Role";
 import { IEventController } from "../../controllers/v1/interfaces/event/IEventController";
+import { HttpStatusCode } from "../../constants/httpStatusCode";
 
 const commonController = container.resolve<ICommonController>('ICommonController');
 const eventController = container.resolve<IEventController>('IEventController');
@@ -24,7 +25,7 @@ router.get(
 );
 
 router.get("/health-check", (req, res) => {
-  res.status(200).json({
+  res.status(HttpStatusCode.OK).json({
     status: "ok",
     service: "CrewMate API",
     env: process.env.NODEENV,

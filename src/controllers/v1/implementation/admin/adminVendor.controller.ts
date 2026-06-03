@@ -3,11 +3,11 @@ import { NextFunction, Request, Response } from "express";
 import logger from "../../../../utils/logger.util";
 import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { HttpStatusCode } from "axios";
 import { VerificationStatus, VerificationStatusType } from "../../../../constants/status";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { IAdminVendorController } from "../../interfaces/admin/IAdminVendor.controller";
 import { IAdminVendorService } from "../../../../services/v1/interfaces/admin/IAdminVendor.service";
+import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 
 
 @injectable()
@@ -21,7 +21,7 @@ constructor(@inject("IAdminVendorService") private _adminVendorService:IAdminVen
 try {
     const vendorsForVerification = await this._adminVendorService.loadAllPendingVerification();
       logger.info("seviceBoysForVerification",{vendorsForVerification});
-            res.status(200).json(responseHandler(ResponseMessage.LOAD_VERIFICATION_SUCCESS, HttpStatusCode.Ok, vendorsForVerification ));
+            res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VERIFICATION_SUCCESS, HttpStatusCode.OK, vendorsForVerification ));
 } catch (error) {
     next(error)
 }
@@ -40,16 +40,16 @@ const {isVerified} =req.query
     const result = await this._adminVendorService.getVendorById(id,verificationStatus);
     if(!result){
    res
-        .status(HttpStatusCode.NotFound)
+        .status(HttpStatusCode.NOT_FOUND)
         .json(
           responseHandler(
             ResponseMessage.NO_USER_TO_VERIFY_WITH_THIS,
-            HttpStatusCode.NotFound
+            HttpStatusCode.NOT_FOUND
           )
         );
         return
     }
-    res.status(200).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.Ok, result))
+    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
 } catch (error) {
   next(error)
@@ -80,7 +80,7 @@ const {isVerified} =req.query
            status === VerificationStatus.Rejected 
              ? ResponseMessage.VERIFICATION_STATUS_REJECTED_SUCCESS
              : ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS;
-          res.status(200).json(responseHandler(responseMessage,HttpStatusCode.Ok, result))
+          res.status(HttpStatusCode.OK).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
       } catch (error) {
           next(error)
       }
@@ -94,7 +94,7 @@ const {isVerified} =req.query
         try {
         const {id} = req.params;
             const result = await this._adminVendorService.getVendorById(id);
-            res.status(200).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.Ok, result))
+            res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.OK, result))
           
         } catch (error) {
           next(error)
@@ -116,7 +116,7 @@ try {
     }
     const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
     const result = await this._adminVendorService.getPaginatedVendors(page, limit, search,isBlocked);
-    res.status(200).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.Ok, result))
+    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.OK, result))
   
 } catch (error) {
   next(error)

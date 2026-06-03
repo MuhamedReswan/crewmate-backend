@@ -26,7 +26,7 @@ export default class VendorController implements IVendorController{
         const vendorProfile = await this._vendorService.loadVendorProfile({ _id });
         logger.info("vendorProfile from controller", vendorProfile);
 
-        res.status(200).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, vendorProfile));
+        res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_PROFILE_SUCCESS, HttpStatusCode.OK, vendorProfile));
     } catch (error) {
         logger.error("VendorController: loadProfile error", error);
         next(error);
@@ -45,9 +45,9 @@ export default class VendorController implements IVendorController{
         req.files as ImageFiles);
 
           if(updateVendorProfile){
-                    res.status(200).json(responseHandler( ResponseMessage.PROFILE_UPDATED,HttpStatusCode.OK, updateVendorProfile));
+                    res.status(HttpStatusCode.OK).json(responseHandler( ResponseMessage.PROFILE_UPDATED,HttpStatusCode.OK, updateVendorProfile));
                 }else{
-                    res.status(400).json(responseHandler( ResponseMessage.PROFILE_UPDATION_FAILED,HttpStatusCode.BAD_REQUEST));
+                    res.status(HttpStatusCode.BAD_REQUEST).json(responseHandler( ResponseMessage.PROFILE_UPDATION_FAILED,HttpStatusCode.BAD_REQUEST));
                 }
  }catch(error){
          logger.error("Error while updating vendor profile", error );
@@ -73,7 +73,7 @@ const verificationStatus = VerificationStatus.Pending
         );
         return
     }
-    res.status(200).json(responseHandler(ResponseMessage.RETRY_VERIFICATION_SENT,HttpStatusCode.OK))
+    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.RETRY_VERIFICATION_SENT,HttpStatusCode.OK))
   } catch (error) {
               logger.error("vendorController: retry verification error", error );
         next(error);
@@ -96,7 +96,7 @@ const verificationStatus = VerificationStatus.Pending
         const vendor = await this._vendorService.loadVendorById({ _id });
         logger.info("loadVendorById from controller", vendor);
 
-        res.status(200).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS, HttpStatusCode.OK, vendor));
+        res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS, HttpStatusCode.OK, vendor));
     } catch (error) {
         logger.error("VendorController: loadProfile error", error);
         next(error);

@@ -23,9 +23,9 @@ export default class CommonController implements ICommonController {
        let imageUrl = await this.commonService.streamImageByKey(key);
 
        if(imageUrl){
-           res.status(200).json(responseHandler(ResponseMessage.IMAGE_URL_SUCCESS, HttpStatusCode.OK, imageUrl ));
+           res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.IMAGE_URL_SUCCESS, HttpStatusCode.OK, imageUrl ));
        }else{
-           res.status(400).json(responseHandler( ResponseMessage.IMAGE_URL_FAILED,HttpStatusCode.BAD_REQUEST));
+           res.status(HttpStatusCode.BAD_REQUEST).json(responseHandler( ResponseMessage.IMAGE_URL_FAILED,HttpStatusCode.BAD_REQUEST));
        }
 
     }catch(error){
@@ -41,9 +41,9 @@ export default class CommonController implements ICommonController {
        let imageUrl = await this.commonService.getSecureDocumentUrl(publicId);
 
        if(imageUrl){
-           res.status(200).json(responseHandler(ResponseMessage.IMAGE_URL_SUCCESS, HttpStatusCode.OK, imageUrl ));
+           res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.IMAGE_URL_SUCCESS, HttpStatusCode.OK, imageUrl ));
        }else{
-           res.status(400).json(responseHandler( ResponseMessage.IMAGE_URL_FAILED,HttpStatusCode.BAD_REQUEST));
+           res.status(HttpStatusCode.BAD_REQUEST).json(responseHandler( ResponseMessage.IMAGE_URL_FAILED,HttpStatusCode.BAD_REQUEST));
        }
 
     }catch(error){
