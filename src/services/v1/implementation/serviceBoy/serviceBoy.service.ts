@@ -23,7 +23,7 @@ export default class ServiceBoyService implements IServiceBoyService {
 
   LoadProfile = async(_id:Partial<IServiceBoy>):Promise<IServiceBoy | undefined> => {
     try {
-const serviceBoyProfile = await this._serviceBoyRepository.loadProfile(_id);
+const serviceBoyProfile = await this._serviceBoyRepository.findUser(_id);
 return serviceBoyProfile;
        } catch (error) {
       throw error;
@@ -49,7 +49,7 @@ updateProfile = async (
       files.aadharImageBack?.length;
 
     if (hasAnyFile) {
-      oldServiceBoyProfile = await this._serviceBoyRepository.loadProfile({ _id: data._id });
+      oldServiceBoyProfile = await this._serviceBoyRepository.findUser({ _id: data._id });
     }
 
     const imagesToDelete: string[] = [];
@@ -114,7 +114,7 @@ updateProfile = async (
     // Update DB
     const _id = data._id;
     delete data._id;
-    const updatedProfile = await this._serviceBoyRepository.updateServiceBoy(
+    const updatedProfile = await this._serviceBoyRepository.updateUser(
       { _id },
       data
     );
@@ -158,7 +158,7 @@ updateProfile = async (
       updateData.rejectionReason = null;
     }
     
-const serviceBoyProfile = await this._serviceBoyRepository.updateServiceBoy(_id, updateData);
+const serviceBoyProfile = await this._serviceBoyRepository.updateUser(_id, updateData);
     return serviceBoyProfile;
        } catch (error) {
       throw error;
@@ -168,7 +168,7 @@ const serviceBoyProfile = await this._serviceBoyRepository.updateServiceBoy(_id,
 
     loadServiceBoyById = async(_id:Partial<IServiceBoy>):Promise<ServiceBoyLoginDTO | undefined> => {
       try {
-  const serviceBoy = await this._serviceBoyRepository.loadProfile(_id);
+  const serviceBoy = await this._serviceBoyRepository.findUser(_id);
   if(!serviceBoy)return 
     return mapToServiceBoyLoginDTO(serviceBoy);
   

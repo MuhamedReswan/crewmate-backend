@@ -14,7 +14,7 @@ export default class ServiceBoyRepository extends BaseRepository<IServiceBoy> im
     super(model);
   }
 
-  async updateServiceBoy(_id:Partial<IServiceBoy>,data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined> {
+  async updateUser(_id:Partial<IServiceBoy>,data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined> {
     try {
    logger.debug("ID from ServiceBoyRepository.updateServiceBoy", { _id });
   logger.debug("ServiceBoy update data", { data });
@@ -31,7 +31,7 @@ logger.debug("Updated profile", { updatedServiceBoy });
     }
   }
 
-async loadProfile(data:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
+async findUser(data:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
   try{
 const serviceBoyProfile = await  this.findOne(data, { password: 0 });
 
@@ -45,7 +45,7 @@ return;
     }
 }
 
-async loadAllSBPendingVerification(): Promise<IServiceBoy[] | undefined>{
+async loadAllPendingVerification(): Promise<IServiceBoy[] | undefined>{
   try {
     const query: FilterQuery<IServiceBoy> = {
   isVerified: VerificationStatus.Pending,

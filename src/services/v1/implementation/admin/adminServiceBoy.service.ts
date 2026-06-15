@@ -20,7 +20,7 @@ constructor(@inject("IServiceBoyRepository")private _serviceBoyRepository:IServi
 
 loadAllPendingVerification = async ():Promise<Partial<IServiceBoy>[] | undefined> =>{
 try {
-   const allPendingVerification  = await this._serviceBoyRepository.loadAllSBPendingVerification()
+   const allPendingVerification  = await this._serviceBoyRepository.loadAllPendingVerification()
    if(allPendingVerification) return allPendingVerification
     return 
 } catch (error) {
@@ -33,7 +33,7 @@ verifyServiceBoy = async (id:string, status:VerificationStatusType, reason?:stri
 try {
    const _id = new Types.ObjectId(id);
 
-   const serviceBoy = await this._serviceBoyRepository.loadProfile({_id});
+   const serviceBoy = await this._serviceBoyRepository.findUser({_id});
     
     if (!serviceBoy) {
       throw new BadrequestError(ResponseMessage.SERVICE_BOY_NOT_EXIST);
@@ -44,7 +44,7 @@ try {
       rejectionReason: status === VerificationStatus.Rejected ? reason : null, 
     };
 
-  const updatedServiceBoy = await this._serviceBoyRepository.updateServiceBoy({ _id }, updateData);
+  const updatedServiceBoy = await this._serviceBoyRepository.updateUser({ _id }, updateData);
    const emailStatus = status === VerificationStatus.Verified ? 'APPROVED' : 'REJECTED';
     const emailSubject = `Crewmate Account Verification - ${emailStatus}`;
 
@@ -86,9 +86,9 @@ try {
       const _id = new Types.ObjectId(id)
 
    if(isVerified){
-       return this._serviceBoyRepository.loadProfile({_id,isVerified});
+       return this._serviceBoyRepository.findUser({_id,isVerified});
    }
-      return this._serviceBoyRepository.loadProfile({_id});
+      return this._serviceBoyRepository.findUser({_id});
    } catch (error) {
       throw error;
    }
@@ -103,7 +103,7 @@ updateServiceBoyStatus = async (id:string, status:string):Promise<Partial<IServi
       const isBlocked = status ==="block"
       const _id = new Types.ObjectId(id);
       logger.debug("created _id from id string",{_id})
-     let result =  this._serviceBoyRepository.updateServiceBoy({_id},{isBlocked:isBlocked});
+     let result =  this._serviceBoyRepository.updateUser({_id},{isBlocked:isBlocked});
      logger.info("updateServiceBoyStatus result",{result});
       return
    } catch (error) {

@@ -60,7 +60,7 @@ export default class EventService implements IEventService {
     async createEvent(eventData: Partial<IEvent>): Promise<IEvent | undefined> {
     try {
       const vendor = new Types.ObjectId(eventData.vendor);
-      const vendorData = await this._vendorRepository.findVendor({ _id: vendor });
+      const vendorData = await this._vendorRepository.findUser({ _id: vendor });
 
       if (!vendorData) {
         throw new BadrequestError(ResponseMessage.VENDOR_NOT_EXIST);

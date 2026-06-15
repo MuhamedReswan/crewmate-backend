@@ -21,6 +21,7 @@ import AdminAuthController from "../controllers/v1/implementation/admin/adminAut
 import AdminVendorController from "../controllers/v1/implementation/admin/adminVendor.controller";
 import AdminServiceBoyController from "../controllers/v1/implementation/admin/adminServiceBoy.controller";
 import EventController from "../controllers/v1/implementation/event/eventController";
+import AdminUserManagementController from "../controllers/v1/implementation/admin/adminUserManagement.controller"
 import { AdminSystemSettingsController } from "../controllers/v1/implementation/admin/adminSystemSettings.controller";
 
 // =========================
@@ -35,6 +36,7 @@ import AdminAuthService from "../services/v1/implementation/admin/adminAuth.serv
 import AdminVendorService from "../services/v1/implementation/admin/adminVendor.service";
 import AdminServiceBoyService from "../services/v1/implementation/admin/adminServiceBoy.service";
 import EventService from "../services/v1/implementation/event/event.service";
+import AdminUserManagementService from "../services/v1/implementation/admin/adminUserManagement.service"
 import { AdminSystemSettingsService } from "../services/v1/implementation/admin/adminSystemSettings.service";
 
 // =========================
@@ -76,6 +78,7 @@ container.register("IVendorService", { useClass: VendorService });
 container.register("IServiceBoyAuthService", { useClass: ServiceBoyAuthService });
 container.register("IServiceBoyService", { useClass: ServiceBoyService });
 container.register("IAdminAuthService", { useClass: AdminAuthService });
+container.register("IAdminUserManagementService", { useClass: AdminUserManagementService });
 container.register("IAdminVendorService", { useClass: AdminVendorService });
 container.register("IAdminServiceBoyService", { useClass: AdminServiceBoyService });
 container.register("ICommonService", { useClass: CommonService });
@@ -89,8 +92,9 @@ container.register("IVendorAuthController", { useClass: VendorAuthController });
 container.register("IVendorController", { useClass: VendorController });
 container.register("IServiceBoyAuthController", { useClass: ServiceBoyAuthController });
 container.register("IServiceBoyController", { useClass: ServiceBoyController });
-container.register("IAdminAuthController", { useClass: AdminAuthController });
 container.register("IAdminVendorController", { useClass: AdminVendorController });
+container.register("IAdminAuthController", { useClass: AdminAuthController });
+container.register("IAdminUserManagementController", { useClass: AdminUserManagementController });
 container.register("IAdminServiceBoyController", { useClass: AdminServiceBoyController });
 container.register("ICommonController", { useClass: CommonController });
 container.register("IEventController", { useClass: EventController });

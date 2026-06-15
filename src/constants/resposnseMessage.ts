@@ -101,7 +101,7 @@ NO_USER_IN_REQUEST = "User not found in request",
 
 
 
-
+USER_NOT_EXIST = "User not found",
 
 
 

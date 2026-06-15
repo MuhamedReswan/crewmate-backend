@@ -6,7 +6,13 @@ import { responseHandler } from '../utils/responseHandler.util';
 import { HttpStatusCode } from '../constants/httpStatusCode';
 
 export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-    logger.error("Unhandled error in request", { error: err });
+    // logger.error("Unhandled error in request", { error: err });
+
+    logger.error("Unhandled error in request", {
+  message: err instanceof Error ? err.message : err,
+  stack: err instanceof Error ? err.stack : undefined,
+});
+
   // Known / operational errors
   if (err instanceof CustomError) {
     const serialized = err.serializeErrors();

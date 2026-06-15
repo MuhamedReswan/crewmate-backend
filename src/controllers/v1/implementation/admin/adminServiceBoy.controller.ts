@@ -16,53 +16,53 @@ export default class AdminServiceBoyController implements IAdminServiceBoyContro
     constructor(@inject("IAdminServiceBoyService") private _adminServiceBoyService: IAdminServiceBoyService){}
 
 
-    getAllServiceBoysPendingVerification =  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-        try {
-            const seviceBoysForVerification  = await this._adminServiceBoyService.loadAllPendingVerification()
-            logger.info("seviceBoysForVerification",{seviceBoysForVerification});
-            res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VERIFICATION_SUCCESS, HttpStatusCode.OK, seviceBoysForVerification ));
-        } catch (error) {
-            logger.error("getAllServiceBoysPendingVerification error", error );
-            next(error)
-        }
-    }
+  //   getAllServiceBoysPendingVerification =  async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> => {
+  //       try {
+  //           const seviceBoysForVerification  = await this._adminServiceBoyService.loadAllPendingVerification()
+  //           logger.info("seviceBoysForVerification",{seviceBoysForVerification});
+  //           res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VERIFICATION_SUCCESS, HttpStatusCode.OK, seviceBoysForVerification ));
+  //       } catch (error) {
+  //           logger.error("getAllServiceBoysPendingVerification error", error );
+  //           next(error)
+  //       }
+  //   }
 
 
 
-    verifyServiceBoyByAdmin =  async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-    try {
+//     verifyServiceBoyByAdmin =  async (
+//         req: Request,
+//         res: Response,
+//         next: NextFunction
+//       ): Promise<void> => {
+//     try {
 
-  const { id } = req.params; 
-  const status = req.query.status as VerificationStatusType;
-    const reason = req.query.reason as string;
+//   const { id } = req.params; 
+//   const status = req.query.status as VerificationStatusType;
+//     const reason = req.query.reason as string;
 
-logger.debug("verification rejection reason ",{reason});
+// logger.debug("verification rejection reason ",{reason});
 
-       if (!status) {
-      throw new NotFoundError(ResponseMessage.NO_VERIFICATION_STATUS)
-    }
+//        if (!status) {
+//       throw new NotFoundError(ResponseMessage.NO_VERIFICATION_STATUS)
+//     }
 
-    const result = await this._adminServiceBoyService.verifyServiceBoy(id, status, reason);
+//     const result = await this._adminServiceBoyService.verifyServiceBoy(id, status, reason);
 
-   if(!result) return;
-    const responseMessage =
-      status === VerificationStatus.Rejected 
-        ? ResponseMessage.VERIFICATION_STATUS_REJECTED_SUCCESS
-        : ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS;
+//    if(!result) return;
+//     const responseMessage =
+//       status === VerificationStatus.Rejected 
+//         ? ResponseMessage.VERIFICATION_STATUS_REJECTED_SUCCESS
+//         : ResponseMessage.VERIFICATION_STATUS_UPDATED_SUCCESS;
 
-        res.status(HttpStatusCode.OK).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
-    } catch (error) {
-        next(error)
-    }
-      }
+//         res.status(HttpStatusCode.OK).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
+//     } catch (error) {
+//         next(error)
+//     }
+//       }
 
 
 
@@ -102,33 +102,33 @@ const {id} = req.params;
 }
       } 
 
-      getSinglePendingVerification = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-try {
-const {id} = req.params;
-const {isVerified} =req.query
-    const verificationStatus = isVerified as VerificationStatusType;
-    const result = await this._adminServiceBoyService.getServiceBoyById(id,verificationStatus);
-    if(!result){
-   res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json(
-          responseHandler(
-            ResponseMessage.NO_USER_TO_VERIFY_WITH_THIS,
-            HttpStatusCode.NOT_FOUND
-          )
-        );
-        return
-    }
-    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+//       getSinglePendingVerification = async (
+//         req: Request,
+//         res: Response,
+//         next: NextFunction
+//       ): Promise<void> => {
+// try {
+// const {id} = req.params;
+// const {isVerified} =req.query
+//     const verificationStatus = isVerified as VerificationStatusType;
+//     const result = await this._adminServiceBoyService.getServiceBoyById(id,verificationStatus);
+//     if(!result){
+//    res
+//         .status(HttpStatusCode.NOT_FOUND)
+//         .json(
+//           responseHandler(
+//             ResponseMessage.NO_USER_TO_VERIFY_WITH_THIS,
+//             HttpStatusCode.NOT_FOUND
+//           )
+//         );
+//         return
+//     }
+//     res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
-} catch (error) {
-  next(error)
-}
-      } 
+// } catch (error) {
+//   next(error)
+// }
+//       } 
 
 
       updateServiceBoyStatus = async (

@@ -14,7 +14,7 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
         super(model);
     }
 
-    updateVendor = async (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined> => {
+    updateUser = async (id: Partial<IVendor>, data: Partial<IVendor>): Promise<IVendor | undefined> => {
         try {
       logger.debug("Updating vendor", { id, updateData: data });
             const updatedVendor = await this.updateOne(id, data);
@@ -31,7 +31,7 @@ export default class VendorRepository  extends BaseRepository<IVendor> implement
     };
 
 
-async findVendor(data: Partial<IVendor>): Promise<IVendor | undefined> {
+async findUser(data: Partial<IVendor>): Promise<IVendor | undefined> {
   try {
     const vendorProfile = await this.findOne(data,{ password: 0 });
 
@@ -45,7 +45,7 @@ async findVendor(data: Partial<IVendor>): Promise<IVendor | undefined> {
 }
 
 
-async loadAllVendorendingVerification(): Promise<IVendor[] | undefined>{
+async loadAllPendingVerification(): Promise<IVendor[] | undefined>{
   try {
     const query: FilterQuery<IVendor> = {
   isVerified: VerificationStatus.Pending,

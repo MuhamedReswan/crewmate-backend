@@ -32,7 +32,7 @@ export default class VendorService implements IVendorService {
       (files.profileImage && files.profileImage.length > 0);
 
          if (hasAnyFile) {
-            oldVendorProfile = await this._vendorRepository.findVendor({ _id: data._id });
+            oldVendorProfile = await this._vendorRepository.findUser({ _id: data._id });
             logger.debug("oldVendorProfile------------",{oldVendorProfile});
           }
 
@@ -105,7 +105,7 @@ const imagesToDelete: string[] = [];
       const _id = data._id;
       delete data._id;
 
-      const updatedProfile = await this._vendorRepository.updateVendor({ _id }, data);
+      const updatedProfile = await this._vendorRepository.updateUser({ _id }, data);
 
     //       if (imagesToDelete.length > 0) {
     //   (async () => {
@@ -172,7 +172,7 @@ const imagesToDelete: string[] = [];
 
   loadVendorProfile = async (_id: Partial<IVendor>): Promise<IVendor | undefined> => {
   try {
-    const vendorProfile = await this._vendorRepository.findVendor(_id);
+    const vendorProfile = await this._vendorRepository.findUser(_id);
     return vendorProfile;
   } catch (error) {
     throw error;
@@ -185,7 +185,7 @@ const imagesToDelete: string[] = [];
              if (isVerified !== VerificationStatus.Rejected) {
             updateData.rejectionReason = null;
           }
-const vendorProfile = await this._vendorRepository.updateVendor(_id,updateData);
+const vendorProfile = await this._vendorRepository.updateUser(_id,updateData);
 return vendorProfile;
        } catch (error) {
       throw error;
@@ -194,7 +194,7 @@ return vendorProfile;
 
   loadVendorById = async(_id:Partial<IVendor>):Promise<VendorLoginDTO | undefined> => {
     try {
-const vendor = await this._vendorRepository.findVendor(_id);
+const vendor = await this._vendorRepository.findUser(_id);
 if(!vendor)return 
   return mapToVendorLoginDTO(vendor);
 
