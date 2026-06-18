@@ -13,6 +13,7 @@ import { BadrequestError } from "../../../../utils/errors/badRequest.error";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { getVerificationEmailTemplate } from "../../../../emailTemplates/accountVerification";
 import { sendEmail } from "../../../../utils/email.util";
+import { PaginatedResponse } from "../../../../types";
 
 @injectable()
 export default class AdminUserManagementService implements IAdminUserManagementService{
@@ -38,7 +39,7 @@ return allPendingVerification;
 }
 
 
-getUserById = async(id:string,isVerified?:VerificationStatusType,userType?:UserType):Promise<Partial<IVendor> | Partial<IServiceBoy> | undefined> =>{
+getUserById = async(userType:UserType, id:string,isVerified?:VerificationStatusType):Promise<Partial<IVendor> | Partial<IServiceBoy> | undefined> =>{
 
   const repository =
     userType === UserType.VENDOR
@@ -110,5 +111,21 @@ verifyUser = async (
     throw error;
   }
 };
+
+
+getPaginatedUsers = async(userType:UserType, page: number, limit: number, search: string, isBlocked:boolean): Promise<PaginatedResponse<IServiceBoy | IVendor> | undefined> => {
+   try {
+
+    const repository = 
+    userType === UserType.VENDOR
+    ? this._serviceBoyRepository
+    : this._vendorRepository
+
+      return repository.findPaginatedUsers(page, limit, search, isBlocked);
+   } catch (error) {
+      throw error;
+   }
+  }
+  
 
 }

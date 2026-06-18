@@ -62,7 +62,7 @@ async loadAllPendingVerification(): Promise<IVendor[] | undefined>{
   }
 }
 
-  async findVendorPaginated(page: number, limit: number, search: string, isBlocked:boolean)
+  async findPaginatedUsers(page: number, limit: number, search: string, isBlocked:boolean)
   :Promise<PaginatedResponse<IVendor>|undefined> {
     try {
          const query:Partial<IVendor>  = {}

@@ -71,7 +71,7 @@ try {
 
    getPaginatedServiceBoys = async(page: number, limit: number, search: string, isBlocked:boolean): Promise<PaginatedResponse<IServiceBoy> | undefined> => {
    try {
-      return this._serviceBoyRepository.findServiceBoysPaginated(page, limit, search, isBlocked);
+      return this._serviceBoyRepository.findPaginatedUsers(page, limit, search, isBlocked);
    } catch (error) {
       throw error;
    }

@@ -61,7 +61,7 @@ const {id,userType} = req.params;
 const {isVerified} =req.query
 logger.log("usertype form single verifivation controller", {userType});
     const verificationStatus = isVerified as VerificationStatusType;
-    const result = await this._adminUserManagementService.getUserById(id,verificationStatus,userType as UserType);
+    const result = await this._adminUserManagementService.getUserById(userType as UserType,id,verificationStatus);
     if(!result){
    res
         .status(HttpStatusCode.NOT_FOUND)
@@ -107,5 +107,54 @@ logger.log("usertype form single verifivation controller", {userType});
                 next(error)
             }
               }
+
+
+                getUsers = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> => {
+try {
+
+        const { userType } = req.params;
+
+        const responseMessage =
+         userType === UserType.SERVICE_BOY 
+        ? ResponseMessage.LOAD_SERVICE_BOY_SUCCESS 
+        : ResponseMessage.LOAD_VENDOR_SUCCESS
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || ""
+    const isBlockedRaw = req.query.isBlocked as string;
+    if(isBlockedRaw){
+    }
+    const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
+    const result = await this._adminUserManagementService.getPaginatedUsers(userType as UserType,page, limit, search,isBlocked);
+    res.status(HttpStatusCode.OK).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
+  
+} catch (error) {
+  next(error)
+}
+      } 
+
+      getUserById = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> => {
+try {
+const {id,userType} = req.params;
+const responseMessage = userType === UserType.SERVICE_BOY
+? ResponseMessage.LOAD_SERVICE_BOY_SUCCESS
+: ResponseMessage.LOAD_VENDOR_SUCCESS
+
+    const result = await this._adminUserManagementService.getUserById(userType as UserType,id);
+    res.status(HttpStatusCode.OK).json(responseHandler(responseMessage,HttpStatusCode.OK, result))
+  
+} catch (error) {
+  next(error)
+}
+      } 
 }
 

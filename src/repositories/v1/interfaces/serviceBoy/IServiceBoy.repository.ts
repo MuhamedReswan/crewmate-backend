@@ -5,5 +5,5 @@ export interface IServiceBoyRepository{
   updateUser(id:Partial<IServiceBoy>, data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined>
   findUser(id:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>
   loadAllPendingVerification(): Promise<IServiceBoy[] | undefined>
-  findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean|undefined):Promise<PaginatedResponse<IServiceBoy>|undefined>
+  findPaginatedUsers(page: number, limit: number, search: string, isBlocked:boolean|undefined):Promise<PaginatedResponse<IServiceBoy>|undefined>
 }

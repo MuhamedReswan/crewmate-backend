@@ -86,7 +86,7 @@ logger.info("vendor UpdateVerification",UpdateVerification);
 
   getPaginatedVendors = async(page: number, limit: number, search: string, isBlocked:boolean): Promise<PaginatedResponse<IVendor> | undefined> => {
    try {
-      return this._vendorRepository.findVendorPaginated(page, limit, search, isBlocked);
+      return this._vendorRepository.findPaginatedUsers(page, limit, search, isBlocked);
    } catch (error) {
       throw error;
    }

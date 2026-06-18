@@ -62,7 +62,7 @@ async loadAllPendingVerification(): Promise<IServiceBoy[] | undefined>{
   }
 }
 
-  async findServiceBoysPaginated(page: number, limit: number, search: string, isBlocked:boolean)
+  async findPaginatedUsers(page: number, limit: number, search: string, isBlocked:boolean)
   :Promise<PaginatedResponse<IServiceBoy>|undefined> {
     try {
 const query: FilterQuery<IServiceBoy> = {};
