@@ -6,14 +6,9 @@
     "auditLog": "logs\\.9e56e0334b9c4b35dabd938e07ef6fead6cc52bd-audit.json",
     "files": [
         {
-            "date": 1781546700386,
-            "name": "logs/error-2026-06-15.log",
-            "hash": "2fecd3f4d8bcfde9e5fa16ff8ec28294ebaf7a80526d056ecc38aa389e2a8993"
-        },
-        {
-            "date": 1781755709725,
-            "name": "logs/error-2026-06-18.log",
-            "hash": "ebef34743b9214e408d891e9858499efff763dad5d09cec670231eeebdd53a7e"
+            "date": 1782534835050,
+            "name": "logs/error-2026-06-27.log",
+            "hash": "00d7f4ebb7e98b8f177da537ac7d0e76704311f4fdbaffbcd484e3d9656e9f6a"
         }
     ],
     "hashType": "sha256"

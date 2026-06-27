@@ -156,5 +156,23 @@ const responseMessage = userType === UserType.SERVICE_BOY
   next(error)
 }
       } 
+
+
+        updateUserStatus = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> => {
+        try {
+const { id, status, userType } = req.params;
+
+const updatedUser = await this._adminUserManagementService.updateUserStatus(id, status,userType as UserType); 
+logger.info("updatedUser",{updatedUser});
+  res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS,HttpStatusCode.OK));
+
+        } catch (error) {
+         next(error);
+        }
+      }
 }
 

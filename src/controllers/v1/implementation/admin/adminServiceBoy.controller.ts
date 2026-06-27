@@ -66,41 +66,41 @@ export default class AdminServiceBoyController implements IAdminServiceBoyContro
 
 
 
-      getAllServiceBoys = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = (req.query.search as string) || ""
-    const isBlockedRaw = req.query.isBlocked as string;
-    if(isBlockedRaw){
-    }
-    const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
-    const result = await this._adminServiceBoyService.getPaginatedServiceBoys(page, limit, search,isBlocked);
-    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+//       getAllServiceBoys = async (
+//         req: Request,
+//         res: Response,
+//         next: NextFunction
+//       ): Promise<void> => {
+// try {
+//     const page = parseInt(req.query.page as string) || 1;
+//     const limit = parseInt(req.query.limit as string) || 10;
+//     const search = (req.query.search as string) || ""
+//     const isBlockedRaw = req.query.isBlocked as string;
+//     if(isBlockedRaw){
+//     }
+//     const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
+//     const result = await this._adminServiceBoyService.getPaginatedServiceBoys(page, limit, search,isBlocked);
+//     res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
-} catch (error) {
-  next(error)
-}
-      } 
+// } catch (error) {
+//   next(error)
+// }
+//       } 
 
-      getServiceBoysById = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-try {
-const {id} = req.params;
-    const result = await this._adminServiceBoyService.getServiceBoyById(id);
-    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
+//       getServiceBoysById = async (
+//         req: Request,
+//         res: Response,
+//         next: NextFunction
+//       ): Promise<void> => {
+// try {
+// const {id} = req.params;
+//     const result = await this._adminServiceBoyService.getServiceBoyById(id);
+//     res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_SERVICE_BOY_SUCCESS,HttpStatusCode.OK, result))
   
-} catch (error) {
-  next(error)
-}
-      } 
+// } catch (error) {
+//   next(error)
+// }
+//       } 
 
 //       getSinglePendingVerification = async (
 //         req: Request,
@@ -131,21 +131,21 @@ const {id} = req.params;
 //       } 
 
 
-      updateServiceBoyStatus = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-        try {
-const { id, status } = req.params;
-const updateServiceBoy = await this._adminServiceBoyService.updateServiceBoyStatus(id, status); 
-logger.info("updateServiceBoy",{updateServiceBoy});
-  res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS,HttpStatusCode.OK));
+//       updateServiceBoyStatus = async (
+//         req: Request,
+//         res: Response,
+//         next: NextFunction
+//       ): Promise<void> => {
+//         try {
+// const { id, status } = req.params;
+// const updateServiceBoy = await this._adminServiceBoyService.updateServiceBoyStatus(id, status); 
+// logger.info("updateServiceBoy",{updateServiceBoy});
+//   res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS,HttpStatusCode.OK));
 
-        } catch (error) {
-         next(error);
-        }
-      }
+//         } catch (error) {
+//          next(error);
+//         }
+//       }
 }
 
 

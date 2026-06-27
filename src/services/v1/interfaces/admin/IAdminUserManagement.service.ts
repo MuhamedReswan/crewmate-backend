@@ -10,4 +10,5 @@ loadAllPendingVerification(userType:UserType):Promise<Partial<IServiceBoy>[] | P
 getUserById(userType:UserType,id:string,isVerified?:VerificationStatusType,):Promise<Partial<IVendor> | Partial<IServiceBoy> | undefined>
 verifyUser (id: string,  status: VerificationStatusType,reason?: string, userType?:UserType): Promise<Partial<IVendor> | undefined> 
 getPaginatedUsers (userType:UserType, page: number, limit: number, search: string, isBlocked:boolean |undefined): Promise<PaginatedResponse<IServiceBoy | IVendor> | undefined> 
+updateUserStatus (id:string, status:string, userType : UserType):Promise<Partial<IServiceBoy |IVendor> | undefined>
 }

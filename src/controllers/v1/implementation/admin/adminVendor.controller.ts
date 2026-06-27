@@ -86,40 +86,40 @@ constructor(@inject("IAdminVendorService") private _adminVendorService:IAdminVen
   //     }
   //       }
 
-              getVendorById = async (
-                req: Request,
-                res: Response,
-                next: NextFunction
-              ): Promise<void> => {
-        try {
-        const {id} = req.params;
-            const result = await this._adminVendorService.getVendorById(id);
-            res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.OK, result))
+        //       getVendorById = async (
+        //         req: Request,
+        //         res: Response,
+        //         next: NextFunction
+        //       ): Promise<void> => {
+        // try {
+        // const {id} = req.params;
+        //     const result = await this._adminVendorService.getVendorById(id);
+        //     res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.OK, result))
           
-        } catch (error) {
-          next(error)
-        }
-              }
+        // } catch (error) {
+        //   next(error)
+        // }
+        //       }
 
 
-                    getAllVendors = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = (req.query.search as string) || ""
-    const isBlockedRaw = req.query.isBlocked as string;
-    if(isBlockedRaw){
-    }
-    const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
-    const result = await this._adminVendorService.getPaginatedVendors(page, limit, search,isBlocked);
-    res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.OK, result))
+//                     getAllVendors = async (
+//         req: Request,
+//         res: Response,
+//         next: NextFunction
+//       ): Promise<void> => {
+// try {
+//     const page = parseInt(req.query.page as string) || 1;
+//     const limit = parseInt(req.query.limit as string) || 10;
+//     const search = (req.query.search as string) || ""
+//     const isBlockedRaw = req.query.isBlocked as string;
+//     if(isBlockedRaw){
+//     }
+//     const isBlocked = isBlockedRaw === 'true' ? true : isBlockedRaw === 'false' ? false : undefined;
+//     const result = await this._adminVendorService.getPaginatedVendors(page, limit, search,isBlocked);
+//     res.status(HttpStatusCode.OK).json(responseHandler(ResponseMessage.LOAD_VENDOR_SUCCESS,HttpStatusCode.OK, result))
   
-} catch (error) {
-  next(error)
-}
-      }
+// } catch (error) {
+//   next(error)
+// }
+//       }
 }

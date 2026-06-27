@@ -180,6 +180,10 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
       }
 
+       if(serviceBoyData && serviceBoyData.isBlocked){
+          throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
+        }
+
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
       
       const role = Role.SERVICE_BOY;
@@ -380,6 +384,10 @@ if (profileImage) {
           profileImage: profileImageData,
         });
       }
+
+       if(serviceBoyData && serviceBoyData.isBlocked){
+          throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
+        }
 
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
       const role = Role.SERVICE_BOY;

@@ -14,6 +14,7 @@ import { ResponseMessage } from "../../../../constants/resposnseMessage";
 import { getVerificationEmailTemplate } from "../../../../emailTemplates/accountVerification";
 import { sendEmail } from "../../../../utils/email.util";
 import { PaginatedResponse } from "../../../../types";
+import logger from "../../../../utils/logger.util";
 
 @injectable()
 export default class AdminUserManagementService implements IAdminUserManagementService{
@@ -118,8 +119,8 @@ getPaginatedUsers = async(userType:UserType, page: number, limit: number, search
 
     const repository = 
     userType === UserType.VENDOR
-    ? this._serviceBoyRepository
-    : this._vendorRepository
+    ? this._vendorRepository
+    : this._serviceBoyRepository
 
       return repository.findPaginatedUsers(page, limit, search, isBlocked);
    } catch (error) {
@@ -128,4 +129,25 @@ getPaginatedUsers = async(userType:UserType, page: number, limit: number, search
   }
   
 
+  updateUserStatus = async (id:string, status:string, userType : UserType):Promise<Partial<IServiceBoy |IVendor> | undefined> => {
+   try {
+
+    const repository = 
+    userType === UserType.VENDOR
+    ? this._vendorRepository
+    : this._serviceBoyRepository
+
+      if (!Types.ObjectId.isValid(id)) {
+  throw new BadrequestError(ResponseMessage.INVALID_USER_ID);
+}
+      const isBlocked = status ==="block"
+      const _id = new Types.ObjectId(id);
+      logger.debug("created _id from id string",{_id})
+     let result =  repository.updateUser({_id},{isBlocked:isBlocked});
+     logger.info("updateUserStatus result",{result});
+      return
+   } catch (error) {
+throw error;
+   }
+}
 }

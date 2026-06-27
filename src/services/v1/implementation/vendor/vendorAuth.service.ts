@@ -187,6 +187,10 @@ export default class VendorAuthService implements IVendorAuthService {
       if (!validPassword)
         throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
 
+       if(vendorData && vendorData.isBlocked){
+          throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
+        }
+
       const vendor = mapToVendorLoginDTO(vendorData);
       const role = Role.VENDOR;
 
@@ -386,6 +390,10 @@ if (profileImage) {
           profileImage: profileImageData,
         });
       }
+
+       if(vendorData && vendorData.isBlocked){
+          throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
+        }
 
       const vendor = mapToVendorLoginDTO(vendorData);
       const role = Role.VENDOR;

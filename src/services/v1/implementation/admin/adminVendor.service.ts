@@ -73,22 +73,22 @@ export default class AdminVendorService implements IAdminVendorService {
 // };
 
 
-getVendorById = async (id:string, isVerified?:IVendor["isVerified"] ):Promise<Partial<IVendor> | undefined> =>{
-try {
-   const _id = new Types.ObjectId(id)
-const UpdateVerification = this._vendorRepository.findUser({ _id, isVerified });
-logger.info("vendor UpdateVerification",UpdateVerification);
-   return UpdateVerification;
-} catch (error) {
-   throw error;
-}
-}
+// getVendorById = async (id:string, isVerified?:IVendor["isVerified"] ):Promise<Partial<IVendor> | undefined> =>{
+// try {
+//    const _id = new Types.ObjectId(id)
+// const UpdateVerification = this._vendorRepository.findUser({ _id, isVerified });
+// logger.info("vendor UpdateVerification",UpdateVerification);
+//    return UpdateVerification;
+// } catch (error) {
+//    throw error;
+// }
+// }
 
-  getPaginatedVendors = async(page: number, limit: number, search: string, isBlocked:boolean): Promise<PaginatedResponse<IVendor> | undefined> => {
-   try {
-      return this._vendorRepository.findPaginatedUsers(page, limit, search, isBlocked);
-   } catch (error) {
-      throw error;
-   }
-  }
+//   getPaginatedVendors = async(page: number, limit: number, search: string, isBlocked:boolean): Promise<PaginatedResponse<IVendor> | undefined> => {
+//    try {
+//       return this._vendorRepository.findPaginatedUsers(page, limit, search, isBlocked);
+//    } catch (error) {
+//       throw error;
+//    }
+//   }
 }

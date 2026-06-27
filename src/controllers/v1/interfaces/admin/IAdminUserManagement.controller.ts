@@ -6,4 +6,6 @@ export interface IAdminUserManagementController {
  verifyUserByAdmin:RequestHandler,
  getUsers:RequestHandler,
  getUserById:RequestHandler,
+ updateUserStatus:RequestHandler,
+ 
 }

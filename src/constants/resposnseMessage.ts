@@ -25,6 +25,7 @@ export enum ResponseMessage {
 
   INAVLID_SERVICE_BOY_ID = "Invalid service boy ID",
   INVALID_VENDOR_ID = "Invalid vendor ID",
+  INVALID_USER_ID = "Invalid user ID",
 
   LOGOUT_SUCCESS = "logout success",
 
