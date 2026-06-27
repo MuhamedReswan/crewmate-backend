@@ -18,8 +18,6 @@ import ServiceBoyController from "../controllers/v1/implementation/serviceBoy/se
 import VendorController from "../controllers/v1/implementation/vendor/vendor.controller";
 import CommonController from "../controllers/v1/implementation/common/common.controller";
 import AdminAuthController from "../controllers/v1/implementation/admin/adminAuth.controller";
-import AdminVendorController from "../controllers/v1/implementation/admin/adminVendor.controller";
-import AdminServiceBoyController from "../controllers/v1/implementation/admin/adminServiceBoy.controller";
 import EventController from "../controllers/v1/implementation/event/eventController";
 import AdminUserManagementController from "../controllers/v1/implementation/admin/adminUserManagement.controller"
 import { AdminSystemSettingsController } from "../controllers/v1/implementation/admin/adminSystemSettings.controller";
@@ -33,8 +31,6 @@ import ServiceBoyService from "../services/v1/implementation/serviceBoy/serviceB
 import VendorService from "../services/v1/implementation/vendor/vendor.service";
 import CommonService from "../services/v1/implementation/common/common.service";
 import AdminAuthService from "../services/v1/implementation/admin/adminAuth.service";
-import AdminVendorService from "../services/v1/implementation/admin/adminVendor.service";
-import AdminServiceBoyService from "../services/v1/implementation/admin/adminServiceBoy.service";
 import EventService from "../services/v1/implementation/event/event.service";
 import AdminUserManagementService from "../services/v1/implementation/admin/adminUserManagement.service"
 import { AdminSystemSettingsService } from "../services/v1/implementation/admin/adminSystemSettings.service";
@@ -79,8 +75,6 @@ container.register("IServiceBoyAuthService", { useClass: ServiceBoyAuthService }
 container.register("IServiceBoyService", { useClass: ServiceBoyService });
 container.register("IAdminAuthService", { useClass: AdminAuthService });
 container.register("IAdminUserManagementService", { useClass: AdminUserManagementService });
-container.register("IAdminVendorService", { useClass: AdminVendorService });
-container.register("IAdminServiceBoyService", { useClass: AdminServiceBoyService });
 container.register("ICommonService", { useClass: CommonService });
 container.register("IEventService", { useClass: EventService });
 container.register("IAdminSystemSettingsService", { useClass: AdminSystemSettingsService });
@@ -92,10 +86,8 @@ container.register("IVendorAuthController", { useClass: VendorAuthController });
 container.register("IVendorController", { useClass: VendorController });
 container.register("IServiceBoyAuthController", { useClass: ServiceBoyAuthController });
 container.register("IServiceBoyController", { useClass: ServiceBoyController });
-container.register("IAdminVendorController", { useClass: AdminVendorController });
 container.register("IAdminAuthController", { useClass: AdminAuthController });
 container.register("IAdminUserManagementController", { useClass: AdminUserManagementController });
-container.register("IAdminServiceBoyController", { useClass: AdminServiceBoyController });
 container.register("ICommonController", { useClass: CommonController });
 container.register("IEventController", { useClass: EventController });
 container.register("IAdminSystemSettingsController", { useClass: AdminSystemSettingsController });
