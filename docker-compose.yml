@@ -12,7 +12,7 @@ services:
     environment:
       - NODE_ENV=development
     env_file:
-      - .env   
+      - .env
     depends_on:
       - redis
     dns:

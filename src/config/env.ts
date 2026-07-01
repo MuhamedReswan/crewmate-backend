@@ -9,7 +9,8 @@ export const NODEMAILERPASSWORD = process.env.NODEMAILERPASSWORD!;
 export const NODEMAILEREMAIL = process.env.NODEMAILEREMAIL!;
 export const ACCESSTOKENSECRET = process.env.ACCESSTOKENSECRET!;
 export const REFRESHTOKENSECRET = process.env.REFRESHTOKENSECRET!;
-export const NODE_ENV  = process.env.NODEENV;
+export const NODE_ENV = process.env.NODEENV;
 
 export const ACCESS_TOKEN_MAX_AGE = Number(process.env.ACCESS_TOKEN_MAX_AGE_IN_MINUTES) * 60 * 1000;
-export const REFRESH_TOKEN_MAX_AGE = Number(process.env.REFRESH_TOKEN_MAX_AGE_IN_DAYS) * 24 * 60 * 60 * 1000;
+export const REFRESH_TOKEN_MAX_AGE =
+  Number(process.env.REFRESH_TOKEN_MAX_AGE_IN_DAYS) * 24 * 60 * 60 * 1000;

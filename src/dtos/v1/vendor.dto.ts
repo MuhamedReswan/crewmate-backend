@@ -7,6 +7,5 @@ export interface VendorLoginDTO {
   isVerified: VerificationStatusType;
   isBlocked: boolean;
   role: string;
-  rejectionReason:string | null;
-
+  rejectionReason: string | null;
 }

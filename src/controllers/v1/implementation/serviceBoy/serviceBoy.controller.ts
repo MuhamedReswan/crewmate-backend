@@ -1,33 +1,24 @@
-import { inject, injectable } from "tsyringe";
 import { NextFunction, Request, Response } from "express";
 import { Types } from "mongoose";
-import { responseHandler } from "../../../../utils/responseHandler.util";
-import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { inject, injectable } from "tsyringe";
+
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
-import logger from "../../../../utils/logger.util";
-import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
-import {
-  VerificationStatus,
-} from "../../../../constants/status";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { VerificationStatus } from "../../../../constants/status";
 import { IServiceBoyService } from "../../../../services/v1/interfaces/serviceBoy/IServiceBoy.service";
+import { formatFilesForLog } from "../../../../utils/formatFilesForLog.util";
+import logger from "../../../../utils/logger.util";
+import { responseHandler } from "../../../../utils/responseHandler.util";
 import { IServiceBoyController } from "../../interfaces/serviceBoy/IServiceBoy.controller";
-
-
 
 @injectable()
 export default class ServiceBoyController implements IServiceBoyController {
-  constructor(
-    @inject("IServiceBoyService") private _serviceBoyService: IServiceBoyService
-  ) {}
+  constructor(@inject("IServiceBoyService") private _serviceBoyService: IServiceBoyService) {}
 
-  loadProfile = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  loadProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       logger.info("req.body of service boy", req.params);
-      let { id } = req.params;
+      const { id } = req.params;
       logger.info("req.params of service boy load profile", { id });
 
       const _id = new Types.ObjectId(id);
@@ -51,38 +42,24 @@ export default class ServiceBoyController implements IServiceBoyController {
     }
   };
 
-  updateProfile = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       logger.info("ServiceBoyController: updateProfile called", {
         body: req.body,
         files: formatFilesForLog(req.files),
       });
-      const updatedProfile = await this._serviceBoyService.updateProfile(
-        req.body,
-        req.files
-      );
+      const updatedProfile = await this._serviceBoyService.updateProfile(req.body, req.files);
       if (updatedProfile) {
         res
           .status(HttpStatusCode.OK)
           .json(
-            responseHandler(
-              ResponseMessage.PROFILE_UPDATED,
-              HttpStatusCode.OK,
-              updatedProfile
-            )
+            responseHandler(ResponseMessage.PROFILE_UPDATED, HttpStatusCode.OK, updatedProfile)
           );
       } else {
         res
           .status(HttpStatusCode.BAD_REQUEST)
           .json(
-            responseHandler(
-              ResponseMessage.PROFILE_UPDATION_FAILED,
-              HttpStatusCode.BAD_REQUEST
-            )
+            responseHandler(ResponseMessage.PROFILE_UPDATION_FAILED, HttpStatusCode.BAD_REQUEST)
           );
       }
     } catch (error) {
@@ -100,40 +77,25 @@ export default class ServiceBoyController implements IServiceBoyController {
       const { id } = req.params;
       const _id = new Types.ObjectId(id);
       const verificationStatus = VerificationStatus.Pending;
-      const result = await this._serviceBoyService.retryVerification(
-        { _id },
-        verificationStatus
-      );
+      const result = await this._serviceBoyService.retryVerification({ _id }, verificationStatus);
       if (!result) {
         res
           .status(HttpStatusCode.NOT_FOUND)
           .json(
-            responseHandler(
-              ResponseMessage.NO_USER_TO_RETRY_WITH_THIS,
-              HttpStatusCode.NOT_FOUND
-            )
+            responseHandler(ResponseMessage.NO_USER_TO_RETRY_WITH_THIS, HttpStatusCode.NOT_FOUND)
           );
         return;
       }
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.RETRY_VERIFICATION_SENT,
-            HttpStatusCode.OK
-          )
-        );
+        .json(responseHandler(ResponseMessage.RETRY_VERIFICATION_SENT, HttpStatusCode.OK));
     } catch (error) {
       logger.error("serviceBoyController: retry verification error", error);
       next(error);
     }
   };
 
-  loadServiceBoyById = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  loadServiceBoyById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       logger.debug("loadServiceBoyId-id from controller", { id });
@@ -152,11 +114,7 @@ export default class ServiceBoyController implements IServiceBoyController {
       res
         .status(HttpStatusCode.OK)
         .json(
-          responseHandler(
-            ResponseMessage.UPDATE_STATUS_SUCCESS,
-            HttpStatusCode.OK,
-            serviceBoy
-          )
+          responseHandler(ResponseMessage.UPDATE_STATUS_SUCCESS, HttpStatusCode.OK, serviceBoy)
         );
     } catch (error) {
       logger.error("serviceBoy controller: loadServiceBoyById error", error);

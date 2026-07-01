@@ -1,42 +1,38 @@
-import { injectable, inject } from "tsyringe";
-import bcrypt from "bcrypt";
 import * as crypto from "crypto";
-import { IServiceBoyAuthRepository } from "../../../../repositories/v1/interfaces/serviceBoy/IServiceBoyAuth.repository";
-import redisClient, {
-  deleteRedisData,
-  getRedisData,
-  setRedisData,
-} from "../../../../utils/redis.util";
-import { IServiceBoyAuthService } from "../../interfaces/serviceBoy/IServiceBoyAuth.service";
-import {
-  sendForgotPasswordLink,
-  sendOtpEmail,
-} from "../../../../utils/otp.util";
-import { createOtp } from "../../../../utils/otp.util";
-import { hashPassword } from "../../../../utils/password.util";
-import { ExpiredError } from "../../../../utils/errors/expired.error";
-import { BadrequestError } from "../../../../utils/errors/badRequest.error";
+
+import bcrypt from "bcrypt";
+import { injectable, inject } from "tsyringe";
+
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-} from "../../../../utils/jwt.util";
 import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
-import {
-  GoogleLogin,
-  ServiceBoyLoginResponse,
-} from "../../../../entities/v1/authenticationEntity";
+import { GoogleLogin, ServiceBoyLoginResponse } from "../../../../entities/v1/authenticationEntity";
 import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { mapToServiceBoyLoginDTO } from "../../../../mappers.ts/serviceBoy.mapper";
 import { storeGoogleImageToS3 } from "../../../../utils/googleImageupload.util";
 import { VerificationStatus } from "../../../../constants/status";
 import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
+import { IServiceBoyAuthRepository } from "../../../../repositories/v1/interfaces/serviceBoy/IServiceBoyAuth.repository";
 import { ForbiddenError } from "../../../../utils/errors/forbidden.error";
-import { uploadImageFromUrlToCloudinary } from "../../../../utils/cloudinary.util";
 import { handleSessionOnLogin } from "../../../../utils/authSession.utils";
+import { uploadImageFromUrlToCloudinary } from "../../../../utils/cloudinary.util";
+import { BadrequestError } from "../../../../utils/errors/badRequest.error";
+import { ExpiredError } from "../../../../utils/errors/expired.error";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../../../../utils/jwt.util";
+import { createOtp } from "../../../../utils/otp.util";
+import { sendForgotPasswordLink, sendOtpEmail } from "../../../../utils/otp.util";
+import { hashPassword } from "../../../../utils/password.util";
+import redisClient, {
+  deleteRedisData,
+  getRedisData,
+  setRedisData,
+} from "../../../../utils/redis.util";
+import { IServiceBoyAuthService } from "../../interfaces/serviceBoy/IServiceBoyAuth.service";
 
 @injectable()
 export default class ServiceBoyAuthService implements IServiceBoyAuthService {
@@ -49,15 +45,9 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     this._serviceBoyAuthRepository = _serviceBoyAuthRepository;
   }
 
-  async register(
-    name: string,
-    email: string,
-    password: string,
-    mobile: string
-  ): Promise<void> {
+  async register(name: string, email: string, password: string, mobile: string): Promise<void> {
     try {
-      const existingServiceBoy =
-        await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
+      const existingServiceBoy = await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
       if (existingServiceBoy) {
         logger.warn(`Email already used: ${email}`);
         throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_USED);
@@ -76,10 +66,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   async generateOTP(email: string) {
     try {
-      const serviceBoy =
-        await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
-      if (serviceBoy)
-        throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
+      const serviceBoy = await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
+      if (serviceBoy) throw new BadrequestError(ResponseMessage.EMAIL_ALREADY_VERIFIED);
 
       const otp = createOtp();
       await setRedisData(`otpB:${email}`, JSON.stringify({ otp }), 60);
@@ -108,9 +96,9 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
       await deleteRedisData(`otpB:${email}`);
 
-      let serviceBoyData = await getRedisData(`serviceBoy:${email}`);
+      const serviceBoyData = await getRedisData(`serviceBoy:${email}`);
       if (serviceBoyData) {
-        let serviceBoyDataObject = JSON.parse(serviceBoyData);
+        const serviceBoyDataObject = JSON.parse(serviceBoyData);
         logger.debug("Parsed serviceBoyData from service", {
           serviceBoyDataObject,
         });
@@ -118,14 +106,11 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         const number = await redisClient.incr("serviceBoy:idCounter"); // auto-increment
         const servicerId = `A-${number}`;
 
-        serviceBoyDataObject.password = await hashPassword(
-          serviceBoyDataObject.password
-        );
+        serviceBoyDataObject.password = await hashPassword(serviceBoyDataObject.password);
         serviceBoyDataObject.servicerId = servicerId;
         serviceBoyDataObject.name = serviceBoyDataObject.name.toLowerCase();
-        let createdBoy = await this._serviceBoyAuthRepository.createServiceBoy(
-          serviceBoyDataObject
-        );
+        const createdBoy =
+          await this._serviceBoyAuthRepository.createServiceBoy(serviceBoyDataObject);
 
         if (!createdBoy) {
           throw new BadrequestError(ResponseMessage.USER_NOT_CREATED);
@@ -148,11 +133,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
           role: role,
         });
 
-    await handleSessionOnLogin(
-      createdBoy._id.toString(),
-      refreshToken,
-      oldRefreshToken
-    );
+        await handleSessionOnLogin(createdBoy._id.toString(), refreshToken, oldRefreshToken);
 
         return { serviceBoy, accessToken, refreshToken };
       }
@@ -167,25 +148,22 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     oldRefreshToken?: string
   ): Promise<ServiceBoyLoginResponse> {
     try {
-
-      let serviceBoyData =
-        await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
+      const serviceBoyData = await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
 
       const isValidPassword =
-        serviceBoyData?.password &&
-        (await bcrypt.compare(password, serviceBoyData.password));
+        serviceBoyData?.password && (await bcrypt.compare(password, serviceBoyData.password));
 
       if (!serviceBoyData || !isValidPassword) {
         logger.warn(`Invalid credentials for email: ${email}`);
         throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
       }
 
-       if(serviceBoyData && serviceBoyData.isBlocked){
-          throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
-        }
+      if (serviceBoyData && serviceBoyData.isBlocked) {
+        throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
+      }
 
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
-      
+
       const role = Role.SERVICE_BOY;
       const accessToken = generateAccessToken({
         id: serviceBoyData._id.toString(),
@@ -200,12 +178,8 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
         role: role,
       });
 
-    // SINGLE LINE (replaces all Redis + blacklist logic)
-    await handleSessionOnLogin(
-      serviceBoyData._id.toString(),
-      refreshToken,
-      oldRefreshToken
-    );
+      // SINGLE LINE (replaces all Redis + blacklist logic)
+      await handleSessionOnLogin(serviceBoyData._id.toString(), refreshToken, oldRefreshToken);
 
       return { serviceBoy, accessToken, refreshToken };
     } catch (error) {
@@ -236,14 +210,9 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
       if (!decoded || !decoded.email) {
         throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
       }
-      const serviceBoy =
-        await this._serviceBoyAuthRepository.findServiceBoyByEmail(
-          decoded.email
-        );
-      if (!serviceBoy)
-        throw new UnAuthorizedError(ResponseMessage.USER_NOT_FOUND);
-      if (serviceBoy.isBlocked)
-        throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
+      const serviceBoy = await this._serviceBoyAuthRepository.findServiceBoyByEmail(decoded.email);
+      if (!serviceBoy) throw new UnAuthorizedError(ResponseMessage.USER_NOT_FOUND);
+      if (serviceBoy.isBlocked) throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
 
       const accessToken = await generateAccessToken({
         id: serviceBoy._id.toString(),
@@ -255,7 +224,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
       logger.info(`New tokens generated for: ${decoded.email}`);
       return {
         accessToken,
-        refreshToken : Token,
+        refreshToken: Token,
         message: ResponseMessage.TOKEN_SET_SUCCESS,
         success: true,
       };
@@ -266,8 +235,7 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   forgotPassword = async (email: string): Promise<string> => {
     try {
-      const serviceBoy =
-        await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
+      const serviceBoy = await this._serviceBoyAuthRepository.findServiceBoyByEmail(email);
       if (!serviceBoy) throw new NotFoundError(ResponseMessage.USER_NOT_FOUND);
       const token = crypto.randomBytes(8).toString("hex");
       await setRedisData(`forgotToken-SB:${email}`, token, 1800);
@@ -277,19 +245,14 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
     }
   };
 
-  resetPasswordTokenVerify = async (
-    email: string,
-    token: string
-  ): Promise<void> => {
+  resetPasswordTokenVerify = async (email: string, token: string): Promise<void> => {
     try {
       const forgotTokenData = await getRedisData(`forgotToken-SB:${email}`);
       if (!forgotTokenData) {
         throw new ExpiredError(ResponseMessage.FORGOT_PASSWORD_TOKEN_EXPIRED);
       }
       if (forgotTokenData != token) {
-        throw new UnAuthorizedError(
-          ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN
-        );
+        throw new UnAuthorizedError(ResponseMessage.INVALID_FORGOT_PASSWORD_TOKEN);
       }
       await deleteRedisData(`forgotToken-SB:${email}`);
     } catch (error) {
@@ -299,18 +262,15 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
   googleAuth = async (
     data: GoogleLogin,
-     oldRefreshToken?: string
+    oldRefreshToken?: string
   ): Promise<ServiceBoyLoginResponse | undefined> => {
     try {
       logger.info("Google auth initiated");
       const { googleToken } = data;
-      const response = await fetch(
-        "https://www.googleapis.com/oauth2/v3/userinfo",
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${googleToken}` },
-        }
-      );
+      const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${googleToken}` },
+      });
 
       if (!response.ok) {
         throw new UnAuthorizedError("google login falied");
@@ -318,14 +278,13 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
       const responseData = await response.json();
       let serviceBoyData;
-      serviceBoyData =
-        await this._serviceBoyAuthRepository.findServiceBoyByEmail(
-          responseData.email
-        );
+      serviceBoyData = await this._serviceBoyAuthRepository.findServiceBoyByEmail(
+        responseData.email
+      );
 
       if (!serviceBoyData) {
         let { name, email, picture: profileImage } = responseData;
-        let isVerified = VerificationStatus.Pending;
+        const isVerified = VerificationStatus.Pending;
         name = name.toLowerCase();
 
         const number = await redisClient.incr("serviceBoy:idCounter");
@@ -349,32 +308,29 @@ export default class ServiceBoyAuthService implements IServiceBoyAuthService {
 
         let profileImageData: { publicId: string; url: string } | undefined;
 
-if (profileImage) {
-  try {
-    const imageName = `${name}-google-${Date.now()}`;
+        if (profileImage) {
+          try {
+            const imageName = `${name}-google-${Date.now()}`;
 
-    profileImageData = await uploadImageFromUrlToCloudinary(
-      profileImage,
-      imageName,
-      "service-boy/profile"
-    );
+            profileImageData = await uploadImageFromUrlToCloudinary(
+              profileImage,
+              imageName,
+              "service-boy/profile"
+            );
 
-    logger.info("Uploaded Google profile image to Cloudinary", {
-      publicId: profileImageData.publicId,
-    });
-  } catch (error) {
-    logger.warn(
-      "Failed to upload Google image, using original URL",
-      error
-    );
+            logger.info("Uploaded Google profile image to Cloudinary", {
+              publicId: profileImageData.publicId,
+            });
+          } catch (error) {
+            logger.warn("Failed to upload Google image, using original URL", error);
 
-    // fallback (optional)
-    profileImageData = {
-      publicId: profileImage, // not ideal but fallback
-      url: profileImage,
-    };
-  }
-}
+            // fallback (optional)
+            profileImageData = {
+              publicId: profileImage, // not ideal but fallback
+              url: profileImage,
+            };
+          }
+        }
 
         serviceBoyData = await this._serviceBoyAuthRepository.createServiceBoy({
           name,
@@ -385,9 +341,9 @@ if (profileImage) {
         });
       }
 
-       if(serviceBoyData && serviceBoyData.isBlocked){
-          throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN)
-        }
+      if (serviceBoyData && serviceBoyData.isBlocked) {
+        throw new ForbiddenError(ResponseMessage.USER_BLOCKED_BY_ADMIN);
+      }
 
       const serviceBoy = mapToServiceBoyLoginDTO(serviceBoyData);
       const role = Role.SERVICE_BOY;
@@ -404,12 +360,7 @@ if (profileImage) {
         role: role,
       });
 
-  await handleSessionOnLogin(
-      serviceBoyData._id.toString(),
-      refreshToken,
-      oldRefreshToken
-    );
-
+      await handleSessionOnLogin(serviceBoyData._id.toString(), refreshToken, oldRefreshToken);
 
       return { serviceBoy, accessToken, refreshToken };
     } catch (error) {
@@ -420,20 +371,13 @@ if (profileImage) {
   resetPassword = async (email: string, password: string): Promise<void> => {
     try {
       const hashedPassword = await hashPassword(password);
-      await this._serviceBoyAuthRepository.updateServiceBoyPassword(
-        email,
-        hashedPassword
-      );
+      await this._serviceBoyAuthRepository.updateServiceBoyPassword(email, hashedPassword);
     } catch (error) {
       throw error;
     }
   };
 
-  resetPasswordLink = async (
-    email: string,
-    token: string,
-    role: Role
-  ): Promise<void> => {
+  resetPasswordLink = async (email: string, token: string, role: Role): Promise<void> => {
     try {
       await sendForgotPasswordLink(email, token, role);
     } catch (error) {

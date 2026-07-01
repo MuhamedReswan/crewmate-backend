@@ -1,7 +1,6 @@
 export interface CustomTokenResponse {
-    accessToken: string;
-    refreshToken: string;
-    message: string;
-    success: boolean;
-  }
-  
+  accessToken: string;
+  refreshToken: string;
+  message: string;
+  success: boolean;
+}

@@ -1,12 +1,11 @@
-import { inject, injectable } from "tsyringe";
 import { Request, Response, NextFunction } from "express";
-import { AdminSystemSettingsService } from "../../../../services/v1/implementation/admin/adminSystemSettings.service";
-import { responseHandler } from "../../../../utils/responseHandler.util";
+import { inject, injectable } from "tsyringe";
+
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { AdminSystemSettingsService } from "../../../../services/v1/implementation/admin/adminSystemSettings.service";
+import { responseHandler } from "../../../../utils/responseHandler.util";
 import { IAdminSystemSettingsController } from "../../interfaces/admin/IAdminSystemSettings.controller";
-
-
 
 @injectable()
 export class AdminSystemSettingsController implements IAdminSystemSettingsController {
@@ -21,11 +20,7 @@ export class AdminSystemSettingsController implements IAdminSystemSettingsContro
       res
         .status(HttpStatusCode.OK)
         .json(
-          responseHandler(
-            ResponseMessage.SYSTEM_SETTINGS_LOAD_SUCCESS,
-            HttpStatusCode.OK,
-            settings
-          )
+          responseHandler(ResponseMessage.SYSTEM_SETTINGS_LOAD_SUCCESS, HttpStatusCode.OK, settings)
         );
     } catch (error) {
       next(error);

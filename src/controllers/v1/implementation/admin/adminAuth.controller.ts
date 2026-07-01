@@ -1,39 +1,27 @@
-import { inject, injectable } from "tsyringe";
 import { NextFunction, Request, Response } from "express";
+import { inject, injectable } from "tsyringe";
+
+import { ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_MAX_AGE } from "../../../../config/env";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { responseHandler } from "../../../../utils/responseHandler.util";
-import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import logger from "../../../../utils/logger.util";
-import {
-  ACCESS_TOKEN_MAX_AGE,
-  REFRESH_TOKEN_MAX_AGE,
-} from "../../../../config/env";
-import { IAdminAuthController } from "../../interfaces/admin/IAdminAuth.controller";
 import { IAdminAuthService } from "../../../../services/v1/interfaces/admin/IAdminAuth.service";
 import { validateRefreshSession } from "../../../../utils/authSession.utils";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { decodeRefreshToken } from "../../../../utils/jwt.util";
+import logger from "../../../../utils/logger.util";
 import { setRedisData } from "../../../../utils/redis.util";
+import { responseHandler } from "../../../../utils/responseHandler.util";
+import { IAdminAuthController } from "../../interfaces/admin/IAdminAuth.controller";
 @injectable()
 export default class AdminAuthController implements IAdminAuthController {
-  constructor(
-    @inject("IAdminAuthService") private _adminAuthService: IAdminAuthService
-  ) {}
+  constructor(@inject("IAdminAuthService") private _adminAuthService: IAdminAuthService) {}
 
-  verifyLogin = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  verifyLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       logger.info("Admin login attempt", { email: req.body.email });
       const { email, password } = req.body;
       const oldRefreshToken = req.cookies?.refreshToken;
-      const admin = await this._adminAuthService.verifyLogin(
-        email,
-        password,
-        oldRefreshToken
-      );
+      const admin = await this._adminAuthService.verifyLogin(email, password, oldRefreshToken);
       if (!admin) {
         logger.warn("Invalid admin credentials", { email });
         throw new NotFoundError(ResponseMessage.INVALID_CREDINTIALS);
@@ -53,44 +41,27 @@ export default class AdminAuthController implements IAdminAuthController {
       });
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.LOGIN_SUCCESS,
-            HttpStatusCode.OK,
-            admin.admin
-          )
-        );
+        .json(responseHandler(ResponseMessage.LOGIN_SUCCESS, HttpStatusCode.OK, admin.admin));
     } catch (error) {
       logger.error("Admin login error", error);
       next(error);
     }
   };
 
-  setNewAccessToken = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  setNewAccessToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const refreshToken = req.cookies?.refreshToken;
 
       if (!refreshToken) {
         res
           .status(HttpStatusCode.UNAUTHORIZED)
-          .json(
-            responseHandler(
-              ResponseMessage.NO_REFRESH_TOKEN,
-              HttpStatusCode.UNAUTHORIZED
-            )
-          );
+          .json(responseHandler(ResponseMessage.NO_REFRESH_TOKEN, HttpStatusCode.UNAUTHORIZED));
         return;
       }
 
       await validateRefreshSession(refreshToken);
 
-      const result = await this._adminAuthService.setNewAccessToken(
-        refreshToken
-      );
+      const result = await this._adminAuthService.setNewAccessToken(refreshToken);
 
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
@@ -101,20 +72,14 @@ export default class AdminAuthController implements IAdminAuthController {
 
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(ResponseMessage.ACCESS_TOKEN_SET, HttpStatusCode.OK)
-        );
+        .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET, HttpStatusCode.OK));
     } catch (error) {
       logger.error("Admin refresh error", error);
       next(error);
     }
   };
 
-  adminLogout = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  adminLogout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       logger.info("Admin logout invoked");
 
@@ -143,13 +108,7 @@ export default class AdminAuthController implements IAdminAuthController {
       });
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.LOGOUT_SUCCESS,
-            HttpStatusCode.OK,
-            true
-          )
-        );
+        .json(responseHandler(ResponseMessage.LOGOUT_SUCCESS, HttpStatusCode.OK, true));
     } catch (error) {
       logger.error("Admin logout error", error);
       next(error);

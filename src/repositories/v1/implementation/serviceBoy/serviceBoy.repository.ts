@@ -1,28 +1,34 @@
-import { inject, injectable } from "tsyringe";
 import { FilterQuery, Model } from "mongoose";
-import { BaseRepository } from "../base/base.repository";
-import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
-import logger from "../../../../utils/logger.util";
-import { VerificationStatus } from "../../../../constants/status";
-import { PaginatedResponse } from "../../../../types/pagination.type";
-import { IServiceBoyRepository } from "../../interfaces/serviceBoy/IServiceBoy.repository";
+import { inject, injectable } from "tsyringe";
 
+import { VerificationStatus } from "../../../../constants/status";
+import IServiceBoy from "../../../../entities/v1/serviceBoyEntity";
+import { PaginatedResponse } from "../../../../types/pagination.type";
+import logger from "../../../../utils/logger.util";
+import { IServiceBoyRepository } from "../../interfaces/serviceBoy/IServiceBoy.repository";
+import { BaseRepository } from "../base/base.repository";
 
 @injectable()
-export default class ServiceBoyRepository extends BaseRepository<IServiceBoy> implements IServiceBoyRepository{
-     constructor(@inject('ServiceBoyModel')  model: Model<IServiceBoy>) {
+export default class ServiceBoyRepository
+  extends BaseRepository<IServiceBoy>
+  implements IServiceBoyRepository
+{
+  constructor(@inject("ServiceBoyModel") model: Model<IServiceBoy>) {
     super(model);
   }
 
-  async updateUser(_id:Partial<IServiceBoy>,data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined> {
+  async updateUser(
+    _id: Partial<IServiceBoy>,
+    data: Partial<IServiceBoy>
+  ): Promise<IServiceBoy | undefined> {
     try {
-   logger.debug("ID from ServiceBoyRepository.updateServiceBoy", { _id });
-  logger.debug("ServiceBoy update data", { data });
+      logger.debug("ID from ServiceBoyRepository.updateServiceBoy", { _id });
+      logger.debug("ServiceBoy update data", { data });
 
-const updatedServiceBoy = await this.updateOne(_id ,data);
-logger.debug("Updated profile", { updatedServiceBoy });
+      const updatedServiceBoy = await this.updateOne(_id, data);
+      logger.debug("Updated profile", { updatedServiceBoy });
 
-      if(updatedServiceBoy){
+      if (updatedServiceBoy) {
         return updatedServiceBoy;
       }
       return;
@@ -31,48 +37,49 @@ logger.debug("Updated profile", { updatedServiceBoy });
     }
   }
 
-async findUser(data:Partial<IServiceBoy>): Promise<IServiceBoy | undefined>{
-  try{
-const serviceBoyProfile = await  this.findOne(data, { password: 0 });
-
-logger.debug("serviceBoyProfile", { serviceBoyProfile });
-
-if(serviceBoyProfile) return serviceBoyProfile;
-return;
-
-   } catch (error) {
-      throw error;
-    }
-}
-
-async loadAllPendingVerification(): Promise<IServiceBoy[] | undefined>{
-  try {
-    const query: FilterQuery<IServiceBoy> = {
-  isVerified: VerificationStatus.Pending,
-  mobile: { $exists: true },
-  age: { $exists: true }
-};
-    const pendingVerifications = await this.findAll(query);
-    logger.info("pendingVerifications-- ServiceBoyRepository",{pendingVerifications});
-    if(pendingVerifications) return pendingVerifications;
-    return;
-    
-  } catch (error) {
-    throw error;
-  }
-}
-
-  async findPaginatedUsers(page: number, limit: number, search: string, isBlocked:boolean)
-  :Promise<PaginatedResponse<IServiceBoy>|undefined> {
+  async findUser(data: Partial<IServiceBoy>): Promise<IServiceBoy | undefined> {
     try {
-const query: FilterQuery<IServiceBoy> = {};
-      if(typeof isBlocked === "boolean"){
-        query.isBlocked = isBlocked;
-      }
-      return this.findPaginated(query, page, limit,  search, ["name", "email", "mobile"]);
+      const serviceBoyProfile = await this.findOne(data, { password: 0 });
+
+      logger.debug("serviceBoyProfile", { serviceBoyProfile });
+
+      if (serviceBoyProfile) return serviceBoyProfile;
+      return;
     } catch (error) {
       throw error;
     }
   }
-  
+
+  async loadAllPendingVerification(): Promise<IServiceBoy[] | undefined> {
+    try {
+      const query: FilterQuery<IServiceBoy> = {
+        isVerified: VerificationStatus.Pending,
+        mobile: { $exists: true },
+        age: { $exists: true },
+      };
+      const pendingVerifications = await this.findAll(query);
+      logger.info("pendingVerifications-- ServiceBoyRepository", { pendingVerifications });
+      if (pendingVerifications) return pendingVerifications;
+      return;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findPaginatedUsers(
+    page: number,
+    limit: number,
+    search: string,
+    isBlocked: boolean
+  ): Promise<PaginatedResponse<IServiceBoy> | undefined> {
+    try {
+      const query: FilterQuery<IServiceBoy> = {};
+      if (typeof isBlocked === "boolean") {
+        query.isBlocked = isBlocked;
+      }
+      return this.findPaginated(query, page, limit, search, ["name", "email", "mobile"]);
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -1,40 +1,83 @@
-import pluginTs from '@typescript-eslint/eslint-plugin';
-import parserTs from '@typescript-eslint/parser';
-import pluginImport from 'eslint-plugin-import';
-import prettierConfig from 'eslint-config-prettier'; // This disables formatting rules
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import globals from "globals";
+import importPlugin from "eslint-plugin-import";
+import prettier from "eslint-config-prettier";
 
 export default [
   {
-    ignores: ['dist', 'node_modules'],
+    ignores: ["dist", "node_modules", "coverage", "*.config.js", "*.config.cjs"],
   },
+
+  js.configs.recommended,
+
+  ...tseslint.configs.recommended,
+
   {
-    files: ['**/*.ts'],
+    files: ["**/*.ts"],
+
     languageOptions: {
-      parser: parserTs,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        project: './tsconfig.json',
+        project: "./tsconfig.json",
+        sourceType: "module",
+        ecmaVersion: "latest",
+      },
+
+      globals: {
+        ...globals.node,
       },
     },
+
     plugins: {
-      '@typescript-eslint': pluginTs,
-      import: pluginImport,
+      import: importPlugin,
     },
+
     rules: {
-      // Sorting imports
-      'import/order': ['warn', { groups: [['builtin', 'external', 'internal']] }],
+      // --------------------------
+      // JavaScript
+      // --------------------------
 
-      // Show warnings for unused variables
-      '@typescript-eslint/no-unused-vars': 'warn',
+      "no-console": "off",
 
-      // Warn for console.log but allow warn/error/info
-      // 'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+      "no-unused-vars": "off",
 
-      // Require semicolons
-      'semi': ['error', 'always'],
+      "prefer-const": "error",
+
+      "no-useless-catch": "error",
+
+      // --------------------------
+      // TypeScript
+      // --------------------------
+
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // --------------------------
+      // Imports
+      // --------------------------
+
+      "import/order": [
+        "warn",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+
+          "newlines-between": "always",
+
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
     },
   },
-  // ✅ Prettier config disabling conflicting ESLint rules
-  prettierConfig,
+
+  prettier,
 ];

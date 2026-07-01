@@ -1,20 +1,20 @@
-import axios from 'axios';
-import mime from 'mime-types';
-import s3Operations from './s3.util';
-import logger from './logger.util';
+import axios from "axios";
+import mime from "mime-types";
+
+import logger from "./logger.util";
+import s3Operations from "./s3.util";
 
 export const storeGoogleImageToS3 = async (
   imageUrl: string,
   userName: string,
-  imageType: string = 'profileImage'
+  imageType: string = "profileImage"
 ): Promise<string> => {
   try {
+    const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
+    const buffer = Buffer.from(response.data, "binary");
 
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    const buffer = Buffer.from(response.data, 'binary');
-
-    const contentType = response.headers['content-type'];
-    const fileExtension = mime.extension(contentType) || 'jpg';
+    const contentType = response.headers["content-type"];
+    const fileExtension = mime.extension(contentType) || "jpg";
 
     const imageName = `${userName}-${imageType}-${Date.now()}.${fileExtension}`;
 

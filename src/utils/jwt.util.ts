@@ -1,9 +1,11 @@
 import jwt from "jsonwebtoken";
+
 import { ACCESSTOKENSECRET, REFRESHTOKENSECRET } from "../config/env";
-import { UnAuthorizedError } from "./errors/unAuthorized.error";
-import { TokenPayload, JwtPayload } from "../types/type";
-import logger from "./logger.util";
 import { ResponseMessage } from "../constants/resposnseMessage";
+import { TokenPayload, JwtPayload } from "../types/type";
+
+import { UnAuthorizedError } from "./errors/unAuthorized.error";
+import logger from "./logger.util";
 
 const accessTokenSecret = ACCESSTOKENSECRET;
 const refreshTokenSecret = REFRESHTOKENSECRET;

@@ -1,20 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 import { container } from "tsyringe";
+
 import { HttpStatusCode } from "../constants/httpStatusCode";
-import { responseHandler } from "../utils/responseHandler.util";
 import { ResponseMessage } from "../constants/resposnseMessage";
-import { verifyAccessToken, verifyRefreshToken } from "../utils/jwt.util";
+import { Role } from "../constants/Role";
+import { IAdminAuthService } from "../services/v1/interfaces/admin/IAdminAuth.service";
 import { IServiceBoyAuthService } from "../services/v1/interfaces/serviceBoy/IServiceBoyAuth.service";
 import { IVendorAuthService } from "../services/v1/interfaces/vendor/IVendorAuth.service";
+import { UnAuthorizedError } from "../utils/errors/unAuthorized.error";
+import { verifyAccessToken, verifyRefreshToken } from "../utils/jwt.util";
 // import { IAdminService } from "../services/v1/interfaces/admin/IAdminService";
 import logger from "../utils/logger.util";
 import { getRedisData } from "../utils/redis.util";
-import { IAdminAuthService } from "../services/v1/interfaces/admin/IAdminAuth.service";
-import { UnAuthorizedError } from "../utils/errors/unAuthorized.error";
-import { Role } from "../constants/Role";
+import { responseHandler } from "../utils/responseHandler.util";
 // import { JwtPayload } from "../types/type";
-
-
 
 // Extend Express Request type
 // export interface AuthenticatedRequest extends Request {
@@ -22,21 +21,14 @@ import { Role } from "../constants/Role";
 // }
 
 // Resolve services from container
-const serviceBoyAuthService = container.resolve<IServiceBoyAuthService>(
-  "IServiceBoyAuthService"
-);
-const vendorAuthService =
-  container.resolve<IVendorAuthService>("IVendorAuthService");
+const serviceBoyAuthService = container.resolve<IServiceBoyAuthService>("IServiceBoyAuthService");
+const vendorAuthService = container.resolve<IVendorAuthService>("IVendorAuthService");
 const adminAuthService = container.resolve<IAdminAuthService>("IAdminAuthService");
 
-export const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     logger.info("Auth middleware triggered");
-  
+
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
     logger.debug(`Access token present: ${!!accessToken}`);
@@ -52,120 +44,107 @@ export const authMiddleware = async (
         req.user = verifiedAccessToken;
 
         logger.info("Authenticated user role", {
-    role: verifiedAccessToken.role,
-  });
+          role: verifiedAccessToken.role,
+        });
         return next();
-      }         
+      }
     }
 
     // If no access token or it's invalid, check for refresh token
     if (!refreshToken) {
-            logger.warn("No refresh token provided");
+      logger.warn("No refresh token provided");
       res
         .status(HttpStatusCode.UNAUTHORIZED)
-        .json(
-          responseHandler(
-            ResponseMessage.NO_REFRESH_TOKEN,
-            HttpStatusCode.UNAUTHORIZED
-          )
-        );
-      return; 
+        .json(responseHandler(ResponseMessage.NO_REFRESH_TOKEN, HttpStatusCode.UNAUTHORIZED));
+      return;
     } else {
-
       try {
+        const isBlacklisted = await getRedisData(refreshToken);
+        logger.warn("isBlacklisted Refresh token--------------------------------", {
+          isBlacklisted,
+        });
+        if (isBlacklisted) {
+          logger.warn("Refresh token is blacklisted");
+          res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "lax" });
+          res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "lax" });
 
-   const isBlacklisted = await getRedisData(refreshToken);
-   logger.warn("isBlacklisted Refresh token--------------------------------",{isBlacklisted});
-    if (isBlacklisted) {
-      logger.warn("Refresh token is blacklisted");
-      res.clearCookie("refreshToken", 
-        { httpOnly: true, secure: true, sameSite: "lax" });
-      res.clearCookie("accessToken",
-         { httpOnly: true, secure: true, sameSite: "lax" });
-
-       res
-        .status(HttpStatusCode.UNAUTHORIZED)
-        .json(
-          responseHandler(
-            ResponseMessage.BLACK_LISTED_TOKEN,
-            HttpStatusCode.UNAUTHORIZED
-          )
-        );
-        return;
-    }
+          res
+            .status(HttpStatusCode.UNAUTHORIZED)
+            .json(responseHandler(ResponseMessage.BLACK_LISTED_TOKEN, HttpStatusCode.UNAUTHORIZED));
+          return;
+        }
 
         let tokenRecreate;
-      //   // Create to new access token and refresh token based on the role
-      //   logger.info("athorization middlware url",{originalUrl})
-      //   if (originalUrl.includes("/admin")) {
-      //        logger.info("within authorization originalUrl.includes(/admin)");
-      //     tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken)
-      //   } 
-      //    else if (originalUrl.includes("/vendor")) {
-      //     tokenRecreate = await vendorAuthService.setNewAccessToken(
-      //       refreshToken
-      //     );
-      //   } else if (originalUrl.includes("/service-boy")) {
-      //     tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
-      //   } else {
-      //   logger.warn("Unknown role in URL path:", { url: originalUrl });
-      //   }
+        //   // Create to new access token and refresh token based on the role
+        //   logger.info("athorization middlware url",{originalUrl})
+        //   if (originalUrl.includes("/admin")) {
+        //        logger.info("within authorization originalUrl.includes(/admin)");
+        //     tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken)
+        //   }
+        //    else if (originalUrl.includes("/vendor")) {
+        //     tokenRecreate = await vendorAuthService.setNewAccessToken(
+        //       refreshToken
+        //     );
+        //   } else if (originalUrl.includes("/service-boy")) {
+        //     tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
+        //   } else {
+        //   logger.warn("Unknown role in URL path:", { url: originalUrl });
+        //   }
 
-      //   if (tokenRecreate) {
-      //     // Set new refresh token and acesstoken in cookie
-      //   logger.info("New token generated for refresh");
+        //   if (tokenRecreate) {
+        //     // Set new refresh token and acesstoken in cookie
+        //   logger.info("New token generated for refresh");
 
-      //     const verifiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
-      // console.log("verifiedAccessToken newly created", verifiedAccessToken )
-      // if (verifiedAccessToken) {
-      //   // req.user = verifiedAccessToken  
-      // }
-      //     res.cookie("refreshToken", tokenRecreate.refreshToken, {
-      //       httpOnly: true,
-      //       secure: process.env.NODE_ENV === "production",
-      //       maxAge: 30 * 24 * 60 * 60 * 1000,
-      //       sameSite: "lax",
-      //     });
-      //     res.cookie("accessToken", tokenRecreate.accessToken, {
-      //       httpOnly: true,
-      //       secure: process.env.NODE_ENV === "production",
-      //       maxAge: 15 * 60 * 1000,
-      //       sameSite: "lax",
-      //     });
+        //     const verifiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
+        // console.log("verifiedAccessToken newly created", verifiedAccessToken )
+        // if (verifiedAccessToken) {
+        //   // req.user = verifiedAccessToken
+        // }
+        //     res.cookie("refreshToken", tokenRecreate.refreshToken, {
+        //       httpOnly: true,
+        //       secure: process.env.NODE_ENV === "production",
+        //       maxAge: 30 * 24 * 60 * 60 * 1000,
+        //       sameSite: "lax",
+        //     });
+        //     res.cookie("accessToken", tokenRecreate.accessToken, {
+        //       httpOnly: true,
+        //       secure: process.env.NODE_ENV === "production",
+        //       maxAge: 15 * 60 * 1000,
+        //       sameSite: "lax",
+        //     });
 
-      //   return  next();
+        //   return  next();
 
+        const refreshPayload = await verifyRefreshToken(refreshToken);
 
-      const refreshPayload = await verifyRefreshToken(refreshToken);
+        if (!refreshPayload) throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
 
-if (!refreshPayload) throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
+        switch (refreshPayload.role) {
+          case Role.ADMIN:
+            tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken);
+            break;
 
-switch (refreshPayload.role) {
-  case Role.ADMIN:
-    tokenRecreate = await adminAuthService.setNewAccessToken(refreshToken);
-    break;
+          case Role.VENDOR:
+            tokenRecreate = await vendorAuthService.setNewAccessToken(refreshToken);
+            break;
 
-  case Role.VENDOR:
-    tokenRecreate = await vendorAuthService.setNewAccessToken(refreshToken);
-    break;
+          case Role.SERVICE_BOY:
+            tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
+            break;
 
-  case Role.SERVICE_BOY:
-    tokenRecreate = await serviceBoyAuthService.setNewAccessToken(refreshToken);
-    break;
+          default:
+            throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN);
+        }
 
-  default:
-    throw new UnAuthorizedError(ResponseMessage.INVALID_REFRESH_TOKEN)
-}
-
-  if (tokenRecreate) {
+        if (tokenRecreate) {
           // Set new refresh token and acesstoken in cookie
-        logger.info("New token generated for refresh");
+          logger.info("New token generated for refresh");
 
           const verifiedAccessToken = await verifyAccessToken(tokenRecreate.accessToken);
-      console.log("verifiedAccessToken newly created", verifiedAccessToken )
-      if (verifiedAccessToken) {
-        req.user = verifiedAccessToken  
-      }
+          console.log("verifiedAccessToken newly created", verifiedAccessToken);
+          if (verifiedAccessToken) {
+            req.user = verifiedAccessToken;
+          }
           res.cookie("refreshToken", tokenRecreate.refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -179,35 +158,30 @@ switch (refreshPayload.role) {
             sameSite: "lax",
           });
 
-        return  next();
-
+          return next();
         } else {
-  logger.warn("Failed to recreate token - refresh token invalid or user role not found");
-  
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-  });
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-  });
+          logger.warn("Failed to recreate token - refresh token invalid or user role not found");
 
-  res
-    .status(HttpStatusCode.UNAUTHORIZED)
-    .json(
-      responseHandler(
-        ResponseMessage.INVALID_REFRESH_TOKEN,
-        HttpStatusCode.UNAUTHORIZED
-      )
-    );
-    return 
-}
+          res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+          });
+          res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+          });
 
+          res
+            .status(HttpStatusCode.UNAUTHORIZED)
+            .json(
+              responseHandler(ResponseMessage.INVALID_REFRESH_TOKEN, HttpStatusCode.UNAUTHORIZED)
+            );
+          return;
+        }
       } catch (error) {
-        logger.error("Error while validating or regenerating tokens",error);
+        logger.error("Error while validating or regenerating tokens", error);
         res.clearCookie("refreshToken", {
           httpOnly: true,
           secure: true,
@@ -222,12 +196,9 @@ switch (refreshPayload.role) {
         res
           .status(HttpStatusCode.UNAUTHORIZED)
           .json(
-            responseHandler(
-              ResponseMessage.INVALID_REFRESH_TOKEN,
-              HttpStatusCode.UNAUTHORIZED
-            )
+            responseHandler(ResponseMessage.INVALID_REFRESH_TOKEN, HttpStatusCode.UNAUTHORIZED)
           );
-        return; 
+        return;
       }
     }
   } catch (error) {
@@ -235,12 +206,8 @@ switch (refreshPayload.role) {
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
       .json(
-        responseHandler(
-          ResponseMessage.INTERNAL_SERVER_ERROR,
-          HttpStatusCode.INTERNAL_SERVER_ERROR
-        )
+        responseHandler(ResponseMessage.INTERNAL_SERVER_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR)
       );
   }
-  return; 
+  return;
 };
-

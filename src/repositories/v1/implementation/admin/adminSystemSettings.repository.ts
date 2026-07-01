@@ -1,8 +1,8 @@
-import { inject, injectable } from "tsyringe";
 import { Model } from "mongoose";
-import { BaseRepository } from "../base/base.repository";
+import { inject, injectable } from "tsyringe";
 
 import ISystemSettings from "../../../../entities/v1/systemSettingsEntity";
+import { BaseRepository } from "../base/base.repository";
 
 export interface IAdminSystemSettingsRepository {
   getSettings(): Promise<ISystemSettings | null>;
@@ -12,8 +12,8 @@ export interface IAdminSystemSettingsRepository {
 @injectable()
 export class AdminSystemSettingsRepository
   extends BaseRepository<ISystemSettings>
-  implements IAdminSystemSettingsRepository {
-
+  implements IAdminSystemSettingsRepository
+{
   constructor(
     @inject("SystemSettingsModel")
     model: Model<ISystemSettings>

@@ -1,35 +1,34 @@
 import "reflect-metadata";
-import express, {Application} from "express";
+import express, { Application } from "express";
 import "./config/diContainer";
 import morgan from "morgan";
 import cors from "cors";
-import cookieParser from 'cookie-parser';
-import router from "./routes/router";
-import { PORT,CLIENTURL } from "./config/env";
+import cookieParser from "cookie-parser";
+
 import { connectDB } from "./config/connectDB";
+import { PORT, CLIENTURL } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler.middleware";
+import router from "./routes/router";
 import logger from "./utils/logger.util";
 
-
-
-
-const app : Application = express();
+const app: Application = express();
 
 app.use(cookieParser());
-app.use(cors({
-    origin:CLIENTURL,
-    methods:["GET","POST","PATCH","DELETE","PUT"],
-    allowedHeaders:["Content-Type","Authorization"],
-    credentials:true
-}));
+app.use(
+  cors({
+    origin: CLIENTURL,
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 logger.info("✅ Winston logger is working");
 
-
-app.get("/", (req,res)=>{
-    res.send("server started");
+app.get("/", (req, res) => {
+  res.send("server started");
 });
 
 app.use("/api", router);
@@ -37,7 +36,7 @@ app.use("/api", router);
 app.use(errorHandler);
 
 connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-    });
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
 });

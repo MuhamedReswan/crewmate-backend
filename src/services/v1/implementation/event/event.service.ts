@@ -1,22 +1,23 @@
-import { inject, injectable } from "tsyringe";
-import IEvent from "../../../../entities/v1/eventEntity";
 import { SchemaTypes, Types } from "mongoose";
-import logger from "../../../../utils/logger.util";
-import { BadrequestError } from "../../../../utils/errors/badRequest.error";
+import { inject, injectable } from "tsyringe";
+
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { ConflictError } from "../../../../utils/errors/conflict.error";
-import {  eventFilter, EventQueryFilter, JwtPayload,} from "../../../../types/type";
-import { PaginatedResponse } from "../../../../types/pagination.type";
-import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import { calculateTotalEventBill } from "../../../../utils/billCalculation.util";
+import { Role } from "../../../../constants/Role";
+import IEvent from "../../../../entities/v1/eventEntity";
 import { IEventRepository } from "../../../../repositories/v1/interfaces/event/IEvent.repository";
 import { IVendorRepository } from "../../../../repositories/v1/interfaces/vendor/IVendor.repository";
+import { PaginatedResponse } from "../../../../types/pagination.type";
+import { eventFilter, EventQueryFilter, JwtPayload } from "../../../../types/type";
+import { calculateTotalEventBill } from "../../../../utils/billCalculation.util";
+import { BadrequestError } from "../../../../utils/errors/badRequest.error";
+import { ConflictError } from "../../../../utils/errors/conflict.error";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import logger from "../../../../utils/logger.util";
+import { eventQuerySchema } from "../../../../validators";
 import { IAdminSystemSettingsService } from "../../interfaces/admin/IAdminSystemSettings.service";
 import { IEventService } from "../../interfaces/event/IEvent.service";
-import { Role } from "../../../../constants/Role";
-import { eventQuerySchema } from "../../../../validators";
-const mongoose = require('mongoose');
 
+const mongoose = require("mongoose");
 
 @injectable()
 export default class EventService implements IEventService {
@@ -57,7 +58,7 @@ export default class EventService implements IEventService {
   //   }
   // }
 
-    async createEvent(eventData: Partial<IEvent>): Promise<IEvent | undefined> {
+  async createEvent(eventData: Partial<IEvent>): Promise<IEvent | undefined> {
     try {
       const vendor = new Types.ObjectId(eventData.vendor);
       const vendorData = await this._vendorRepository.findUser({ _id: vendor });
@@ -73,23 +74,22 @@ export default class EventService implements IEventService {
         throw new ConflictError(ResponseMessage.EVENT_ALREADY_EXIST);
       }
 
-// Fetch wage from System Settings
-const settings = await this._systemSettingsService.getSettings();
-if (!settings) {
-  throw new BadrequestError("System settings are not configured");
-}
+      // Fetch wage from System Settings
+      const settings = await this._systemSettingsService.getSettings();
+      if (!settings) {
+        throw new BadrequestError("System settings are not configured");
+      }
 
-const wage = Number(settings.wagePerBoy);
-eventData.wagePerBoy = wage;
+      const wage = Number(settings.wagePerBoy);
+      eventData.wagePerBoy = wage;
 
-// Calculate totalBill safely
-const boys = Number(eventData.serviceBoys ?? 0);
-const bonus = Number(eventData.bonus ?? 0);
-const overtime = Number(eventData.overTime ?? 0);
-const travel = Number(eventData.travelExpense ?? 0);
+      // Calculate totalBill safely
+      const boys = Number(eventData.serviceBoys ?? 0);
+      const bonus = Number(eventData.bonus ?? 0);
+      const overtime = Number(eventData.overTime ?? 0);
+      const travel = Number(eventData.travelExpense ?? 0);
 
-eventData.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel );
-
+      eventData.totalBill = calculateTotalEventBill(boys, wage, bonus, overtime, travel);
 
       // Create event
       const createdEvent = await this._eventRepository.createEvent(eventData);
@@ -109,22 +109,18 @@ eventData.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel
     query: eventFilter
   ): Promise<PaginatedResponse<IEvent> | undefined> => {
     try {
+      const filter = eventQuerySchema.parse(query);
 
-     const filter = eventQuerySchema.parse(query);
+      const mongoFilter: Partial<IEvent> = {
+        ...(filter.status && { status: filter.status }),
+      };
 
-    const mongoFilter: Partial<IEvent> = {
-      ...(filter.status && { status: filter.status }),
-    };
+      // 👇 ROLE-BASED FILTERING (CORRECT PLACE)
+      if (user.role === Role.VENDOR) {
+        mongoFilter.vendor = new mongoose.Types.ObjectId(user.id);
+      }
 
-    // 👇 ROLE-BASED FILTERING (CORRECT PLACE)
-    if (user.role === Role.VENDOR) {
-      mongoFilter.vendor = new mongoose.Types.ObjectId(user.id);
-    }
-
-    return this._eventRepository.findEventsPaginated(
-      filter,
-      mongoFilter
-    );
+      return this._eventRepository.findEventsPaginated(filter, mongoFilter);
     } catch (error) {
       throw error;
     }
@@ -153,33 +149,28 @@ eventData.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel
     }
   };
 
-  updateEvent = async (
-    eventId: string,
-    data:  Partial<IEvent>
-  ): Promise <IEvent | undefined> => {
+  updateEvent = async (eventId: string, data: Partial<IEvent>): Promise<IEvent | undefined> => {
     try {
       logger.debug("getWorks filter", eventId);
 
-      if(data.bonus || data.overTime|| data.travelExpense || data.serviceBoys  ){
+      if (data.bonus || data.overTime || data.travelExpense || data.serviceBoys) {
         const event = await this._eventRepository.findEventById(eventId);
-        if(!event) throw new NotFoundError(ResponseMessage.EVENT_NOT_FOUND);
+        if (!event) throw new NotFoundError(ResponseMessage.EVENT_NOT_FOUND);
 
-const boys = Number(data.serviceBoys ?? event.serviceBoys);
-const bonus = Number(data.bonus ?? event.bonus);
-const overtime = Number(data.overTime ?? event.overTime);
-const travel = Number(data.travelExpense ?? event.travelExpense);
-const wage = Number(event.wagePerBoy);
+        const boys = Number(data.serviceBoys ?? event.serviceBoys);
+        const bonus = Number(data.bonus ?? event.bonus);
+        const overtime = Number(data.overTime ?? event.overTime);
+        const travel = Number(data.travelExpense ?? event.travelExpense);
+        const wage = Number(event.wagePerBoy);
 
-        data.totalBill = calculateTotalEventBill(boys, wage,bonus, overtime, travel );
+        data.totalBill = calculateTotalEventBill(boys, wage, bonus, overtime, travel);
       }
 
-  const updatedEvent = await this._eventRepository.updateEventById(eventId, data);
+      const updatedEvent = await this._eventRepository.updateEventById(eventId, data);
 
-    return updatedEvent ?? undefined;  
+      return updatedEvent ?? undefined;
     } catch (error) {
       throw error;
     }
   };
-
-
 }

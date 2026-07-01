@@ -1,23 +1,25 @@
-import nodemailer from 'nodemailer';
-import { NODEMAILEREMAIL, NODEMAILERPASSWORD } from '../config/env';
-import { BadrequestError } from './errors/badRequest.error';
-import { Role } from '../constants/Role';
+import nodemailer from "nodemailer";
+
+import { NODEMAILEREMAIL, NODEMAILERPASSWORD } from "../config/env";
+import { Role } from "../constants/Role";
+
+import { BadrequestError } from "./errors/badRequest.error";
 
 const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: NODEMAILEREMAIL,
-        pass: NODEMAILERPASSWORD
-    }
+  service: "Gmail",
+  auth: {
+    user: NODEMAILEREMAIL,
+    pass: NODEMAILERPASSWORD,
+  },
 });
 
 export const sendOtpEmail = async (email: string, otp: string) => {
-  console.log("email from sendOtpEmail----",email);
+  console.log("email from sendOtpEmail----", email);
 
   if (!email) {
     throw new BadrequestError("Email is required");
-}
-    const htmlContent = `
+  }
+  const htmlContent = `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -63,41 +65,40 @@ export const sendOtpEmail = async (email: string, otp: string) => {
     </html>
     `;
 
-    const mailOptions = {
-        from: NODEMAILEREMAIL,
-        to: email,
-        subject: "Your OTP",
-        html: htmlContent
-    };
+  const mailOptions = {
+    from: NODEMAILEREMAIL,
+    to: email,
+    subject: "Your OTP",
+    html: htmlContent,
+  };
 
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log('OTP sent successfully');
-    } catch (err) {
-        console.error('Error sending OTP email:', err);
-        throw new BadrequestError('Error sending OTP email');
-    }
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("OTP sent successfully");
+  } catch (err) {
+    console.error("Error sending OTP email:", err);
+    throw new BadrequestError("Error sending OTP email");
+  }
 };
 
-export function createOtp(): string{
-    return Math.floor(1000 + Math.random() * 9000).toString();
-};
+export function createOtp(): string {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+}
 
-
-export const sendForgotPasswordLink = async (email:string, token:string, role:Role) =>{
-  console.log("email from sendForgotPasswordLink----",email);
-  console.log("token from sendForgotPasswordLink----",token);
-  console.log("role from sendForgotPasswordLink----",role);
+export const sendForgotPasswordLink = async (email: string, token: string, role: Role) => {
+  console.log("email from sendForgotPasswordLink----", email);
+  console.log("token from sendForgotPasswordLink----", token);
+  console.log("role from sendForgotPasswordLink----", role);
 
   if (!email) {
     throw new BadrequestError("Email is required");
-}
-let userRole;
-if(role === Role.VENDOR){
-  userRole = 'vendor';
-} else if(role === Role.SERVICE_BOY){
-  userRole = 'service-boy';
-}
+  }
+  let userRole;
+  if (role === Role.VENDOR) {
+    userRole = "vendor";
+  } else if (role === Role.SERVICE_BOY) {
+    userRole = "service-boy";
+  }
 
   const htmlContent = `
    <!DOCTYPE html>
@@ -174,20 +175,18 @@ if(role === Role.VENDOR){
 </html>
     `;
 
-    const mailOptions = {
-      from: NODEMAILEREMAIL,
-      to: email,
-      subject: "Forgot password link",
-      html: htmlContent
+  const mailOptions = {
+    from: NODEMAILEREMAIL,
+    to: email,
+    subject: "Forgot password link",
+    html: htmlContent,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('email sent successfully');
-} catch (err) {
-    console.error('Error sending OTP email:', err);
+    console.log("email sent successfully");
+  } catch (err) {
+    console.error("Error sending OTP email:", err);
     throw err;
-}
-
+  }
 };
-

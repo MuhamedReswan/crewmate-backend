@@ -10,6 +10,6 @@ export interface IEventRepository {
     mongoFilter: Partial<IEvent>,
     sort?: Record<string, 1 | -1>
   ): Promise<PaginatedResponse<IEvent>>;
-  updateEventById(  eventId: string, data: Partial<IEvent>): Promise<IEvent | undefined>
-  findEventById(id: string): Promise<IEvent | null>
+  updateEventById(eventId: string, data: Partial<IEvent>): Promise<IEvent | undefined>;
+  findEventById(id: string): Promise<IEvent | null>;
 }

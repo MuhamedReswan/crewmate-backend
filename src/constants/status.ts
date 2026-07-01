@@ -4,21 +4,19 @@ export enum VerificationStatus {
   Rejected = "rejected",
 }
 
-
 export enum BookingStatus {
-  Active= "Active",
+  Active = "Active",
   Stopped = "Stopped",
   Cancelled = "Cancelled",
-  Completed = "Completed"
+  Completed = "Completed",
 }
 
-
 export enum EventStatus {
-  Pending = "Pending",    
-  Upcoming = "Upcoming",   
-  Ongoing = "Ongoing",   
-  Completed = "Completed", 
-  Cancelled = "Cancelled", 
+  Pending = "Pending",
+  Upcoming = "Upcoming",
+  Ongoing = "Ongoing",
+  Completed = "Completed",
+  Cancelled = "Cancelled",
 }
 
 export type EventStatusType = `${EventStatus}`;

@@ -6,5 +6,5 @@ export const LocationSchema = new Schema(
     lng: { type: Number, required: true },
     address: { type: String, required: true },
   },
-  { _id: false } 
+  { _id: false }
 );

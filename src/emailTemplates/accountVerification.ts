@@ -1,18 +1,18 @@
 export const getVerificationEmailTemplate = (
   name: string,
-  status: 'APPROVED' | 'REJECTED',
-  user:string,
+  status: "APPROVED" | "REJECTED",
+  user: string,
   reason?: string,
   redirectUrl: string = `http://localhost:5173/${user}/login`
 ): string => {
-  const statusClass = status === 'APPROVED' ? 'status-success' : 'status-rejected';
+  const statusClass = status === "APPROVED" ? "status-success" : "status-rejected";
   const reasonSection = reason
     ? `
     <div class="reason">
       <strong>Reason for rejection:</strong> ${reason}
     </div>
     `
-    : '';
+    : "";
 
   return `
 <!DOCTYPE html>
@@ -63,4 +63,3 @@ export const getVerificationEmailTemplate = (
 </html>
   `;
 };
-

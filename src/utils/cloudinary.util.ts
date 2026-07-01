@@ -38,10 +38,9 @@
 //   });
 // };
 
-
-
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
+
 import { IImage, ISecureImage, UploadOptions } from "../types";
 
 cloudinary.config({
@@ -66,16 +65,16 @@ export const uploadImageToCloudinary = (
       (error, result) => {
         if (error || !result) return reject(error);
 
-      if (isSecure) {
-  resolve({
-    publicId: result.public_id,
-  });
-} else {
-  resolve({
-    publicId: result.public_id,
-    url: result.secure_url,
-  });
-}
+        if (isSecure) {
+          resolve({
+            publicId: result.public_id,
+          });
+        } else {
+          resolve({
+            publicId: result.public_id,
+            url: result.secure_url,
+          });
+        }
       }
     );
 
@@ -84,9 +83,7 @@ export const uploadImageToCloudinary = (
 };
 
 // Delete image
-export const deleteImageFromCloudinary = async (
-  publicId: string
-): Promise<void> => {
+export const deleteImageFromCloudinary = async (publicId: string): Promise<void> => {
   try {
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
@@ -113,8 +110,6 @@ export const uploadImageFromUrlToCloudinary = async (
     throw error;
   }
 };
-
-
 
 export const generateSignedUrl = (publicId: string): string => {
   return cloudinary.url(publicId, {

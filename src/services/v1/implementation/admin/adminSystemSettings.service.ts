@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
+
 import { AdminSystemSettingsRepository } from "../../../../repositories/v1/implementation/admin/adminSystemSettings.repository";
 import { IAdminSystemSettingsService } from "../../interfaces/admin/IAdminSystemSettings.service";
-
 
 @injectable()
 export class AdminSystemSettingsService implements IAdminSystemSettingsService {
@@ -19,4 +19,3 @@ export class AdminSystemSettingsService implements IAdminSystemSettingsService {
     return this.systemSettingsRepo.updateSettings(data);
   }
 }
-

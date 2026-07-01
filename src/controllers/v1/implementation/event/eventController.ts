@@ -1,35 +1,28 @@
-import { inject, injectable } from "tsyringe";
-import {
-  EventQueryFilter,
-} from "../../../../types/type";
 import { NextFunction, Request, Response } from "express";
+import { Types } from "mongoose";
+import { inject, injectable } from "tsyringe";
+
+import { HttpStatusCode } from "../../../../constants/httpStatusCode";
+import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { EventStatusType } from "../../../../constants/status";
+import { IEventService } from "../../../../services/v1/interfaces/event/IEvent.service";
+import { EventQueryFilter } from "../../../../types/type";
+import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import logger from "../../../../utils/logger.util";
 import { responseHandler } from "../../../../utils/responseHandler.util";
-import { ResponseMessage } from "../../../../constants/resposnseMessage";
-import { HttpStatusCode } from "../../../../constants/httpStatusCode";
-import { Types } from "mongoose";
-import { EventStatusType } from "../../../../constants/status";
 import { IEventController } from "../../interfaces/event/IEventController";
-import { IEventService } from "../../../../services/v1/interfaces/event/IEvent.service";
-import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
-
 
 @injectable()
 export default class EventController implements IEventController {
   constructor(@inject("IEventService") private _eventService: IEventService) {}
 
-
-  createEvent = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  createEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-          logger.info("req.body in createEvent ",{body:req.body});
+      logger.info("req.body in createEvent ", { body: req.body });
       const { date, reportingTime, ...rest } = req.body;
       const reportingDateTime = new Date(`${date}T${reportingTime}:00`);
-      logger.debug("createEvent createEvent",{reportingDateTime})
-      
+      logger.debug("createEvent createEvent", { reportingDateTime });
+
       const event = await this._eventService.createEvent({
         ...rest,
         reportingDateTime,
@@ -39,11 +32,7 @@ export default class EventController implements IEventController {
         res
           .status(HttpStatusCode.OK)
           .json(
-            responseHandler(
-              ResponseMessage.EVENT_CREATION_SUCCESS,
-              HttpStatusCode.CREATED,
-              event
-            )
+            responseHandler(ResponseMessage.EVENT_CREATION_SUCCESS, HttpStatusCode.CREATED, event)
           );
       }
     } catch (error) {
@@ -52,197 +41,162 @@ export default class EventController implements IEventController {
     }
   };
 
+  getEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      logger.info("req.query from getEvents", req.query);
 
-getEvents = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    logger.info("req.query from getEvents",req.query);
+      if (!req.user) {
+        throw new UnAuthorizedError(ResponseMessage.NO_USER_IN_REQUEST);
+      }
+      const events = await this._eventService.getEvents(req.user, req.query);
+      res
+        .status(HttpStatusCode.OK)
+        .json(responseHandler(ResponseMessage.LOAD_EVENT_SUCCESS, HttpStatusCode.OK, events));
+    } catch (error) {
+      logger.error("getEvents on event controller", error);
+      next(error);
+    }
+  };
 
-    if (!req.user) {
-  throw new UnAuthorizedError(ResponseMessage.NO_USER_IN_REQUEST);
-}
-   const events = await this._eventService.getEvents(req.user,req.query);
-    res
-      .status(HttpStatusCode.OK)
-      .json(
-        responseHandler(
-          ResponseMessage.LOAD_EVENT_SUCCESS,
-          HttpStatusCode.OK,
-          events
-        )
-      );
-  } catch (error) {
-    logger.error("getEvents on event controller", error);
-    next(error);
-  }
-};
+  // getEvents = async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> => {
+  //   try {
+  //     const page = parseInt(req.query.page as string) || 1;
+  //     const limit = parseInt(req.query.limit as string) || 10;
+  //     const search = (req.query.search as string) || "";
+  //     const status = (req.query.status as EventStatusType) || undefined;
+  //     const from = (req.query.from as string) || undefined;
+  //     const to = (req.query.to as string) || undefined;
+  //     const sortBy = (req.query.sortBy as string) || "reportingDateTime";
+  //     const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
 
-// getEvents = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ): Promise<void> => {
-//   try {
-//     const page = parseInt(req.query.page as string) || 1;
-//     const limit = parseInt(req.query.limit as string) || 10;
-//     const search = (req.query.search as string) || "";
-//     const status = (req.query.status as EventStatusType) || undefined;
-//     const from = (req.query.from as string) || undefined;
-//     const to = (req.query.to as string) || undefined;
-//     const sortBy = (req.query.sortBy as string) || "reportingDateTime";
-//     const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
+  //     if (!req.params.vendorId) {
+  //       res.status(HttpStatusCode.BAD_REQUEST)
+  //       .json(
+  //        responseHandler(
+  //           ResponseMessage.VENDOR_ID_MISSING,
+  //           HttpStatusCode.BAD_REQUEST,
+  //         )
+  //       );
+  //       return;
+  //     }
 
-//     if (!req.params.vendorId) {
-//       res.status(HttpStatusCode.BAD_REQUEST)
-//       .json(
-//        responseHandler(
-//           ResponseMessage.VENDOR_ID_MISSING,
-//           HttpStatusCode.BAD_REQUEST,
-//         )
-//       );
-//       return;
-//     }
+  //     const vendor = new Types.ObjectId(req.params.vendorId);
 
-//     const vendor = new Types.ObjectId(req.params.vendorId);
-    
-//     const filter: EventQueryFilter = {
-//       vendor,
-//       search,
-//       status,
-//       from,
-//       to,
-//       page,
-//       limit
-//     };
+  //     const filter: EventQueryFilter = {
+  //       vendor,
+  //       search,
+  //       status,
+  //       from,
+  //       to,
+  //       page,
+  //       limit
+  //     };
 
-    
-//     const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
+  //     const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
 
-//     const events = await this._eventService.getEvents(filter,sort);
-//     logger.debug("getEvents out in controller",{events})
+  //     const events = await this._eventService.getEvents(filter,sort);
+  //     logger.debug("getEvents out in controller",{events})
 
-//     res
-//       .status(HttpStatusCode.OK)
-//       .json(
-//         responseHandler(
-//           ResponseMessage.LOAD_EVENT_SUCCESS,
-//           HttpStatusCode.OK,
-//           events
-//         )
-//       );
-//   } catch (error) {
-//     logger.error("getEvents on event controller", error);
-//     next(error);
-//   }
-// };
+  //     res
+  //       .status(HttpStatusCode.OK)
+  //       .json(
+  //         responseHandler(
+  //           ResponseMessage.LOAD_EVENT_SUCCESS,
+  //           HttpStatusCode.OK,
+  //           events
+  //         )
+  //       );
+  //   } catch (error) {
+  //     logger.error("getEvents on event controller", error);
+  //     next(error);
+  //   }
+  // };
 
+  getWorks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      logger.debug("getWorks req.query", req.query);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
+      const status = (req.query.status as EventStatusType) || undefined;
+      const from = (req.query.from as string) || undefined;
+      const to = (req.query.to as string) || undefined;
+      const sortBy = (req.query.sortBy as string) || "reportingDateTime";
+      const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
 
-getWorks = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-        logger.debug("getWorks req.query",req.query);
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = (req.query.search as string) || "";
-    const status = (req.query.status as EventStatusType) || undefined;
-    const from = (req.query.from as string) || undefined;
-    const to = (req.query.to as string) || undefined;
-    const sortBy = (req.query.sortBy as string) || "reportingDateTime";
-    const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
+      // if (!req.params.vendorId) {
+      //   res.status(HttpStatusCode.BAD_REQUEST).json({ message: "vendorId is required" });
+      //   return;
+      // }
 
-    // if (!req.params.vendorId) {
-    //   res.status(HttpStatusCode.BAD_REQUEST).json({ message: "vendorId is required" });
-    //   return;
-    // }
+      // const vendorId = new Types.ObjectId(req.params.vendorId);
 
-    // const vendorId = new Types.ObjectId(req.params.vendorId);
-    
-    const filter: EventQueryFilter = {
-      search,
-      status,
-      from,
-      to,
-      page,
-      limit
-    };
+      const filter: EventQueryFilter = {
+        search,
+        status,
+        from,
+        to,
+        page,
+        limit,
+      };
 
-    
-    const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
+      const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
 
-    const works = await this._eventService.getEvents(filter,sort);
-    logger.debug("getWorks out in controller",{works})
+      const works = await this._eventService.getEvents(filter, sort);
+      logger.debug("getWorks out in controller", { works });
 
-    res
-      .status(HttpStatusCode.OK)
-      .json(
-        responseHandler(
-          ResponseMessage.LOAD_WORKS_SUCCESS,
-          HttpStatusCode.OK,
-          works
-        )
-      );
-  } catch (error) {
-    next(error);
-  }
-};
+      res
+        .status(HttpStatusCode.OK)
+        .json(responseHandler(ResponseMessage.LOAD_WORKS_SUCCESS, HttpStatusCode.OK, works));
+    } catch (error) {
+      next(error);
+    }
+  };
 
+  updateEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { eventId } = req.params;
+      const updateData = req.body;
+      const updatedEvent = await this._eventService.updateEvent(eventId, updateData);
 
-
-updateEvent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { eventId } = req.params;
-     const updateData = req.body;
-     const updatedEvent = await this._eventService.updateEvent(eventId, updateData);
-        
       if (!updatedEvent) {
-       res.status(HttpStatusCode.NOT_FOUND).json({
-        message: ResponseMessage.EVENT_NOT_FOUND,
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          message: ResponseMessage.EVENT_NOT_FOUND,
+        });
+      }
+
+      res.status(HttpStatusCode.OK).json({
+        message: ResponseMessage.EVENT_UPDATION_SUCCESS,
+        data: updatedEvent,
       });
+    } catch (error) {
+      next(error);
     }
+  };
 
-     res.status(HttpStatusCode.OK).json({
-      message:ResponseMessage.EVENT_UPDATION_SUCCESS,
-      data: updatedEvent,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  changeBookingStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { eventId } = req.params;
+      const bookingStatus = req.body;
+      logger.debug("changeBookingStatus out in controller", { bookingStatus });
+      const bookingUpdatedEvent = await this._eventService.updateEvent(eventId, bookingStatus);
 
-changeBookingStatus = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { eventId } = req.params;
-     const bookingStatus = req.body;
-     logger.debug("changeBookingStatus out in controller",{bookingStatus})
-     const bookingUpdatedEvent = await this._eventService.updateEvent(eventId, bookingStatus);
-        
       if (!bookingUpdatedEvent) {
-       res.status(HttpStatusCode.NOT_FOUND).json({
-        message: ResponseMessage.EVENT_NOT_FOUND,
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          message: ResponseMessage.EVENT_NOT_FOUND,
+        });
+      }
+
+      res.status(HttpStatusCode.OK).json({
+        message: ResponseMessage.BOOKING_STATUS_UPDATED,
+        data: bookingUpdatedEvent,
       });
+    } catch (error) {
+      next(error);
     }
-
-     res.status(HttpStatusCode.OK).json({
-      message: ResponseMessage.BOOKING_STATUS_UPDATED ,
-      data: bookingUpdatedEvent,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
+  };
 }

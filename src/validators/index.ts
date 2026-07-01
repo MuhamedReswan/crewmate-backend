@@ -1,1 +1,1 @@
-export * from "./event.query.validator"
+export * from "./event.query.validator";

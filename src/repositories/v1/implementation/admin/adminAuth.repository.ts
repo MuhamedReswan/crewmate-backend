@@ -1,23 +1,25 @@
-import { inject, injectable } from "tsyringe";
 import { Model } from "mongoose";
+import { inject, injectable } from "tsyringe";
+
 import IAdmin from "../../../../entities/v1/adminEntity";
-import { BaseRepository } from "../base/base.repository";
 import { IAdminAuthRepository } from "../../interfaces/admin/IAdminAuth.repository";
+import { BaseRepository } from "../base/base.repository";
 
 @injectable()
-export default class AdminAuthRepository extends BaseRepository<IAdmin> implements IAdminAuthRepository  {
- constructor(@inject("AdminModel") model: Model<IAdmin>){
-super(model);
- }   
+export default class AdminAuthRepository
+  extends BaseRepository<IAdmin>
+  implements IAdminAuthRepository
+{
+  constructor(@inject("AdminModel") model: Model<IAdmin>) {
+    super(model);
+  }
 
- async findByEmail (email:string): Promise<IAdmin | null>{
+  async findByEmail(email: string): Promise<IAdmin | null> {
     try {
-      const adminDetails =  await this.findOne({email});
+      const adminDetails = await this.findOne({ email });
       return adminDetails;
     } catch (error) {
-        throw error;
+      throw error;
     }
- }
-
-
+  }
 }

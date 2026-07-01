@@ -1,7 +1,9 @@
 import mongoose, { Schema } from "mongoose";
-import IEvents from "../../entities/v1/eventEntity";
-import { LocationSchema } from "./location.model";
+
 import { BookingStatus, EventStatus } from "../../constants/status";
+import IEvents from "../../entities/v1/eventEntity";
+
+import { LocationSchema } from "./location.model";
 
 // const EventsSchema: Schema = new Schema({
 //   CustomerName: { type: String },
@@ -22,7 +24,6 @@ import { BookingStatus, EventStatus } from "../../constants/status";
 //   NoOfPax: { type: Number },
 //   Bonus: { type: Number },
 // });
-
 
 // const EventsSchema = new Schema<IEvents>({
 //   customerName: { type: String, required: true },
@@ -48,28 +49,39 @@ import { BookingStatus, EventStatus } from "../../constants/status";
 //   bonus: { type: Number, default: 0 },
 // });
 
+const EventsSchema = new Schema<IEvents>(
+  {
+    customerName: { type: String, required: true },
+    vendor: { type: Schema.Types.ObjectId, ref: "Vendors", required: true },
+    typeOfService: { type: String, required: true },
+    typeOfWork: { type: String, required: true },
+    noOfPax: { type: Number, required: true },
+    reportingDateTime: { type: Date, required: true },
+    serviceBoys: { type: Number, required: true },
+    wagePerBoy: { type: Number, default: 500 },
+    eventLocation: LocationSchema,
+    status: {
+      type: String,
+      enum: Object.values(EventStatus),
+      default: EventStatus.Upcoming,
+      required: true,
+    },
+    bookingStatus: {
+      type: String,
+      enum: Object.values(BookingStatus),
+      default: BookingStatus.Active,
+      required: true,
+    },
+    overTime: { type: Number, default: 0 },
+    bonus: { type: Number, default: 0 },
+    travelExpense: { type: Number, default: 0 },
+    totalBill: { type: Number, default: 0 },
+    bookedBoys: [{ type: Schema.Types.ObjectId, ref: "ServiceBoys" }],
+    bookedBoysForFriends: [{ type: Schema.Types.ObjectId, ref: "FriendBooking" }],
+  },
+  { timestamps: true }
+);
 
-
-const EventsSchema = new Schema<IEvents>({
-  customerName: { type: String, required: true },
-  vendor: { type: Schema.Types.ObjectId, ref: "Vendors", required: true },
-  typeOfService: { type: String, required: true },
-  typeOfWork: { type: String, required: true },
-  noOfPax: { type: Number, required: true },
-  reportingDateTime: { type: Date, required: true },
-  serviceBoys: { type: Number, required: true },
-  wagePerBoy: {type:Number, default:500},
-  eventLocation: LocationSchema,
-  status: { type: String, enum: Object.values(EventStatus), default: EventStatus.Upcoming, required: true, },
-  bookingStatus: {type: String, enum: Object.values(BookingStatus), default: BookingStatus.Active, required: true,},
-  overTime: { type: Number, default: 0 },
-  bonus: { type: Number, default: 0 },
-  travelExpense: { type: Number, default: 0 },
-  totalBill: { type: Number, default: 0 },
-  bookedBoys: [{ type: Schema.Types.ObjectId, ref: "ServiceBoys" }], 
-  bookedBoysForFriends: [{ type: Schema.Types.ObjectId, ref: "FriendBooking" }],
-}, { timestamps: true });
-
-const eventModel = mongoose.model<IEvents>('Events', EventsSchema);
+const eventModel = mongoose.model<IEvents>("Events", EventsSchema);
 
 export default eventModel;

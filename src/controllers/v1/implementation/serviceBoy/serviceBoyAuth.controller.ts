@@ -1,35 +1,27 @@
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
-import { IServiceBoyAuthService } from "../../../../services/v1/interfaces/serviceBoy/IServiceBoyAuth.service";
-import { IServiceBoyAuthController } from "../../interfaces/serviceBoy/IServiceBoyAuth.controller";
+
+import { ACCESS_TOKEN_MAX_AGE, REFRESH_TOKEN_MAX_AGE } from "../../../../config/env";
 import { HttpStatusCode } from "../../../../constants/httpStatusCode";
-import { responseHandler } from "../../../../utils/responseHandler.util";
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { Role } from "../../../../constants/Role";
+import { IServiceBoyAuthService } from "../../../../services/v1/interfaces/serviceBoy/IServiceBoyAuth.service";
+import { validateRefreshSession } from "../../../../utils/authSession.utils";
 import { NotFoundError } from "../../../../utils/errors/notFound.error";
 import { decodeRefreshToken } from "../../../../utils/jwt.util";
-import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
 import { setRedisData } from "../../../../utils/redis.util";
-import {
-  ACCESS_TOKEN_MAX_AGE,
-  REFRESH_TOKEN_MAX_AGE,
-} from "../../../../config/env";
-import { validateRefreshSession } from "../../../../utils/authSession.utils";
+import { responseHandler } from "../../../../utils/responseHandler.util";
+import { IServiceBoyAuthController } from "../../interfaces/serviceBoy/IServiceBoyAuth.controller";
 
 @injectable()
-export default class ServiceBoyAuthController
-  implements IServiceBoyAuthController
-{
+export default class ServiceBoyAuthController implements IServiceBoyAuthController {
   constructor(
     @inject("IServiceBoyAuthService")
     private _serviceBoyAuthService: IServiceBoyAuthService
   ) {}
 
-  register = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { name, email, password, mobile } = req.body;
       logger.debug("Register controller received: " + JSON.stringify(req.body));
@@ -38,29 +30,19 @@ export default class ServiceBoyAuthController
       logger.info(`OTP generated and sent to email: ${email}`);
       res
         .status(HttpStatusCode.CREATED)
-        .json(
-          responseHandler(
-            ResponseMessage.REGISTER_SUCCESS,
-            HttpStatusCode.CREATED,
-            { email }
-          )
-        );
+        .json(responseHandler(ResponseMessage.REGISTER_SUCCESS, HttpStatusCode.CREATED, { email }));
     } catch (error) {
       logger.error("Service Boy Register error: " + error);
       next(error);
     }
   };
 
-  verifyOTP = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  verifyOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, otp } = req.body;
       logger.info(`Verifying OTP for email: ${email}`);
       const oldRefreshToken = req.cookies?.refreshToken;
-      let serviceBoyData = await this._serviceBoyAuthService.verifyOTP(
+      const serviceBoyData = await this._serviceBoyAuthService.verifyOTP(
         email,
         otp,
         oldRefreshToken
@@ -81,9 +63,7 @@ export default class ServiceBoyAuthController
           sameSite: "lax",
         });
 
-        logger.info(
-          `OTP verified. Access and Refresh tokens generated for: ${email}`
-        );
+        logger.info(`OTP verified. Access and Refresh tokens generated for: ${email}`);
         res
           .status(HttpStatusCode.OK)
           .json(
@@ -96,12 +76,7 @@ export default class ServiceBoyAuthController
       } else {
         res
           .status(HttpStatusCode.BAD_REQUEST)
-          .json(
-            responseHandler(
-              ResponseMessage.USER_NOT_FOUND,
-              HttpStatusCode.BAD_REQUEST
-            )
-          );
+          .json(responseHandler(ResponseMessage.USER_NOT_FOUND, HttpStatusCode.BAD_REQUEST));
       }
     } catch (error) {
       logger.error(" Service Boy OTP Verification error", error);
@@ -109,11 +84,7 @@ export default class ServiceBoyAuthController
     }
   };
 
-  resendOtp = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  resendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email } = req.body;
       logger.info(`Resending OTP to email: ${email}`);
@@ -130,11 +101,7 @@ export default class ServiceBoyAuthController
     }
   };
 
-  serviceBoyLogin = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  serviceBoyLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, password } = req.body;
       const serviceBoyData = await this._serviceBoyAuthService.serviceBoyLogin(
@@ -176,23 +143,14 @@ export default class ServiceBoyAuthController
     }
   };
 
-  setNewAccessToken = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  setNewAccessToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const refreshToken = req.cookies?.refreshToken;
       if (!refreshToken) {
         logger.warn("No refresh token found in cookies");
         res
           .status(HttpStatusCode.UNAUTHORIZED)
-          .json(
-            responseHandler(
-              ResponseMessage.NO_REFRESH_TOKEN,
-              HttpStatusCode.UNAUTHORIZED
-            )
-          );
+          .json(responseHandler(ResponseMessage.NO_REFRESH_TOKEN, HttpStatusCode.UNAUTHORIZED));
         return;
       }
 
@@ -201,9 +159,7 @@ export default class ServiceBoyAuthController
       // (optional) you can log decoded user
       logger.debug("Refresh token valid for user:", decoded.id);
 
-      const result = await this._serviceBoyAuthService.setNewAccessToken(
-        refreshToken
-      );
+      const result = await this._serviceBoyAuthService.setNewAccessToken(refreshToken);
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -213,83 +169,49 @@ export default class ServiceBoyAuthController
       logger.info("New access token set successfully");
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(ResponseMessage.ACCESS_TOKEN_SET, HttpStatusCode.OK)
-        );
+        .json(responseHandler(ResponseMessage.ACCESS_TOKEN_SET, HttpStatusCode.OK));
     } catch (error) {
       logger.error("Set New Access Token error", error);
       next(error);
     }
   };
 
-  forgotPassword = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email } = req.body;
       logger.info(`Forgot password request for email: ${email}`);
-      const forgotToken = await this._serviceBoyAuthService.forgotPassword(
-        email
-      );
-      if (!forgotToken)
-        throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
-      await this._serviceBoyAuthService.resetPasswordLink(
-        email,
-        forgotToken,
-        Role.SERVICE_BOY
-      );
+      const forgotToken = await this._serviceBoyAuthService.forgotPassword(email);
+      if (!forgotToken) throw new NotFoundError(ResponseMessage.FORGOT_PASSWORD_TOKEN_NOTFOUND);
+      await this._serviceBoyAuthService.resetPasswordLink(email, forgotToken, Role.SERVICE_BOY);
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.FORGOT_PASSWORD_LINK_SEND,
-            HttpStatusCode.OK
-          )
-        );
+        .json(responseHandler(ResponseMessage.FORGOT_PASSWORD_LINK_SEND, HttpStatusCode.OK));
     } catch (error) {
       logger.error("Forgot password error", error);
       next(error);
     }
   };
 
-  resetPassword = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, password, token } = req.body;
       logger.info(`Resetting password for email: ${email}`);
       if (token) {
-        await this._serviceBoyAuthService.resetPasswordTokenVerify(
-          email,
-          token
-        );
+        await this._serviceBoyAuthService.resetPasswordTokenVerify(email, token);
         await this._serviceBoyAuthService.resetPassword(email, password);
       } else {
         await this._serviceBoyAuthService.resetPassword(email, password);
       }
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.RESET_PASSWORD_SUCCESS,
-            HttpStatusCode.OK
-          )
-        );
+        .json(responseHandler(ResponseMessage.RESET_PASSWORD_SUCCESS, HttpStatusCode.OK));
     } catch (error) {
       logger.error("Reset password error", error);
       next(error);
     }
   };
 
-  googleAuth = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  googleAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { googleToken } = req.body;
       logger.info("Google login token received");
@@ -299,15 +221,11 @@ export default class ServiceBoyAuthController
         oldRefreshToken
       );
       console.log("Google auth result: " + JSON.stringify(serviceBoyData));
-      if (!serviceBoyData)
-        throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
+      if (!serviceBoyData) throw new NotFoundError(ResponseMessage.GOOGLE_AUTH_FAILED);
 
       console.log("google auth controller serviceBoyData", serviceBoyData);
 
-      console.log(
-        "google auth controller serviceBoyData.serviceBoy",
-        serviceBoyData.serviceBoy
-      );
+      console.log("google auth controller serviceBoyData.serviceBoy", serviceBoyData.serviceBoy);
 
       logger.info("Google login token received", {});
       // set access token and refresh token in coockies
@@ -338,11 +256,7 @@ export default class ServiceBoyAuthController
     }
   };
 
-  logout = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const refreshToken = req.cookies?.refreshToken;
 
@@ -355,13 +269,7 @@ export default class ServiceBoyAuthController
 
         res
           .status(HttpStatusCode.OK)
-          .json(
-            responseHandler(
-              ResponseMessage.LOGOUT_SUCCESS,
-              HttpStatusCode.OK,
-              true
-            )
-          );
+          .json(responseHandler(ResponseMessage.LOGOUT_SUCCESS, HttpStatusCode.OK, true));
         return;
       }
 
@@ -390,13 +298,7 @@ export default class ServiceBoyAuthController
 
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.LOGOUT_SUCCESS,
-            HttpStatusCode.OK,
-            true
-          )
-        );
+        .json(responseHandler(ResponseMessage.LOGOUT_SUCCESS, HttpStatusCode.OK, true));
     } catch (error) {
       logger.error("Logout error", error);
       next(error);
@@ -407,13 +309,7 @@ export default class ServiceBoyAuthController
     try {
       res
         .status(HttpStatusCode.OK)
-        .json(
-          responseHandler(
-            ResponseMessage.TEST_TOKEN_SUCCESS,
-            HttpStatusCode.OK,
-            true
-          )
-        );
+        .json(responseHandler(ResponseMessage.TEST_TOKEN_SUCCESS, HttpStatusCode.OK, true));
     } catch (error) {
       logger.error("Token test error", error);
       next(error);

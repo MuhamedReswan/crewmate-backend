@@ -1,21 +1,22 @@
+import bcrypt from "bcrypt";
 import { inject, injectable } from "tsyringe";
+
 import { ResponseMessage } from "../../../../constants/resposnseMessage";
+import { Role } from "../../../../constants/Role";
+import IAdmin from "../../../../entities/v1/adminEntity";
+import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
+import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
+import { IAdminAuthRepository } from "../../../../repositories/v1/interfaces/admin/IAdminAuth.repository";
+import { handleSessionOnLogin } from "../../../../utils/authSession.utils";
+import { NotFoundError } from "../../../../utils/errors/notFound.error";
+import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
 } from "../../../../utils/jwt.util";
-import IAdmin from "../../../../entities/v1/adminEntity";
-import { LoginResponse } from "../../../../entities/v1/authenticationEntity";
-import { Role } from "../../../../constants/Role";
 import logger from "../../../../utils/logger.util";
-import { IAdminAuthRepository } from "../../../../repositories/v1/interfaces/admin/IAdminAuth.repository";
 import { IAdminAuthService } from "../../interfaces/admin/IAdminAuth.service";
-import bcrypt from "bcrypt";
-import { CustomTokenResponse } from "../../../../entities/v1/tokenEntity";
-import { UnAuthorizedError } from "../../../../utils/errors/unAuthorized.error";
-import { NotFoundError } from "../../../../utils/errors/notFound.error";
-import { handleSessionOnLogin } from "../../../../utils/authSession.utils";
 
 @injectable()
 export default class AdminAuthService implements IAdminAuthService {
@@ -31,16 +32,14 @@ export default class AdminAuthService implements IAdminAuthService {
   ): Promise<LoginResponse<IAdmin, Role.ADMIN>> {
     try {
       logger.info("Admin login attempt", { email });
-      let adminData = await this._adminAuthReposritory.findByEmail(email);
+      const adminData = await this._adminAuthReposritory.findByEmail(email);
       const isValidPassword =
-        adminData?.password &&
-        (await bcrypt.compare(password, adminData.password));
+        adminData?.password && (await bcrypt.compare(password, adminData.password));
 
       if (!adminData || !isValidPassword) {
         logger.warn(`Invalid credentials for email: ${email}`);
         throw new UnAuthorizedError(ResponseMessage.INVALID_CREDINTIALS);
       } else {
-
         const role = Role.ADMIN;
 
         const accessToken = generateAccessToken({
@@ -56,11 +55,7 @@ export default class AdminAuthService implements IAdminAuthService {
           role: role,
         });
 
-            await handleSessionOnLogin(
-      adminData._id.toString(),
-      refreshToken,
-      oldRefreshToken
-    );
+        await handleSessionOnLogin(adminData._id.toString(), refreshToken, oldRefreshToken);
         logger.info("Admin login successful", { adminData });
         return { [role]: adminData, accessToken, refreshToken };
       }

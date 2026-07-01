@@ -8,8 +8,6 @@ export enum ResponseMessage {
   INVALID_CREDINTIALS = "Invalid credintials",
   INVALID_INPUT = "Invalid input",
 
-
-
   OTP_EXPIRED = "OTP expired",
   OTP_VERIFICATION_SUCCESS = "OTP verification Success",
   RESEND_OTP_SEND = "OTP resend successfully",
@@ -39,76 +37,65 @@ export enum ResponseMessage {
   RESET_PASSWORD_SUCCESS = "Password changed successfully",
 
   LOGIN_VERIFICATION_FAILED = "Login failed",
-GOOGLE_AUTH_FAILED = "Authentication failed",
-USE_GOOGLE_AUTH = "Account was created using Google. Please use Google Sign-In.",
+  GOOGLE_AUTH_FAILED = "Authentication failed",
+  USE_GOOGLE_AUTH = "Account was created using Google. Please use Google Sign-In.",
 
-VALIDATION_FAILED = "server side validation failed",
-USER_BLOCKED_BY_ADMIN = "User is blocked by admin",
+  VALIDATION_FAILED = "server side validation failed",
+  USER_BLOCKED_BY_ADMIN = "User is blocked by admin",
 
-INTERNAL_SERVER_ERROR = "Internal server error",
+  INTERNAL_SERVER_ERROR = "Internal server error",
 
-PROFILE_UPDATED = "Profile updated successfully",
-PROFILE_UPDATION_FAILED = "Profile updation failed",
+  PROFILE_UPDATED = "Profile updated successfully",
+  PROFILE_UPDATION_FAILED = "Profile updation failed",
 
-ADMIN_CREDENTIAL_FAILED_TO_SET = "Admin credentials are not set in environment variables",
-ADMIN_CREDENTIALS_NOT_CONFIGURED = "Admin credentials not configured",
+  ADMIN_CREDENTIAL_FAILED_TO_SET = "Admin credentials are not set in environment variables",
+  ADMIN_CREDENTIALS_NOT_CONFIGURED = "Admin credentials not configured",
 
-LOAD_PROFILE_SUCCESS = "Load profile success",
-IMAGE_URL_SUCCESS = "Image url fetched success",
-IMAGE_URL_FAILED = "wrong key for image",
+  LOAD_PROFILE_SUCCESS = "Load profile success",
+  IMAGE_URL_SUCCESS = "Image url fetched success",
+  IMAGE_URL_FAILED = "wrong key for image",
 
-LOAD_VERIFICATION_SUCCESS = "Load verification success",
-RETRY_VERIFICATION_REQUEST_SUCCESS = "Retry verification request success",
-NO_VERIFICATION_STATUS = "No verifaction status found to update",
-VERIFICATION_STATUS_UPDATED_SUCCESS = "Verification success",
-VERIFICATION_STATUS_REJECTED_SUCCESS = "Verification successfully rejected ",
-RETRY_VERIFICATION_SENT = "Request sent for verification",
+  LOAD_VERIFICATION_SUCCESS = "Load verification success",
+  RETRY_VERIFICATION_REQUEST_SUCCESS = "Retry verification request success",
+  NO_VERIFICATION_STATUS = "No verifaction status found to update",
+  VERIFICATION_STATUS_UPDATED_SUCCESS = "Verification success",
+  VERIFICATION_STATUS_REJECTED_SUCCESS = "Verification successfully rejected ",
+  RETRY_VERIFICATION_SENT = "Request sent for verification",
 
-LOAD_SERVICE_BOY_SUCCESS = "ServiceBoy loading success",
-LOAD_VENDOR_SUCCESS = "Vendor loading success",
-LOAD_USER_PROFILE_SUCCESS = "User profile loading success",
+  LOAD_SERVICE_BOY_SUCCESS = "ServiceBoy loading success",
+  LOAD_VENDOR_SUCCESS = "Vendor loading success",
+  LOAD_USER_PROFILE_SUCCESS = "User profile loading success",
 
-NO_USER_TO_VERIFY_WITH_THIS = "No user found to verify with this",
-NO_USER_TO_RETRY_WITH_THIS = "No user found to retry with this",
-USER_LOAD_SUCCESS = "User loaded success",
+  NO_USER_TO_VERIFY_WITH_THIS = "No user found to verify with this",
+  NO_USER_TO_RETRY_WITH_THIS = "No user found to retry with this",
+  USER_LOAD_SUCCESS = "User loaded success",
 
-UPDATE_STATUS_SUCCESS = "Status updated success",
-EVENT_UPDATION_SUCCESS = "Event updated successfully",
-EVENT_CREATION_SUCCESS = "Event created successfully",
-EVENT_NOT_CREATED = "Eent Not created",
-EVENT_ALREADY_EXIST = "Event already exist",
-EVENT_NOT_FOUND = "Event Not Found",
-LOAD_EVENT_SUCCESS = "Events successfully loaded",
-LOAD_WORKS_SUCCESS = "Works successfully loaded",
-VENDOR_NOT_EXIST = "Vendor not found with this details",
-SERVICE_BOY_NOT_EXIST = "Service BOy not found with this details",
+  UPDATE_STATUS_SUCCESS = "Status updated success",
+  EVENT_UPDATION_SUCCESS = "Event updated successfully",
+  EVENT_CREATION_SUCCESS = "Event created successfully",
+  EVENT_NOT_CREATED = "Eent Not created",
+  EVENT_ALREADY_EXIST = "Event already exist",
+  EVENT_NOT_FOUND = "Event Not Found",
+  LOAD_EVENT_SUCCESS = "Events successfully loaded",
+  LOAD_WORKS_SUCCESS = "Works successfully loaded",
+  VENDOR_NOT_EXIST = "Vendor not found with this details",
+  SERVICE_BOY_NOT_EXIST = "Service BOy not found with this details",
 
-NO_REFRESH_TOKEN_SECRET = "Refrsesh token secret in not defined",
-NO_ACCESS_TOKEN_SECRET = "Access token secret in not defined",
+  NO_REFRESH_TOKEN_SECRET = "Refrsesh token secret in not defined",
+  NO_ACCESS_TOKEN_SECRET = "Access token secret in not defined",
 
-VENDOR_ID_MISSING = "vendorId is Missing",
+  VENDOR_ID_MISSING = "vendorId is Missing",
 
-SYSTEM_SETTINGS_LOAD_SUCCESS = "System settings loaded successfully",
-SYSTEM_SETTINGS_UPDATE_SUCCESS = "System settings updated successfully",
-SYSTEM_SETTINGS_NOT_FOUND = "System settings not found",
-SYSTEM_SETTINGS_UPDATE_FAILED = "Failed to update system settings",
+  SYSTEM_SETTINGS_LOAD_SUCCESS = "System settings loaded successfully",
+  SYSTEM_SETTINGS_UPDATE_SUCCESS = "System settings updated successfully",
+  SYSTEM_SETTINGS_NOT_FOUND = "System settings not found",
+  SYSTEM_SETTINGS_UPDATE_FAILED = "Failed to update system settings",
 
+  BOOKING_STATUS_UPDATED = "Booking status successfuyll updated",
 
-BOOKING_STATUS_UPDATED = "Booking status successfuyll updated",
+  FORBIDDEN = "Access denied",
 
-FORBIDDEN = "Access denied",
+  NO_USER_IN_REQUEST = "User not found in request",
 
-NO_USER_IN_REQUEST = "User not found in request",
-
-
-
-USER_NOT_EXIST = "User not found",
-
-
-
-
-
-
-
-
+  USER_NOT_EXIST = "User not found",
 }

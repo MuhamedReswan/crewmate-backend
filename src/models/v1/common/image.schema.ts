@@ -3,7 +3,7 @@ import { Schema } from "mongoose";
 export const ImageSchema = new Schema(
   {
     publicId: { type: String, required: true },
-    url: { type: String, required:true },
+    url: { type: String, required: true },
   },
   { _id: false }
 );

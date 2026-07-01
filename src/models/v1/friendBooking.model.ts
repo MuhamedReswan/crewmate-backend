@@ -7,5 +7,5 @@ const FriendBookingSchema = new Schema({
   friendVerified: { type: Boolean, default: false },
   bookingStatus: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });

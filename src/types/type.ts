@@ -1,28 +1,25 @@
 import { NextFunction, Request, Response } from "express";
+import { ObjectId, Types } from "mongoose";
+
+import { Role } from "../constants/Role";
+import { EventStatusType } from "../constants/status";
+import IAdmin from "../entities/v1/adminEntity";
+import IEvent from "../entities/v1/eventEntity";
 import IServiceBoy from "../entities/v1/serviceBoyEntity";
 import IVendor from "../entities/v1/vendorEntity";
-import IAdmin from "../entities/v1/adminEntity";
-import { Role } from "../constants/Role";
-import { ObjectId, Types } from "mongoose";
-import IEvent from "../entities/v1/eventEntity";
-import { EventStatusType } from "../constants/status";
 
-export type RequestHandler<
-  TReturn = void
-> = (
+export type RequestHandler<TReturn = void> = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => Promise<TReturn>;
 
-// export type CreateToken = 
+// export type CreateToken =
 // | { role: Role.SERVICE_BOY; data: Partial<IServiceBoy> }
 // | { role: Role.ADMIN; data: Partial<IAdmin> }
 // | { role: Role.VENDOR; data: Partial<IVendor> };
 
-export type TokenPayload  = 
-{ role: Role; id:string, email:string, name:string}
-
+export type TokenPayload = { role: Role; id: string; email: string; name: string };
 
 export interface FileData {
   fieldname: string;
@@ -40,32 +37,28 @@ export interface ImageFiles {
   licenceImage?: FileData[];
 }
 
-
-
-
 export interface JwtPayload {
   id: string;
   email: string;
   role: Role;
-  name: string,
+  name: string;
   iat: number;
   exp: number;
 }
 
-
 export interface LocationData {
   lat: number;
-  lng: number;    
+  lng: number;
   address: string;
 }
 
 export interface eventFilter {
-  search? :string;
-  limit? : number
-  page? : number,
-  status?:EventStatusType,
-  from ?:string,
-  to ?: string,
+  search?: string;
+  limit?: number;
+  page?: number;
+  status?: EventStatusType;
+  from?: string;
+  to?: string;
 }
 
 export type SortOption<T> = Partial<Record<keyof T, 1 | -1>>;
@@ -75,7 +68,7 @@ export interface EventQueryFilter extends Partial<IEvent> {
   search?: string;
   status?: EventStatusType;
   from?: string;
-  to?: string;   
+  to?: string;
   page: number;
   limit: number;
 }
@@ -86,7 +79,6 @@ export interface SendEmailOptions {
   html?: string;
   text?: string;
 }
-
 
 export interface IImage {
   publicId: string;
